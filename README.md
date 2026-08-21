@@ -7,11 +7,13 @@ de Magneto. Construida en **Python + Django**.
 
 Cubre las siguientes historias de usuario (deben tener, prioridad alta):
 
-- **HU-04** — Listado de vacantes disponibles.
-- **HU-05** — Detalle de una vacante (`/vacantes/<id>`).
-- **HU-01** — Carga de CV (PDF) para crear el perfil del candidato.
-- **HU-06** — Ranking diario de vacantes recomendadas, "Matches de hoy".
-- **HU-13** — Registro e inicio de sesión, con rutas protegidas.
+| HU | Historia | Prioridad | Talla | Qué se hizo |
+|----|----------|-----------|-------|-------------|
+| HU-13 | Registro e inicio de sesión, con rutas protegidas | Alta | M | Modelo `Usuario` custom (login por email), sesión de 30 días, rutas protegidas con `@login_required`. |
+| HU-01 | Carga de CV (PDF) para crear el perfil del candidato | Alta | XL | Parser heurístico (`cv_parser.py`) con `pypdf`: nombre, correo, habilidades, experiencia y educación; lo no detectado queda "Pendiente". |
+| HU-04 | Listado de vacantes disponibles | Alta | S | Listado en el dashboard desde `Vacante`, sembrado con `seed_vacantes` (dedup y validación de datos rotos). |
+| HU-06 | Ranking diario de vacantes recomendadas, "Matches de hoy" | Alta | L | Scoring por coincidencia de palabras clave (`matching.py`) entre habilidades del perfil y requisitos; top 3 en dashboard. |
+| HU-05 | Detalle de una vacante (`/vacantes/<id>`) | Alta | M | Vista pública con anillo de compatibilidad y checklist de requisitos cumplidos/faltantes cuando hay sesión. |
 
 ### Flujo de la aplicación
 
