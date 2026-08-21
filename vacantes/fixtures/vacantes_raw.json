@@ -1,0 +1,123 @@
+[
+  {
+    "id": "vac-001",
+    "titulo": "Desarrollador Frontend React",
+    "empresa": "TechNova",
+    "ubicacion": "Bogotá, Cundinamarca",
+    "modalidad": "Remoto",
+    "salario": { "min": 4500000, "max": 6500000, "moneda": "COP", "periodo": "mensual" },
+    "requisitos": ["react", "javascript", "typescript", "css"],
+    "descripcion": "Construir y mantener interfaces de usuario para la plataforma de vacantes de TechNova, trabajando junto al equipo de producto.",
+    "fechaPublicacion": "2026-08-18"
+  },
+  {
+    "id": "vac-002",
+    "titulo": "Desarrollador Backend Node.js",
+    "empresa": "Datavox",
+    "ubicacion": "Medellín, Antioquia",
+    "modalidad": "Híbrido",
+    "salario": { "min": 5000000, "max": 7000000, "moneda": "COP", "periodo": "mensual" },
+    "requisitos": ["node.js", "sql", "javascript"],
+    "descripcion": "Diseñar e implementar servicios backend en Node.js para los productos internos de Datavox.",
+    "fechaPublicacion": "2026-08-17"
+  },
+  {
+    "id": "vac-002",
+    "titulo": "Full Stack (duplicado desde otra fuente de n8n)",
+    "empresa": "Datavox",
+    "ubicacion": "Medellín, Antioquia",
+    "modalidad": "Híbrido",
+    "salario": null,
+    "requisitos": ["next.js"],
+    "descripcion": "Registro duplicado proveniente de otra fuente del workflow de n8n.",
+    "fechaPublicacion": "2026-08-17"
+  },
+  {
+    "id": "vac-003",
+    "titulo": "Analista de Datos Python",
+    "empresa": "InsightCo",
+    "ubicacion": "Cali, Valle del Cauca",
+    "modalidad": "Remoto",
+    "salario": { "min": 4000000, "max": 5500000, "moneda": "COP", "periodo": "mensual" },
+    "requisitos": ["python", "sql", "excel"],
+    "descripcion": "Analizar datos comerciales y construir reportes para el equipo de crecimiento de InsightCo.",
+    "fechaPublicacion": "2026-08-16"
+  },
+  {
+    "id": "vac-004",
+    "titulo": "Ingeniero DevOps",
+    "empresa": "CloudBridge",
+    "ubicacion": "Bogotá, Cundinamarca",
+    "modalidad": "Remoto",
+    "salario": { "min": 6000000, "max": 9000000, "moneda": "COP", "periodo": "mensual" },
+    "requisitos": ["aws", "docker", "kubernetes"],
+    "descripcion": "Administrar la infraestructura en la nube y los pipelines de despliegue de CloudBridge.",
+    "fechaPublicacion": "2026-08-15"
+  },
+  {
+    "id": "vac-005",
+    "titulo": "Diseñador UX/UI",
+    "empresa": "Pixelworks",
+    "ubicacion": "Medellín, Antioquia",
+    "modalidad": "Presencial",
+    "salario": { "min": 3500000, "max": 5000000, "moneda": "COP", "periodo": "mensual" },
+    "requisitos": ["figma", "comunicación"],
+    "descripcion": "Diseñar prototipos e interfaces para los productos digitales de Pixelworks.",
+    "fechaPublicacion": "2026-08-14"
+  },
+  {
+    "id": "vac-006",
+    "titulo": "Scrum Master",
+    "empresa": "AgileWorks",
+    "ubicacion": "Bogotá, Cundinamarca",
+    "modalidad": "Híbrido",
+    "salario": { "min": 5500000, "max": 7500000, "moneda": "COP", "periodo": "mensual" },
+    "requisitos": ["agile", "scrum", "liderazgo", "comunicación"],
+    "descripcion": "Facilitar los rituales ágiles y acompañar a dos equipos de desarrollo en AgileWorks.",
+    "fechaPublicacion": "2026-08-13"
+  },
+  {
+    "id": "vac-007",
+    "titulo": "Desarrollador Full Stack",
+    "empresa": "Magneto Labs",
+    "ubicacion": "Bogotá, Cundinamarca",
+    "modalidad": "Remoto",
+    "salario": null,
+    "requisitos": ["javascript", "react", "node.js", "sql"],
+    "descripcion": "Trabajar en las plataformas internas de Magneto Labs, de extremo a extremo.",
+    "fechaPublicacion": "2026-08-12"
+  },
+  {
+    "id": "vac-008",
+    "titulo": "Soporte TI",
+    "empresa": "HelpDesk Solutions",
+    "ubicacion": "Barranquilla, Atlántico",
+    "modalidad": "Presencial",
+    "salario": { "min": 2800000, "max": 3500000, "moneda": "COP", "periodo": "mensual" },
+    "requisitos": ["excel", "comunicación", "ingles"],
+    "descripcion": "Atender incidentes de soporte técnico de nivel 1 y 2 para clientes de HelpDesk Solutions.",
+    "fechaPublicacion": "2026-08-11"
+  },
+  {
+    "id": "vac-009",
+    "titulo": "Ingeniero de Datos",
+    "empresa": "DataForge",
+    "ubicacion": "Bogotá, Cundinamarca",
+    "modalidad": "Remoto",
+    "salario": { "min": 6500000, "max": 8500000, "moneda": "COP", "periodo": "mensual" },
+    "requisitos": ["python", "sql", "aws"],
+    "descripcion": "Construir y mantener pipelines de datos para los productos analíticos de DataForge.",
+    "fechaPublicacion": "2026-08-10"
+  },
+  {
+    "id": "vac-010",
+    "titulo": "",
+    "empresa": "Fuente sin verificar",
+    "ubicacion": "",
+    "modalidad": "Remoto",
+    "salario": null,
+    "requisitos": [],
+    "descripcion": "Registro con datos rotos, usado para ejercitar el filtrado defensivo al sembrar la base de datos.",
+    "fechaPublicacion": "2026-08-09"
+  }
+]

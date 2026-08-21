@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}{{ vacante.titulo }} en {{ vacante.empresa }} | Scoutly{% endblock %}
+
+{% block content %}
+<section class="detail-hero">
+  <div class="container">
+    <a href="{% url 'dashboard' %}" class="btn-link">← Volver a vacantes</a>
+
+    <div style="margin-top:1.5rem;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:2rem;">
+      <div style="max-width:40rem;">
+        <p class="label-eyebrow">{{ vacante.empresa }}</p>
+        <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">{{ vacante.titulo }}</h1>
+        <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.4rem 1.5rem;font-size:0.875rem;color:var(--muted-foreground);">
+          <span>{{ vacante.ubicacion }}</span>
+          <span>{{ vacante.modalidad }}</span>
+          <span>{{ vacante.fecha_publicacion }}</span>
+        </div>
+        <p style="margin-top:1.25rem;font-family:var(--font-display);font-size:1.125rem;font-weight:600;color:var(--navy);">
+          {{ vacante.salario_formateado }}
+        </p>
+      </div>
+
+      {% if match %}
+      <div class="card" style="display:flex;align-items:center;gap:1.25rem;">
+        <div style="width:88px;height:88px;border-radius:999px;background:conic-gradient(var(--brand) {{ match.score }}%, var(--surface-strong) 0);display:flex;align-items:center;justify-content:center;">
+          <div style="width:70px;height:70px;border-radius:999px;background:var(--background);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:1.3rem;color:var(--navy);">
+            {{ match.score }}%
+          </div>
+        </div>
+        <div style="max-width:12rem;">
+          <p style="margin:0;font-family:var(--font-display);font-size:0.875rem;font-weight:700;color:var(--navy);">
+            Compatibilidad con tu perfil
+          </p>
+          <p style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">
+            Calculada sobre las habilidades registradas en tu hoja de vida.
+          </p>
+        </div>
+      </div>
+      {% else %}
+      <div class="card" style="max-width:16rem;">
+        <p style="margin:0;font-size:0.875rem;font-weight:600;color:var(--navy);">¿Qué tan compatible eres?</p>
+        <p style="margin-top:0.4rem;font-size:0.8rem;color:var(--muted-foreground);line-height:1.5;">
+          Inicia sesión y carga tu hoja de vida para ver tu compatibilidad con esta vacante.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<div class="container detail-layout">
+  <article style="display:flex;flex-direction:column;gap:2.5rem;">
+    <section>
+      <h2 style="font-size:1.125rem;color:var(--navy);">Descripción del cargo</h2>
+      <p style="margin-top:0.75rem;color:var(--muted-foreground);line-height:1.6;">{{ vacante.descripcion }}</p>
+    </section>
+
+    <section>
+      <h2 style="font-size:1.125rem;color:var(--navy);">Requisitos</h2>
+      <ul style="margin-top:0.75rem;padding-left:1.1rem;color:var(--muted-foreground);line-height:1.8;">
+        {% for req in vacante.requisitos %}
+        <li>{{ req }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </article>
+
+  <aside>
+    <div class="card">
+      <h3 style="font-size:0.875rem;color:var(--navy);">Análisis de tu perfil</h3>
+      {% if match %}
+        {% for req in match.coincidencias %}
+        <div class="requirement-item">
+          <span class="requirement-dot matched">✓</span>
+          {{ req }}
+        </div>
+        {% endfor %}
+        {% for req in match.faltantes %}
+        <div class="requirement-item">
+          <span class="requirement-dot missing">–</span>
+          {{ req }}
+        </div>
+        {% endfor %}
+        {% if match.faltantes %}
+        <p style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">
+          Actualiza tu hoja de vida para mejorar tu compatibilidad con vacantes similares.
+        </p>
+        {% endif %}
+      {% else %}
+        <p style="margin-top:0.75rem;font-size:0.8125rem;color:var(--muted-foreground);line-height:1.5;">
+          {% if user.is_authenticated %}
+            Aún no has cargado tu hoja de vida.
+            <a href="{% url 'onboarding' %}" style="color:var(--navy);font-weight:600;text-decoration:underline;">Cárgala aquí</a>.
+          {% else %}
+            <a href="{% url 'login' %}" style="color:var(--navy);font-weight:600;text-decoration:underline;">Inicia sesión</a>
+            para ver tu compatibilidad.
+          {% endif %}
+        </p>
+      {% endif %}
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+      <h3 style="font-size:0.875rem;color:var(--navy);">Sobre la empresa</h3>
+      <p style="margin-top:0.75rem;font-size:0.875rem;color:var(--muted-foreground);line-height:1.6;">
+        {{ vacante.empresa }} publica sus vacantes de forma verificada en Magneto.
+      </p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

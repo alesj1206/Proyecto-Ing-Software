@@ -1,0 +1,60 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Scoutly{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="{% static 'css/scoutly.css' %}" />
+  <link rel="icon" href="{% static 'img/logo.svg' %}" type="image/svg+xml" />
+</head>
+<body>
+  {% block body %}
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="app-header-inner">
+        <div style="display:flex;align-items:center;gap:2.5rem;">
+          <a class="brand-mark" href="{% url 'dashboard' %}">
+            <img src="{% static 'img/logo.svg' %}" alt="Scoutly" />
+            Scoutly
+          </a>
+          {% if user.is_authenticated %}
+          <nav class="app-nav">
+            <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Vacantes</a>
+            <a href="{% url 'perfil' %}" class="{% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">Mi hoja de vida</a>
+          </nav>
+          {% endif %}
+        </div>
+        {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post" style="display:flex;align-items:center;gap:1rem;">
+          {% csrf_token %}
+          <span style="font-size:0.85rem;color:var(--muted-foreground);">{{ user.email }}</span>
+          <button type="submit" class="btn-link">Cerrar sesión</button>
+        </form>
+        {% endif %}
+      </div>
+    </header>
+
+    <main style="flex:1;">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="app-footer">
+      <div class="app-footer-inner">
+        <span class="brand-mark">
+          <img src="{% static 'img/logo.svg' %}" alt="Scoutly" />
+          Scoutly
+        </span>
+        <p>Magneto Empleos S.A.S. — Todos los derechos reservados.</p>
+      </div>
+    </footer>
+  </div>
+  {% endblock %}
+</body>
+</html>

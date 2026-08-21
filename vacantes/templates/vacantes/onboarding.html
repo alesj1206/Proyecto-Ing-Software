@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Carga tu hoja de vida | Scoutly{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="padding-top:3.5rem;padding-bottom:3.5rem;">
+  <ol class="stepper">
+    <li>
+      <span class="step-dot done">✓</span>
+      <span class="step-label">Cuenta</span>
+      <span class="step-line"></span>
+    </li>
+    <li>
+      <span class="step-dot current">2</span>
+      <span class="step-label current">Hoja de vida</span>
+    </li>
+  </ol>
+
+  <div style="margin-top:3rem;">
+    <p class="label-eyebrow">Paso 2 de 2</p>
+    <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">Carga tu hoja de vida</h1>
+    <p style="margin-top:0.75rem;max-width:36rem;color:var(--muted-foreground);line-height:1.6;">
+      Extraemos tu experiencia, formación y habilidades para calcular la compatibilidad con
+      cada vacante. Puedes volver a cargarla cuando quieras.
+    </p>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" style="margin-top:2rem;">
+    {% csrf_token %}
+    <div class="card">
+      {% if form.cv.errors %}
+        <div class="form-error-box">{{ form.cv.errors.0 }}</div>
+      {% endif %}
+      <label for="{{ form.cv.id_for_label }}" class="dropzone">
+        <span class="dropzone-icon">⬆</span>
+        <span>
+          <span style="display:block;font-family:var(--font-display);font-weight:600;color:var(--navy);">
+            Selecciona tu archivo
+          </span>
+          <span style="display:block;margin-top:0.25rem;font-size:0.875rem;color:var(--muted-foreground);">
+            PDF — se analiza automáticamente al enviarlo
+          </span>
+        </span>
+      </label>
+      {{ form.cv }}
+
+      <div style="margin-top:2rem;border-top:1px solid var(--border);padding-top:1.75rem;display:grid;gap:1.5rem;grid-template-columns:repeat(3,1fr);">
+        <div>
+          <p style="font-size:0.875rem;font-weight:600;color:var(--navy);margin:0;">Lectura automática</p>
+          <p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">Identificamos habilidades y experiencia.</p>
+        </div>
+        <div>
+          <p style="font-size:0.875rem;font-weight:600;color:var(--navy);margin:0;">Datos protegidos</p>
+          <p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">Solo tú ves el detalle completo de tu perfil.</p>
+        </div>
+        <div>
+          <p style="font-size:0.875rem;font-weight:600;color:var(--navy);margin:0;">Match inmediato</p>
+          <p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">Verás tus coincidencias apenas termine el análisis.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+      <a href="{% url 'dashboard' %}" class="btn-link">Completar más tarde</a>
+      <button type="submit" class="btn btn-brand btn-lg">Analizar y continuar</button>
+    </div>
+  </form>
+</div>
+
+<style>
+  #id_cv { display: none; }
+</style>
+<script>
+  document.getElementById("id_cv").addEventListener("change", function () {
+    if (this.files.length) {
+      this.closest("form").querySelector("button[type=submit]").focus();
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Matches de hoy | Scoutly{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container">
+    <p class="label-eyebrow">Matches de hoy</p>
+    <h1>Hola, {{ perfil.nombre|default:user.email }}</h1>
+    {% if perfil %}
+      <p style="margin-top:0.5rem;max-width:36rem;color:var(--muted-foreground);">
+        Tienes {{ top_matches|length }} vacante{{ top_matches|length|pluralize }} con coincidencias según tu hoja de vida actual.
+      </p>
+    {% else %}
+      <div class="cta-banner">
+        <div>
+          <p style="margin:0;font-weight:600;color:var(--navy);">Aún no has cargado tu hoja de vida</p>
+          <p style="margin:0.25rem 0 0;font-size:0.875rem;color:var(--muted-foreground);">Cárgala para ver tus vacantes recomendadas.</p>
+        </div>
+        <a href="{% url 'onboarding' %}" class="btn btn-brand">Cargar CV</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<div class="container" style="padding-top:3rem;padding-bottom:3rem;">
+  {% if perfil %}
+  <h2 style="font-size:1.25rem;color:var(--navy);">Matches de hoy</h2>
+  {% if top_matches %}
+  <div class="matches-grid">
+    {% for m in top_matches %}
+    <a href="{% url 'vacante_detalle' m.vacante.id %}" class="card" style="display:flex;flex-direction:column;text-decoration:none;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+        <div>
+          <h3 style="font-size:1.05rem;color:var(--navy);">{{ m.vacante.titulo }}</h3>
+          <p style="margin-top:0.25rem;font-size:0.875rem;color:var(--muted-foreground);">{{ m.vacante.empresa }}</p>
+        </div>
+        <div class="match-ring" style="width:56px;height:56px;background:conic-gradient(var(--brand) {{ m.score_pct }}%, var(--surface-strong) 0);border-radius:999px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:44px;height:44px;border-radius:999px;background:var(--background);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:0.8rem;color:var(--navy);">
+            {{ m.score_pct }}%
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1rem;">
+        {% for skill in m.coincidencias|slice:":3" %}
+          <span class="skill-chip">{{ skill }}</span>
+        {% endfor %}
+      </div>
+      <div style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);font-size:0.75rem;color:var(--navy);font-weight:600;">
+        Ver detalle →
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="margin-top:1rem;color:var(--muted-foreground);">Todavía no hay vacantes que coincidan con tus habilidades registradas.</p>
+  {% endif %}
+  {% endif %}
+
+  <h2 style="font-size:1.25rem;color:var(--navy);margin-top:3rem;">Todas las vacantes</h2>
+  <p style="margin-top:0.25rem;font-size:0.875rem;color:var(--muted-foreground);">{{ total_vacantes }} ofertas activas en Magneto</p>
+
+  <ul class="job-list">
+    {% for vacante in vacantes %}
+    <li>
+      <a href="{% url 'vacante_detalle' vacante.id %}" class="job-row">
+        <div>
+          <h3 style="font-size:1rem;color:var(--navy);">{{ vacante.titulo }}</h3>
+          <div class="job-meta">
+            <span>{{ vacante.empresa }}</span>
+            <span>{{ vacante.ubicacion }}</span>
+            <span>{{ vacante.modalidad }}</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <p style="margin:0;font-size:0.875rem;font-weight:600;color:var(--navy);">{{ vacante.salario_formateado }}</p>
+          <p style="margin:0.15rem 0 0;font-size:0.75rem;color:var(--muted-foreground);">{{ vacante.fecha_publicacion }}</p>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

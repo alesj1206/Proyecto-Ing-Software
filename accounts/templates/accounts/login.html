@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if modo == "registro" %}Crear cuenta{% else %}Ingresar{% endif %} | Scoutly{% endblock %}
+
+{% block body %}
+<div class="login-grid">
+  <aside class="login-aside">
+    <span class="brand-mark" style="color:var(--navy-foreground);">
+      <img src="{% static 'img/logo.svg' %}" alt="Scoutly" />
+      Scoutly
+    </span>
+
+    <div>
+      <p class="label-eyebrow" style="color:rgba(255,255,255,0.5);">Magneto Empleos</p>
+      <h1>La compatibilidad entre tu perfil y cada vacante, medida con criterio.</h1>
+      <p>
+        Scoutly analiza tu hoja de vida y la contrasta con los requisitos reales
+        de cada oferta para mostrarte primero lo que sí corresponde a tu experiencia.
+      </p>
+    </div>
+
+    <dl class="login-stats">
+      <div>
+        <dt>12.400</dt>
+        <dd>Vacantes activas</dd>
+      </div>
+      <div>
+        <dt>3.100</dt>
+        <dd>Empresas verificadas</dd>
+      </div>
+      <div>
+        <dt>94%</dt>
+        <dd>Precisión del match</dd>
+      </div>
+    </dl>
+  </aside>
+
+  <section class="login-form-panel">
+    <div class="login-form-inner">
+      <div style="margin-bottom:2.25rem;">
+        <p class="label-eyebrow">{% if modo == "registro" %}Crear cuenta{% else %}Acceso de candidatos{% endif %}</p>
+        <h2 style="font-size:1.75rem;margin-top:0.75rem;color:var(--navy);">
+          {% if modo == "registro" %}Registra tu perfil{% else %}Ingresa a tu cuenta{% endif %}
+        </h2>
+        <p style="margin-top:0.5rem;font-size:0.9rem;color:var(--muted-foreground);">
+          {% if modo == "registro" %}
+            Toma menos de dos minutos. Después cargas tu hoja de vida.
+          {% else %}
+            Usa el correo con el que registraste tu hoja de vida en Magneto.
+          {% endif %}
+        </p>
+      </div>
+
+      <div class="mode-toggle">
+        <a href="{% url 'login' %}" class="{% if modo != 'registro' %}active{% endif %}">Iniciar sesión</a>
+        <a href="#registro" id="tab-registro" class="{% if modo == 'registro' %}active{% endif %}">Registrarme</a>
+      </div>
+
+      <form method="post" action="{% url 'login' %}" id="form-login" style="{% if modo == 'registro' %}display:none;{% endif %}">
+        {% csrf_token %}
+        {% if login_form.non_field_errors %}
+          <div class="form-error-box">{{ login_form.non_field_errors.0 }}</div>
+        {% endif %}
+        <div class="field">
+          <label for="{{ login_form.email.id_for_label }}">Correo electrónico</label>
+          {{ login_form.email }}
+        </div>
+        <div class="field">
+          <label for="{{ login_form.password.id_for_label }}">Contraseña</label>
+          {{ login_form.password }}
+        </div>
+        <button type="submit" class="btn btn-brand btn-lg btn-block">Ingresar</button>
+      </form>
+
+      <form method="post" action="{% url 'registro' %}" id="form-registro" style="{% if modo != 'registro' %}display:none;{% endif %}">
+        {% csrf_token %}
+        {% if registro_form.non_field_errors %}
+          <div class="form-error-box">{{ registro_form.non_field_errors.0 }}</div>
+        {% endif %}
+        <div class="field">
+          <label for="{{ registro_form.email.id_for_label }}">Correo electrónico</label>
+          {{ registro_form.email }}
+          {% if registro_form.email.errors %}<p class="form-error">{{ registro_form.email.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ registro_form.password.id_for_label }}">Contraseña</label>
+          {{ registro_form.password }}
+          {% if registro_form.password.errors %}<p class="form-error">{{ registro_form.password.errors.0 }}</p>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-brand btn-lg btn-block">Crear cuenta y continuar</button>
+      </form>
+
+      <p style="margin-top:2rem;text-align:center;font-size:0.75rem;color:var(--muted-foreground);line-height:1.6;">
+        Al continuar aceptas los términos de uso y la política de privacidad de Magneto.
+      </p>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.getElementById("tab-registro").addEventListener("click", function (e) {
+    e.preventDefault();
+    document.getElementById("form-login").style.display = "none";
+    document.getElementById("form-registro").style.display = "block";
+    document.querySelectorAll(".mode-toggle a").forEach((a) => a.classList.remove("active"));
+    this.classList.add("active");
+  });
+</script>
+{% endblock %}
