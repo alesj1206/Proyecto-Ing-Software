@@ -1,30 +1,7 @@
-# Scoutly
+# Scoutly · Sprint 1
 
 Plataforma de vacantes y matching para candidatos, con la identidad visual
 de Magneto. Construida en **Python + Django**.
-
-> La entrega congelada del Sprint 1 vive en [`entregas/sprint-1/`](entregas/sprint-1/)
-> y en el tag de git `sprint-1`. Este README documenta el estado actual
-> (Sprint 2 en curso); no lo sobrescribe, lo continúa.
-
-## Sprint 2 (en curso)
-
-Punto de partida: todo lo del Sprint 1, sin remover alcance.
-
-| HU | Historia | Prioridad | Estado |
-|----|----------|-----------|--------|
-| HU-02 | Completar mis expectativas laborales | Should-have | ✅ Hecho — `/expectativas`, pondera hasta 15% del score de match |
-| HU-06 | Ranking diario vía workflow n8n automático | Must-have | ⏳ Pendiente (sigue en keyword-matching; falta el workflow real) |
-| HU-07 | Entender por qué me recomendaron una vacante | Should-have | ⏳ Pendiente |
-| HU-08 | Postularme (simulado) a una vacante | Should-have | ⏳ Pendiente |
-| HU-10 | Tablero de estado de cada proceso | Should-have | ⏳ Pendiente |
-
-**Identidad visual recalibrada contra Magneto real** (ver sección de abajo)
-— esta fue la corrección explícita de la profesora sobre el Sprint 1: la
-paleta y el chrome no se sentían como una extensión de Magneto. Se ajustó
-`templates/base.html` (barra utilitaria + franja de marca) y
-`static/css/scoutly.css` (tokens de color) en todas las pantallas
-existentes, sin tocar el flujo ni las rutas del Sprint 1.
 
 ## Sprint 1
 
@@ -89,27 +66,12 @@ Las rutas `/dashboard`, `/onboarding` y `/perfil` están protegidas con
 
 ### Identidad visual
 
-**Recalibrada en Sprint 2.** La retroalimentación del Sprint 1 fue que la
-app no se sentía como una extensión real de Magneto, solo usaba su verde y
-azul sobre fondo blanco plano. Se tomaron capturas de magneto365.com y se
-extrajeron sus colores reales por pixel-sampling; el resultado difiere del
-plan original en tres puntos: Magneto usa una franja de acento **morado**
-muy reconocible (no solo verde+azul), el fondo de página es gris-lavanda
-claro (no blanco puro, las tarjetas sí son blancas), y hay una barra
-utilitaria oscura por encima de la navegación. Tokens actualizados en
-`static/css/scoutly.css`:
+Paleta fija de Magneto, definida en `static/css/scoutly.css` (CSS plano, sin
+Tailwind ni build de Node):
 
-- Verde `#0CBB4E` — acción primaria (botones, CTA) y señal positiva
-  (indicador de compatibilidad de match). Es, de hecho, el color real del
-  botón "Crear cuenta" de Magneto.
-- Morado `#9140FE` — acento de marca Magneto: franja utilitaria, estados
-  activos (pestaña/pill de filtro seleccionado), foco de campos. Con
-  moderación, nunca como fondo dominante ni en botones de acción.
-- Azul marino `#1A324C` — autoridad: texto, headers, footer, botones de
-  acción secundaria ("Aplicar" en Magneto usa este mismo tono).
-- Gris-lavanda `#F5F5F9` — fondo de página (antes blanco plano).
-  Blanco `#FFFFFF` — tarjetas, listados, navegación.
-- Carbón `#2D3033` — barra utilitaria superior.
+- Verde `#0CBB4E` — acciones, botones, acentos.
+- Azul oscuro `#1A324C` — texto, headers, fondo de navegación.
+- Blanco `#FFFFFF` — fondo base y tarjetas.
 
 ## Desarrollo local
 

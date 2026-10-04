@@ -17,6 +17,15 @@
 <body>
   {% block body %}
   <div class="app-shell">
+    <div class="app-topbar">
+      <div class="app-topbar-inner">
+        <span>Powered by <a href="#">Magneto</a> — portal de empleo colombiano</span>
+        <span>¿Necesitas ayuda? <a href="#">Centro de ayuda</a></span>
+      </div>
+    </div>
+    <div class="app-ribbon">
+      Scoutly prioriza tu búsqueda: un ranking diario de vacantes hecho a tu medida.
+    </div>
     <header class="app-header">
       <div class="app-header-inner">
         <div style="display:flex;align-items:center;gap:2.5rem;">
@@ -28,6 +37,7 @@
           <nav class="app-nav">
             <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Vacantes</a>
             <a href="{% url 'perfil' %}" class="{% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">Mi hoja de vida</a>
+            <a href="{% url 'expectativas' %}" class="{% if request.resolver_match.url_name == 'expectativas' %}active{% endif %}">Mis expectativas</a>
           </nav>
           {% endif %}
         </div>

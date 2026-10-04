@@ -59,6 +59,13 @@
   <h2 style="font-size:1.25rem;color:var(--navy);margin-top:3rem;">Todas las vacantes</h2>
   <p style="margin-top:0.25rem;font-size:0.875rem;color:var(--muted-foreground);">{{ total_vacantes }} ofertas activas en Magneto</p>
 
+  <div class="filter-bar">
+    <a href="{% url 'dashboard' %}" class="filter-pill{% if not modalidad_activa %} active{% endif %}">Todas las modalidades</a>
+    {% for valor, etiqueta in modalidades %}
+      <a href="?modalidad={{ valor }}" class="filter-pill{% if modalidad_activa == valor %} active{% endif %}">{{ etiqueta }}</a>
+    {% endfor %}
+  </div>
+
   <ul class="job-list">
     {% for vacante in vacantes %}
     <li>

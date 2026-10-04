@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Mis expectativas | Scoutly{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="padding-top:3rem;padding-bottom:3.5rem;">
+  <p class="label-eyebrow" style="color:var(--magneto-purple);">HU-02 · Onboarding</p>
+  <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">Mis expectativas laborales</h1>
+  <p style="margin-top:0.5rem;max-width:34rem;color:var(--muted-foreground);">
+    Cuéntanos qué buscas para que el ranking de "Matches de hoy" se ajuste
+    mejor a lo que esperas, no solo a tus habilidades.
+  </p>
+
+  <form method="post" class="card" style="margin-top:1.75rem;">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="form-error-box">{{ form.non_field_errors.0 }}</div>
+    {% endif %}
+
+    <div style="display:grid;gap:1.1rem;grid-template-columns:repeat(2,1fr);">
+      <div class="field">
+        <label for="{{ form.exp_salario_min.id_for_label }}">{{ form.exp_salario_min.label }}</label>
+        {{ form.exp_salario_min }}
+        {% if form.exp_salario_min.errors %}<p class="form-error">{{ form.exp_salario_min.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="{{ form.exp_modalidad.id_for_label }}">{{ form.exp_modalidad.label }}</label>
+        {{ form.exp_modalidad }}
+        {% if form.exp_modalidad.errors %}<p class="form-error">{{ form.exp_modalidad.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="{{ form.exp_ubicacion.id_for_label }}">{{ form.exp_ubicacion.label }}</label>
+        {{ form.exp_ubicacion }}
+        {% if form.exp_ubicacion.errors %}<p class="form-error">{{ form.exp_ubicacion.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="{{ form.exp_disponibilidad.id_for_label }}">{{ form.exp_disponibilidad.label }}</label>
+        {{ form.exp_disponibilidad }}
+        {% if form.exp_disponibilidad.errors %}<p class="form-error">{{ form.exp_disponibilidad.errors.0 }}</p>{% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:1.25rem;display:flex;align-items:center;gap:0.9rem;">
+      <button type="submit" class="btn btn-brand btn-lg">Guardar expectativas</button>
+      {% if perfil.tiene_expectativas %}
+        <span class="badge-match"><span class="dot"></span> Usadas en tu ranking de hoy</span>
+      {% endif %}
+    </div>
+  </form>
+
+  <div class="card" style="margin-top:1.5rem;background:var(--magneto-purple-soft);border-color:var(--magneto-purple);">
+    <p style="margin:0;font-size:0.8125rem;color:var(--navy);">
+      Estos datos ajustan hasta un 15% del score de compatibilidad de cada
+      vacante (modalidad, salario mínimo y ubicación). El 85% restante sigue
+      siendo la coincidencia de habilidades de tu hoja de vida.
+    </p>
+  </div>
+</div>
+{% endblock %}
