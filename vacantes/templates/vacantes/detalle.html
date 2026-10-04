@@ -18,6 +18,24 @@
         <p style="margin-top:1.25rem;font-family:var(--font-display);font-size:1.125rem;font-weight:600;color:var(--navy);">
           {{ vacante.salario_formateado }}
         </p>
+
+        {% if user.is_authenticated %}
+        <div style="margin-top:1.5rem;">
+          {% if not match %}
+          <button class="btn btn-brand btn-lg" disabled title="Carga tu hoja de vida para postularte">Postularme</button>
+          {% elif postulacion %}
+          <span class="badge-match" style="font-size:0.8125rem;padding:0.55rem 1.1rem;">
+            <span class="dot"></span> Postulado el {{ postulacion.fecha_aplicacion|date:"d/m/Y" }} — {{ postulacion.get_estado_display }}
+          </span>
+          <a href="{% url 'tablero' %}" class="btn-link" style="margin-left:0.75rem;">Ver en mi tablero →</a>
+          {% else %}
+          <form method="post" action="{% url 'postularme' vacante.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-brand btn-lg">Postularme</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endif %}
       </div>
 
       {% if match %}
@@ -66,7 +84,24 @@
   </article>
 
   <aside>
+    {% if match %}
     <div class="card">
+      <h3 style="font-size:0.875rem;color:var(--navy);">¿Por qué te la recomendamos?</h3>
+      {% if match.razones %}
+      <ul style="margin:0.75rem 0 0;padding-left:1.1rem;color:var(--navy);font-size:0.8125rem;line-height:1.7;">
+        {% for razon in match.razones %}
+        <li>{{ razon }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p style="margin-top:0.75rem;font-size:0.8125rem;color:var(--muted-foreground);">
+        Esta vacante no coincide todavía con tu perfil ni tus expectativas.
+      </p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="card" style="margin-top:1.5rem;">
       <h3 style="font-size:0.875rem;color:var(--navy);">Análisis de tu perfil</h3>
       {% if match %}
         {% for req in match.coincidencias %}

@@ -1,7 +1,9 @@
 import hmac
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -10,8 +12,8 @@ from django.views.decorators.http import require_POST
 
 from .cv_parser import extraer_datos_cv
 from .forms import CVUploadForm, ExpectativasForm
-from .matching import compute_match
-from .models import MatchDiario, Perfil, Vacante
+from .matching import compute_match, explicar_match
+from .models import MatchDiario, Perfil, Postulacion, Vacante
 from .scoring import recalcular_matches_de_perfil, recalcular_matches_todos
 
 TOP_MATCHES = 3
@@ -106,10 +108,19 @@ def dashboard_view(request):
             recalcular_matches_de_perfil(perfil, fecha=hoy)
             matches_hoy = MatchDiario.objects.filter(perfil=perfil, fecha=hoy)
 
-        top_matches = [
-            {"vacante": m.vacante, "score_pct": round(m.score * 100), "coincidencias": m.coincidencias}
-            for m in matches_hoy.select_related("vacante").order_by("-score")[:TOP_MATCHES]
-        ]
+        top_matches = []
+        for m in matches_hoy.select_related("vacante").order_by("-score")[:TOP_MATCHES]:
+            razones = explicar_match(perfil, m.vacante)
+            top_matches.append(
+                {
+                    "vacante": m.vacante,
+                    "score_pct": round(m.score * 100),
+                    "coincidencias": m.coincidencias,
+                    # HU-07: solo la razón más fuerte en la tarjeta del
+                    # dashboard — la lista completa va en el detalle.
+                    "razon_principal": razones[0] if razones else None,
+                }
+            )
 
     modalidad_activa = request.GET.get("modalidad", "")
     vacantes = (
@@ -138,6 +149,7 @@ def detalle_view(request, vacante_id):
     vacante = get_object_or_404(Vacante, id=vacante_id)
 
     match = None
+    postulacion = None
     if request.user.is_authenticated:
         perfil = _perfil_con_cv(request.user)
         if perfil:
@@ -147,9 +159,93 @@ def detalle_view(request, vacante_id):
                 "score": round(score * 100),
                 "coincidencias": coincidencias,
                 "faltantes": faltantes,
+                # HU-07
+                "razones": explicar_match(perfil, vacante),
             }
+            # HU-08: estado del botón "Postularme" — None si nunca aplicó.
+            postulacion = Postulacion.objects.filter(perfil=perfil, vacante=vacante).first()
 
-    return render(request, "vacantes/detalle.html", {"vacante": vacante, "match": match})
+    return render(
+        request,
+        "vacantes/detalle.html",
+        {"vacante": vacante, "match": match, "postulacion": postulacion},
+    )
+
+
+@login_required
+@require_POST
+def postular_view(request, vacante_id):
+    """HU-08: postulación simulada — no hay integración real con Magneto,
+    solo un registro con timestamp (evidencia) que además alimenta el
+    tablero de HU-10. Idempotente: postularse dos veces a la misma vacante
+    no crea una segunda fila ni reinicia el estado."""
+    vacante = get_object_or_404(Vacante, id=vacante_id)
+    perfil = _perfil_con_cv(request.user)
+    if not perfil:
+        messages.error(request, "Carga tu hoja de vida antes de postularte.")
+        return redirect("vacante_detalle", vacante_id=vacante_id)
+
+    try:
+        _, creada = Postulacion.objects.get_or_create(perfil=perfil, vacante=vacante)
+    except IntegrityError:
+        # Doble clic / dos pestañas: ambas peticiones pasan el SELECT de
+        # get_or_create antes de que la primera confirme su INSERT. La
+        # segunda choca con el UniqueConstraint — se trata igual que
+        # "ya te habías postulado" en vez de devolver un 500.
+        creada = False
+
+    if creada:
+        messages.success(request, f'Postulación registrada para "{vacante.titulo}".')
+    else:
+        messages.info(request, "Ya te habías postulado a esta vacante.")
+
+    return redirect("vacante_detalle", vacante_id=vacante_id)
+
+
+@login_required
+def tablero_view(request):
+    """HU-10: tablero Kanban de las postulaciones del candidato, agrupadas
+    por estado en las 4 columnas mínimas que pide la historia."""
+    perfil = _perfil_con_cv(request.user)
+    postulaciones = (
+        Postulacion.objects.filter(perfil=perfil).select_related("vacante")
+        if perfil
+        else Postulacion.objects.none()
+    )
+
+    columnas = [
+        {"estado": valor, "etiqueta": etiqueta, "postulaciones": []}
+        for valor, etiqueta in Postulacion.Estado.choices
+    ]
+    columnas_por_estado = {c["estado"]: c for c in columnas}
+    for p in postulaciones:
+        columnas_por_estado[p.estado]["postulaciones"].append(p)
+
+    return render(
+        request,
+        "vacantes/tablero.html",
+        {"columnas": columnas, "perfil": perfil, "estados": Postulacion.Estado.choices},
+    )
+
+
+@login_required
+@require_POST
+def cambiar_estado_postulacion_view(request, postulacion_id):
+    """HU-10: mover una tarjeta del tablero a otra columna. "Simulado" como
+    el resto de HU-08 — quien decide el estado en este sprint es el propio
+    candidato, no hay bandeja del lado de la empresa todavía."""
+    perfil = _perfil_con_cv(request.user)
+    postulacion = get_object_or_404(Postulacion, id=postulacion_id, perfil=perfil)
+
+    nuevo_estado = request.POST.get("estado", "")
+    if nuevo_estado not in Postulacion.Estado.values:
+        messages.error(request, "Estado inválido.")
+        return redirect("tablero")
+
+    postulacion.estado = nuevo_estado
+    postulacion.save(update_fields=["estado", "actualizado_en"])
+    messages.success(request, f'"{postulacion.vacante.titulo}" movida a {postulacion.get_estado_display()}.')
+    return redirect("tablero")
 
 
 @csrf_exempt

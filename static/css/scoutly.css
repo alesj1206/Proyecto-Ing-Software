@@ -353,6 +353,18 @@ select:focus {
   margin-bottom: 1.1rem;
 }
 
+.form-error-box.toast-success {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: #0a7a35;
+}
+
+.form-error-box.toast-info {
+  background: var(--magneto-purple-soft);
+  border-color: var(--magneto-purple);
+  color: var(--navy);
+}
+
 /* Tarjetas */
 
 .card {
@@ -728,4 +740,61 @@ select:focus {
 .requirement-dot.missing {
   background: var(--surface-strong);
   color: var(--muted-foreground);
+}
+
+/* Tablero Kanban (HU-10) */
+
+.tablero-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 64rem) {
+  .tablero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tablero-columna {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.tablero-columna-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.tablero-contador {
+  background: var(--surface-strong);
+  color: var(--muted-foreground);
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.7rem;
+}
+
+.tablero-columna-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.tablero-card {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: 0.85rem;
 }

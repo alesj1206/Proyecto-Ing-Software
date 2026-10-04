@@ -15,9 +15,9 @@ Punto de partida: todo lo del Sprint 1, sin remover alcance.
 |----|----------|-----------|--------|
 | HU-02 | Completar mis expectativas laborales | Should-have | ✅ Hecho — `/expectativas`, pondera hasta 15% del score de match |
 | HU-06 | Ranking diario vía workflow n8n automático | Must-have | ✅ Hecho — ver [`n8n/README.md`](n8n/README.md) |
-| HU-07 | Entender por qué me recomendaron una vacante | Should-have | ⏳ Pendiente |
-| HU-08 | Postularme (simulado) a una vacante | Should-have | ⏳ Pendiente |
-| HU-10 | Tablero de estado de cada proceso | Should-have | ⏳ Pendiente |
+| HU-07 | Entender por qué me recomendaron una vacante | Should-have | ✅ Hecho — sección "¿Por qué te la recomendamos?" en el detalle |
+| HU-08 | Postularme (simulado) a una vacante | Should-have | ✅ Hecho — botón "Postularme" en el detalle |
+| HU-10 | Tablero de estado de cada proceso | Should-have | ✅ Hecho — `/postulaciones`, Kanban de 4 columnas |
 
 **HU-06 — cómo quedó armado.** El scoring ya no se calcula en cada
 request: `vacantes/scoring.py::recalcular_matches_todos()` recorre todos
@@ -40,6 +40,24 @@ scrapear Magneto directamente con un pipeline HTTP→HTML→Postgres antes de
 pivotar a Django. Se reutilizan sus contenedores de n8n (ya tenían cuenta
 creada), pero el workflow de HU-06 apunta al Django actual, no a ese
 esquema de Postgres viejo — ver la nota en ese README.
+
+**HU-07 — cómo quedó armado.** `vacantes/matching.py::explicar_match()`
+genera las razones con los mismos helpers que usa `compute_match()` para
+calcular el score (`_modalidad_coincide`, `_salario_coincide`,
+`_ubicacion_coincide`, coincidencia de habilidades) — nunca puede mostrar
+una razón que el número no respalde, porque no hay una segunda copia de la
+lógica. Si solo hay una razón calculable, se agrega un resumen del % de
+match para cumplir el mínimo de 2 que pide la historia.
+
+**HU-08 / HU-10 — cómo quedaron armadas.** Un único modelo,
+`vacantes/models.py::Postulacion`, es a la vez la "evidencia con
+timestamp" de HU-08 (`fecha_aplicacion`, `auto_now_add`) y la tarjeta del
+tablero Kanban de HU-10 (campo `estado`, una de las 4 columnas mínimas).
+Postularse es idempotente (`get_or_create`): si ya habías aplicado, el
+botón se reemplaza por un badge con la fecha y el estado actual en vez de
+duplicar la fila. El estado lo mueve el propio candidato desde
+`/postulaciones` — "simulado" significa que no hay bandeja del lado de la
+empresa todavía, eso queda fuera de este sprint.
 
 **Identidad visual recalibrada contra Magneto real** (ver sección de abajo)
 — esta fue la corrección explícita de la profesora sobre el Sprint 1: la

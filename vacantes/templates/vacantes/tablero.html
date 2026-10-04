@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Mis postulaciones | Scoutly{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:3rem;padding-bottom:3.5rem;">
+  <p class="label-eyebrow" style="color:var(--magneto-purple);">HU-10 · Seguimiento</p>
+  <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">Mis postulaciones</h1>
+  <p style="margin-top:0.5rem;max-width:34rem;color:var(--muted-foreground);">
+    Cada postulación simulada queda en una columna según su estado. Muévela
+    con el selector de cada tarjeta.
+  </p>
+
+  {% if not perfil %}
+  <div class="cta-banner" style="margin-top:1.75rem;">
+    <div>
+      <p style="margin:0;font-weight:600;color:var(--navy);">Aún no has cargado tu hoja de vida</p>
+      <p style="margin:0.25rem 0 0;font-size:0.875rem;color:var(--muted-foreground);">Cárgala para poder postularte a vacantes.</p>
+    </div>
+    <a href="{% url 'onboarding' %}" class="btn btn-brand">Cargar CV</a>
+  </div>
+  {% else %}
+  <div class="tablero-grid">
+    {% for columna in columnas %}
+    <div class="tablero-columna">
+      <div class="tablero-columna-header">
+        <span>{{ columna.etiqueta }}</span>
+        <span class="tablero-contador">{{ columna.postulaciones|length }}</span>
+      </div>
+      <div class="tablero-columna-body">
+        {% for p in columna.postulaciones %}
+        <div class="tablero-card">
+          <a href="{% url 'vacante_detalle' p.vacante.id %}" style="text-decoration:none;">
+            <h3 style="font-size:0.9rem;color:var(--navy);">{{ p.vacante.titulo }}</h3>
+          </a>
+          <p style="margin-top:0.25rem;font-size:0.75rem;color:var(--muted-foreground);">{{ p.vacante.empresa }}</p>
+          <p style="margin-top:0.4rem;font-size:0.7rem;color:var(--muted-foreground);">Postulado el {{ p.fecha_aplicacion|date:"d/m/Y" }}</p>
+
+          <form method="post" action="{% url 'cambiar_estado_postulacion' p.id %}" style="margin-top:0.75rem;">
+            {% csrf_token %}
+            <select name="estado" onchange="this.form.submit()" style="height:2.25rem;font-size:0.8rem;">
+              {% for valor, etiqueta in estados %}
+              <option value="{{ valor }}" {% if valor == p.estado %}selected{% endif %}>{{ etiqueta }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
+        {% empty %}
+        <p style="font-size:0.75rem;color:var(--muted-foreground);">Sin postulaciones.</p>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -38,6 +38,7 @@
             <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Vacantes</a>
             <a href="{% url 'perfil' %}" class="{% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">Mi hoja de vida</a>
             <a href="{% url 'expectativas' %}" class="{% if request.resolver_match.url_name == 'expectativas' %}active{% endif %}">Mis expectativas</a>
+            <a href="{% url 'tablero' %}" class="{% if request.resolver_match.url_name == 'tablero' %}active{% endif %}">Mis postulaciones</a>
           </nav>
           {% endif %}
         </div>
@@ -52,6 +53,15 @@
     </header>
 
     <main style="flex:1;">
+      {% if messages %}
+      <div class="container" style="padding-top:1.25rem;">
+        {% for message in messages %}
+        <div class="form-error-box{% if message.tags == 'success' %} toast-success{% elif message.tags == 'info' %} toast-info{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
 
