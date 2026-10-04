@@ -25,9 +25,10 @@ los perfiles con CV cargado y persiste el ranking del día en el modelo
 `MatchDiario`. Lo dispara `POST /api/recalcular-matches` (protegido por el
 header `X-Scoutly-Token`, ver `N8N_SCORING_TOKEN` en `settings.py`), que es
 exactamente lo que llama el workflow de n8n (`Schedule Trigger` diario →
-`HTTP Request`) descrito en [`n8n/README.md`](n8n/README.md) — ahí está el
-JSON del workflow listo para importar y la conectividad contenedor→host ya
-verificada. El dashboard lee de `MatchDiario`; si el workflow todavía no
+`HTTP Request`) descrito en [`n8n/README.md`](n8n/README.md) — **ya
+instalado, activo y probado con una ejecución real** (ver ese README para
+el detalle de cómo se armó todo por API, sin tocar el navegador). El
+dashboard lee de `MatchDiario`; si el workflow todavía no
 corrió hoy para alguien, se calcula y persiste al vuelo en ese momento
 (para que nunca se vea vacío), pero la fuente de verdad es el batch diario.
 El ranking también se recalcula de inmediato cuando el candidato actualiza
