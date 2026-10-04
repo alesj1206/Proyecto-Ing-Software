@@ -41,6 +41,14 @@ class Perfil(models.Model):
     def __str__(self):
         return f"Perfil de {self.usuario.email}"
 
+    def tiene_cv(self):
+        """False para el Perfil vacío que expectativas_view crea con
+        get_or_create cuando alguien visita /expectativas sin haber pasado
+        por onboarding. Única fuente de verdad para "¿ya cargó su hoja de
+        vida?" — la usan tanto views._perfil_con_cv (candidato individual)
+        como scoring.recalcular_matches_todos (batch diario)."""
+        return bool(self.cv_nombre_archivo)
+
     def tiene_expectativas(self):
         """True si hay al menos una expectativa que matching.py realmente usa
         para el score. exp_disponibilidad queda fuera a propósito: se guarda
@@ -88,3 +96,28 @@ class Vacante(models.Model):
             f"{self.salario_moneda} {self.salario_min:,.0f}-{self.salario_max:,.0f}"
             f" / {self.get_salario_periodo_display().lower()}"
         ).replace(",", ".")
+
+
+class MatchDiario(models.Model):
+    """HU-06: ranking de 'Matches de hoy' persistido, para que no dependa de
+    recalcular el score en cada request. Lo escribe scoring.recalcular_matches_de_perfil,
+    llamado por el workflow de n8n (vía /api/recalcular-matches, una vez al
+    día) y también de inmediato cuando el candidato actualiza su CV o sus
+    expectativas (para que el ranking se sienta al día sin esperar al
+    siguiente ciclo del workflow)."""
+
+    perfil = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name="matches_diarios")
+    vacante = models.ForeignKey(Vacante, on_delete=models.CASCADE)
+    score = models.FloatField()
+    coincidencias = models.JSONField(default=list)
+    fecha = models.DateField()
+    calculado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["perfil", "vacante", "fecha"], name="unico_match_por_dia")
+        ]
+        ordering = ["-fecha", "-score"]
+
+    def __str__(self):
+        return f"{self.perfil} ↔ {self.vacante} ({self.fecha}): {self.score:.2f}"

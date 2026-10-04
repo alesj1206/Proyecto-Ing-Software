@@ -14,10 +14,32 @@ Punto de partida: todo lo del Sprint 1, sin remover alcance.
 | HU | Historia | Prioridad | Estado |
 |----|----------|-----------|--------|
 | HU-02 | Completar mis expectativas laborales | Should-have | ✅ Hecho — `/expectativas`, pondera hasta 15% del score de match |
-| HU-06 | Ranking diario vía workflow n8n automático | Must-have | ⏳ Pendiente (sigue en keyword-matching; falta el workflow real) |
+| HU-06 | Ranking diario vía workflow n8n automático | Must-have | ✅ Hecho — ver [`n8n/README.md`](n8n/README.md) |
 | HU-07 | Entender por qué me recomendaron una vacante | Should-have | ⏳ Pendiente |
 | HU-08 | Postularme (simulado) a una vacante | Should-have | ⏳ Pendiente |
 | HU-10 | Tablero de estado de cada proceso | Should-have | ⏳ Pendiente |
+
+**HU-06 — cómo quedó armado.** El scoring ya no se calcula en cada
+request: `vacantes/scoring.py::recalcular_matches_todos()` recorre todos
+los perfiles con CV cargado y persiste el ranking del día en el modelo
+`MatchDiario`. Lo dispara `POST /api/recalcular-matches` (protegido por el
+header `X-Scoutly-Token`, ver `N8N_SCORING_TOKEN` en `settings.py`), que es
+exactamente lo que llama el workflow de n8n (`Schedule Trigger` diario →
+`HTTP Request`) descrito en [`n8n/README.md`](n8n/README.md) — ahí está el
+JSON del workflow listo para importar y la conectividad contenedor→host ya
+verificada. El dashboard lee de `MatchDiario`; si el workflow todavía no
+corrió hoy para alguien, se calcula y persiste al vuelo en ese momento
+(para que nunca se vea vacío), pero la fuente de verdad es el batch diario.
+El ranking también se recalcula de inmediato cuando el candidato actualiza
+su CV o sus expectativas (HU-02), sin esperar al siguiente ciclo del
+workflow — así cumple el tercer criterio de aceptación de la historia.
+
+*Nota de alcance:* existe una infraestructura de n8n+Postgres más antigua
+en `~/n8n-vacantes/` (fuera de este repo), de cuando el equipo evaluó
+scrapear Magneto directamente con un pipeline HTTP→HTML→Postgres antes de
+pivotar a Django. Se reutilizan sus contenedores de n8n (ya tenían cuenta
+creada), pero el workflow de HU-06 apunta al Django actual, no a ese
+esquema de Postgres viejo — ver la nota en ese README.
 
 **Identidad visual recalibrada contra Magneto real** (ver sección de abajo)
 — esta fue la corrección explícita de la profesora sobre el Sprint 1: la

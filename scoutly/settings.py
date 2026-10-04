@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,9 @@ SECRET_KEY = 'django-insecure-1(1!@u*m7fmsfkn8d)mp0a2qa22n77%+3-n1$j0z_kiqai55&)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = ['https://*.loca.lt']
 
 
 # Application definition
@@ -100,7 +103,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Candidatos y vacantes son colombianos; "hoy" para Matches de hoy (HU-06)
+# debe ser el día en Bogotá, no en UTC.
+TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
 
@@ -120,3 +125,12 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 LOGIN_URL = '/login'
+
+# HU-06: token compartido que el workflow de n8n manda en el header
+# X-Scoutly-Token al disparar POST /api/recalcular-matches. En desarrollo
+# cae a un valor fijo (conocido, está en este repo) para que el endpoint
+# funcione sin configurar nada; con DEBUG=False, views.recalcular_matches_api
+# rechaza este valor en vez de aceptarlo como si fuera un secreto real —
+# ver la comparación ahí.
+N8N_SCORING_TOKEN_DEV_DEFAULT = 'dev-local-token-change-me'
+N8N_SCORING_TOKEN = os.environ.get('N8N_SCORING_TOKEN', N8N_SCORING_TOKEN_DEV_DEFAULT)
