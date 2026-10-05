@@ -21,7 +21,12 @@ from .models import ExplicacionCriterio
 logger = logging.getLogger(__name__)
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+# El catálogo de modelos gratuitos de Groq cambia con frecuencia — llama-3.3
+# ya no está disponible en esta cuenta (probado en vivo: 404 model_not_found).
+# qwen3.8-27b respondió en español natural y rápido (~0.5s); los modelos
+# gpt-oss-20b/120b devolvieron contenido vacío con max_tokens=100 (gastan el
+# presupuesto en razonamiento interno antes de la respuesta final).
+GROQ_MODEL = "qwen/qwen3.8-27b"
 GROQ_TIMEOUT = 8  # segundos — una explicación no debe colgar la carga de la página
 
 # Tolerancia al comparar el score_pct cacheado contra el recién calculado:
