@@ -41,6 +41,12 @@
         {{ form.exp_disponibilidad }}
         {% if form.exp_disponibilidad.errors %}<p class="form-error">{{ form.exp_disponibilidad.errors.0 }}</p>{% endif %}
       </div>
+
+      <div class="field">
+        <label for="{{ form.anios_experiencia.id_for_label }}">{{ form.anios_experiencia.label }}</label>
+        {{ form.anios_experiencia }}
+        {% if form.anios_experiencia.errors %}<p class="form-error">{{ form.anios_experiencia.errors.0 }}</p>{% endif %}
+      </div>
     </div>
 
     <div style="margin-top:1.25rem;display:flex;align-items:center;gap:0.9rem;">
@@ -53,9 +59,11 @@
 
   <div class="card" style="margin-top:1.5rem;background:var(--magneto-purple-soft);border-color:var(--magneto-purple);">
     <p style="margin:0;font-size:0.8125rem;color:var(--navy);">
-      Estos datos ajustan hasta un 15% del score de compatibilidad de cada
-      vacante (modalidad, salario mínimo y ubicación). El 85% restante sigue
-      siendo la coincidencia de habilidades de tu hoja de vida.
+      Tu compatibilidad con cada vacante se calcula con 5 criterios independientes:
+      habilidades (40%), experiencia (20%), salario (15%), modalidad (15%) y
+      ubicación (10%). Los que dejes sin completar aquí simplemente no cuentan
+      — su peso se reparte entre los demás. Puedes ver el desglose completo,
+      con una explicación de cada criterio, en el detalle de cualquier vacante.
     </p>
   </div>
 </div>

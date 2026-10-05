@@ -84,20 +84,45 @@
   </article>
 
   <aside>
-    {% if match %}
+    {% if criterios %}
     <div class="card">
-      <h3 style="font-size:0.875rem;color:var(--navy);">¿Por qué te la recomendamos?</h3>
-      {% if match.razones %}
-      <ul style="margin:0.75rem 0 0;padding-left:1.1rem;color:var(--navy);font-size:0.8125rem;line-height:1.7;">
-        {% for razon in match.razones %}
-        <li>{{ razon }}</li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p style="margin-top:0.75rem;font-size:0.8125rem;color:var(--muted-foreground);">
-        Esta vacante no coincide todavía con tu perfil ni tus expectativas.
+      <h3 style="font-size:0.875rem;color:var(--navy);">Desglose de compatibilidad</h3>
+      <p style="margin-top:0.35rem;font-size:0.75rem;color:var(--muted-foreground);">
+        5 criterios, cada uno con su propio peso. Toca "¿Por qué?" para el detalle.
       </p>
-      {% endif %}
+
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:0.9rem;">
+        {% for c in criterios %}
+        <div class="criterio-row">
+          <div class="criterio-row-head">
+            <span class="criterio-nombre">{{ c.etiqueta }}</span>
+            <span class="criterio-peso">peso {{ c.peso_pct }}%</span>
+            {% if c.aplica %}
+              <span class="criterio-score">{{ c.score_pct }}%</span>
+            {% endif %}
+          </div>
+
+          {% if c.aplica %}
+            <div class="criterio-bar">
+              <div class="criterio-bar-fill" style="width:{{ c.score_pct }}%;"></div>
+            </div>
+            {% if c.explicacion %}
+            <details class="criterio-detalle">
+              <summary>¿Por qué este puntaje?</summary>
+              <p>{{ c.explicacion }}</p>
+            </details>
+            {% endif %}
+          {% else %}
+            <p class="criterio-sin-datos">
+              {{ c.razon_no_aplica }}
+              {% if c.es_del_candidato %}
+                <a href="{% url 'expectativas' %}">Complétalo aquí</a>.
+              {% endif %}
+            </p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
     </div>
     {% endif %}
 

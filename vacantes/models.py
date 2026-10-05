@@ -38,6 +38,12 @@ class Perfil(models.Model):
         max_length=20, choices=Disponibilidad.choices, blank=True
     )
 
+    # Criterio "experiencia" del matching (Sprint 2, rediseño de criterios).
+    # Declarado por el candidato, igual que las expectativas — no se intenta
+    # parsear años de experiencia del texto libre del CV (los formatos de
+    # fecha varían demasiado para que una heurística sea confiable).
+    anios_experiencia = models.PositiveIntegerField(null=True, blank=True)
+
     def __str__(self):
         return f"Perfil de {self.usuario.email}"
 
@@ -82,6 +88,11 @@ class Vacante(models.Model):
     requisitos = models.JSONField(default=list)
     descripcion = models.TextField()
     fecha_publicacion = models.DateField()
+
+    # Criterio "experiencia" del matching (Sprint 2). None = la vacante no
+    # exige una antigüedad mínima, así que el criterio no aplica para ella
+    # (se excluye del promedio ponderado en vez de contar como 0%).
+    experiencia_minima = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ["-fecha_publicacion"]
@@ -150,3 +161,36 @@ class Postulacion(models.Model):
 
     def __str__(self):
         return f"{self.perfil} → {self.vacante} ({self.get_estado_display()})"
+
+
+class ExplicacionCriterio(models.Model):
+    """Explicación en lenguaje natural (generada por IA, Groq) de por qué un
+    criterio de matching obtuvo cierto puntaje para un candidato y una
+    vacante específicos. Se cachea aquí para no llamar la API en cada vista
+    de página — matching.evaluar_criterios compara el score_pct guardado
+    contra el recién calculado y solo regenera si cambió (CV o expectativas
+    actualizadas)."""
+
+    class Criterio(models.TextChoices):
+        HABILIDADES = "habilidades", "Habilidades"
+        EXPERIENCIA = "experiencia", "Experiencia"
+        SALARIO = "salario", "Salario"
+        MODALIDAD = "modalidad", "Modalidad"
+        UBICACION = "ubicacion", "Ubicación"
+
+    perfil = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name="explicaciones")
+    vacante = models.ForeignKey(Vacante, on_delete=models.CASCADE, related_name="explicaciones")
+    criterio = models.CharField(max_length=20, choices=Criterio.choices)
+    score_pct = models.FloatField()
+    texto = models.TextField()
+    generado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["perfil", "vacante", "criterio"], name="una_explicacion_por_criterio"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.perfil} / {self.vacante} / {self.criterio}: {self.score_pct:.0f}%"

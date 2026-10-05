@@ -1,22 +1,36 @@
 import hmac
+from concurrent.futures import ThreadPoolExecutor
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
+from django.db import IntegrityError, connections
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from .ai_explicaciones import guardar_explicacion, resolver_explicacion
 from .cv_parser import extraer_datos_cv
 from .forms import CVUploadForm, ExpectativasForm
-from .matching import compute_match, explicar_match
+from .matching import compute_match, evaluar_criterios, explicar_match
 from .models import MatchDiario, Perfil, Postulacion, Vacante
 from .scoring import recalcular_matches_de_perfil, recalcular_matches_todos
 
 TOP_MATCHES = 3
+
+
+def _resolver_explicacion_en_hilo(perfil, vacante, criterio):
+    """Wrapper para correr resolver_explicacion() (solo lectura/Groq, sin
+    escribir) en un hilo del ThreadPoolExecutor de detalle_view. Django
+    abre una conexión a la BD por hilo la primera vez que se usa, y no la
+    cierra sola cuando el hilo no vive atado al ciclo request/response —
+    connections.close_all() aquí evita dejar conexiones SQLite huérfanas."""
+    try:
+        return resolver_explicacion(perfil, vacante, criterio)
+    finally:
+        connections.close_all()
 
 
 def _guardar_perfil_desde_cv(usuario, archivo):
@@ -149,26 +163,76 @@ def detalle_view(request, vacante_id):
     vacante = get_object_or_404(Vacante, id=vacante_id)
 
     match = None
+    criterios = []
     postulacion = None
     if request.user.is_authenticated:
         perfil = _perfil_con_cv(request.user)
         if perfil:
+            criterios_resultado = evaluar_criterios(perfil, vacante)
             score, coincidencias = compute_match(perfil, vacante)
-            faltantes = [r for r in vacante.requisitos if r not in coincidencias]
+            # El detalle de habilidades ya trae "faltantes" calculado —
+            # evita recalcularlo aquí con una segunda lista por comprensión
+            # que podría divergir si _criterio_habilidades cambia su lógica.
+            habilidades_detalle = next(
+                c.detalle for c in criterios_resultado if c.criterio == "habilidades"
+            )
             match = {
                 "score": round(score * 100),
                 "coincidencias": coincidencias,
-                "faltantes": faltantes,
-                # HU-07
+                "faltantes": habilidades_detalle["faltantes"],
+                # HU-07 (versión corta, sin IA) — se mantiene por si se
+                # necesita en otro lugar; el detalle usa "criterios" abajo.
                 "razones": explicar_match(perfil, vacante),
             }
+
+            # Desglose de los 5 criterios, cada uno con su explicación por
+            # IA (cacheada — ver vacantes/ai_explicaciones.py). Las
+            # llamadas a Groq de los criterios sin caché van en paralelo
+            # (en serie, hasta 5 × GROQ_TIMEOUT (8s) podrían sumar ~40s de
+            # carga; en paralelo el peor caso queda acotado a
+            # ~1×GROQ_TIMEOUT) — pero la escritura en caché NO: SQLite no
+            # tolera varios hilos escribiendo a la vez ("database is
+            # locked"), así que cada hilo solo lee/llama a Groq
+            # (resolver_explicacion) y el hilo principal guarda los
+            # resultados uno por uno después, ya sin paralelismo.
+            aplicables = [c for c in criterios_resultado if c.aplica]
+            explicaciones = {}
+            pendientes_de_guardar = []
+            if aplicables:
+                with ThreadPoolExecutor(max_workers=len(aplicables)) as executor:
+                    futuros = {
+                        executor.submit(_resolver_explicacion_en_hilo, perfil, vacante, c): c
+                        for c in aplicables
+                    }
+                    for futuro, c in futuros.items():
+                        texto, score_a_guardar = futuro.result()
+                        explicaciones[c.criterio] = texto
+                        if score_a_guardar is not None:
+                            pendientes_de_guardar.append((c.criterio, score_a_guardar, texto))
+
+            for criterio_nombre, score_pct, texto in pendientes_de_guardar:
+                guardar_explicacion(perfil, vacante, criterio_nombre, score_pct, texto)
+
+            for c in criterios_resultado:
+                criterios.append(
+                    {
+                        "etiqueta": c.etiqueta,
+                        "peso_pct": round(c.peso * 100),
+                        "score_pct": round(c.score_pct),
+                        "aplica": c.aplica,
+                        "razon_no_aplica": c.razon_no_aplica,
+                        "es_del_candidato": c.es_del_candidato,
+                        "explicacion": explicaciones.get(c.criterio),
+                    }
+                )
+
             # HU-08: estado del botón "Postularme" — None si nunca aplicó.
             postulacion = Postulacion.objects.filter(perfil=perfil, vacante=vacante).first()
 
     return render(
         request,
         "vacantes/detalle.html",
-        {"vacante": vacante, "match": match, "postulacion": postulacion},
+        {"vacante": vacante, "match": match, "criterios": criterios, "postulacion": postulacion},
     )
 
 

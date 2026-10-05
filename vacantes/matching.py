@@ -1,12 +1,28 @@
-"""Port directo de matching.ts: score por coincidencia de palabras clave,
-más un ajuste por expectativas laborales (HU-02) cuando el candidato las
-definió."""
+"""Motor de matching — 5 criterios independientes, cada uno con su propio
+peso e índice de afinidad continuo (0-100%, no solo sí/no). Si un criterio
+no tiene datos suficientes para evaluarse (el candidato no declaró esa
+expectativa, o la vacante no exige una antigüedad mínima), se excluye y su
+peso se reparte proporcionalmente entre los que sí aplican — habilidades
+siempre aplica, así que el score final nunca queda sin ningún criterio.
+"""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-# Peso de las expectativas dentro del score final. El resto (1 - este peso)
-# sigue siendo la coincidencia de habilidades, que es la señal principal.
-PESO_EXPECTATIVAS = 0.15
+PESOS = {
+    "habilidades": 0.40,
+    "experiencia": 0.20,
+    "salario": 0.15,
+    "modalidad": 0.15,
+    "ubicacion": 0.10,
+}
+
+ETIQUETAS = {
+    "habilidades": "Habilidades",
+    "experiencia": "Experiencia",
+    "salario": "Salario",
+    "modalidad": "Modalidad",
+    "ubicacion": "Ubicación",
+}
 
 
 @dataclass
@@ -14,6 +30,28 @@ class MatchVacante:
     vacante: object
     score: float
     coincidencias: list
+
+
+@dataclass
+class CriterioResultado:
+    criterio: str
+    etiqueta: str
+    peso: float
+    score_pct: float
+    aplica: bool
+    # Datos crudos del cálculo — se los pasamos tal cual al prompt de la IA
+    # (vacantes/ai_explicaciones.py) para que la explicación cite números
+    # reales en vez de inventar una justificación genérica.
+    detalle: dict = field(default_factory=dict)
+    # Por qué aplica=False, para que la UI no siempre apunte al candidato
+    # ("completa tus expectativas") cuando en realidad es la vacante la que
+    # no trae el dato (p. ej. no exige una experiencia mínima).
+    razon_no_aplica: str = ""
+    # True solo cuando razon_no_aplica describe algo que el candidato puede
+    # arreglar en /expectativas — si el dato que falta es de la vacante
+    # (salario no especificado, sin experiencia mínima), no tiene sentido
+    # mandarlo a ese formulario.
+    es_del_candidato: bool = False
 
 
 def _score_habilidades(perfil, vacante):
@@ -52,52 +90,160 @@ def _ubicacion_coincide(perfil, vacante):
     return any(p in ubicacion_vacante or ubicacion_vacante in p for p in partes_esperadas)
 
 
-def _score_expectativas(perfil, vacante):
-    """Fracción (0-1) de expectativas declaradas que la vacante cumple.
-    Solo cuenta los criterios que el candidato efectivamente definió."""
-    if perfil is None or not perfil.tiene_expectativas():
-        return None
+def _criterio_habilidades(perfil, vacante):
+    score, coincidencias = _score_habilidades(perfil, vacante)
+    faltantes = [r for r in vacante.requisitos if r not in coincidencias]
+    return CriterioResultado(
+        criterio="habilidades",
+        etiqueta=ETIQUETAS["habilidades"],
+        peso=PESOS["habilidades"],
+        score_pct=score * 100,
+        aplica=True,
+        detalle={
+            "coincidencias": coincidencias,
+            "faltantes": faltantes,
+            "total_requisitos": len(vacante.requisitos),
+        },
+    )
 
-    criterios_definidos = 0
-    criterios_cumplidos = 0
 
-    if perfil.exp_modalidad:
-        criterios_definidos += 1
-        criterios_cumplidos += _modalidad_coincide(perfil, vacante)
+def _criterio_experiencia(perfil, vacante):
+    minimo = vacante.experiencia_minima
+    anios = perfil.anios_experiencia
 
-    if perfil.exp_salario_min:
-        criterios_definidos += 1
-        criterios_cumplidos += _salario_coincide(perfil, vacante)
+    if minimo is None:
+        return CriterioResultado(
+            "experiencia", ETIQUETAS["experiencia"], PESOS["experiencia"], 0.0, False,
+            razon_no_aplica="Esta vacante no especifica una experiencia mínima.",
+        )
+    if anios is None:
+        return CriterioResultado(
+            "experiencia", ETIQUETAS["experiencia"], PESOS["experiencia"], 0.0, False,
+            razon_no_aplica="No declaraste tus años de experiencia.",
+            es_del_candidato=True,
+        )
 
-    if perfil.exp_ubicacion:
-        criterios_definidos += 1
-        criterios_cumplidos += _ubicacion_coincide(perfil, vacante)
+    # minimo == 0 ("sin experiencia previa requerida") lo cumple cualquier
+    # candidato — min()/max() evita la división por cero sin tratar "0 años
+    # mínimos" como "no aplica" (ver hallazgo de revisión: `if not minimo`
+    # excluía por error el caso 0, que es un valor válido y distinto de None).
+    pct = 100.0 if minimo == 0 else min(100.0, (anios / minimo) * 100)
+    return CriterioResultado(
+        "experiencia",
+        ETIQUETAS["experiencia"],
+        PESOS["experiencia"],
+        pct,
+        True,
+        {"anios_candidato": anios, "anios_minimos": minimo},
+    )
 
-    if criterios_definidos == 0:
-        return None
-    return criterios_cumplidos / criterios_definidos
+
+def _criterio_salario(perfil, vacante):
+    if vacante.salario_max is None:
+        return CriterioResultado(
+            "salario", ETIQUETAS["salario"], PESOS["salario"], 0.0, False,
+            razon_no_aplica="Esta vacante no especifica salario.",
+        )
+    if not perfil.exp_salario_min:
+        return CriterioResultado(
+            "salario", ETIQUETAS["salario"], PESOS["salario"], 0.0, False,
+            razon_no_aplica="No declaraste tu salario mínimo esperado.",
+            es_del_candidato=True,
+        )
+
+    pct = min(100.0, (vacante.salario_max / perfil.exp_salario_min) * 100)
+    return CriterioResultado(
+        "salario",
+        ETIQUETAS["salario"],
+        PESOS["salario"],
+        pct,
+        True,
+        {
+            "salario_ofrecido": vacante.salario_max,
+            "salario_esperado": perfil.exp_salario_min,
+            "moneda": vacante.salario_moneda,
+        },
+    )
+
+
+def _criterio_modalidad(perfil, vacante):
+    if not perfil.exp_modalidad:
+        return CriterioResultado(
+            "modalidad", ETIQUETAS["modalidad"], PESOS["modalidad"], 0.0, False,
+            razon_no_aplica="No declaraste tu modalidad preferida.",
+            es_del_candidato=True,
+        )
+
+    coincide = _modalidad_coincide(perfil, vacante)
+    return CriterioResultado(
+        "modalidad",
+        ETIQUETAS["modalidad"],
+        PESOS["modalidad"],
+        100.0 if coincide else 0.0,
+        True,
+        {"modalidad_vacante": vacante.modalidad, "modalidad_esperada": perfil.exp_modalidad},
+    )
+
+
+def _criterio_ubicacion(perfil, vacante):
+    if not perfil.exp_ubicacion:
+        return CriterioResultado(
+            "ubicacion", ETIQUETAS["ubicacion"], PESOS["ubicacion"], 0.0, False,
+            razon_no_aplica="No declaraste tu ubicación preferida.",
+            es_del_candidato=True,
+        )
+
+    coincide = _ubicacion_coincide(perfil, vacante)
+    return CriterioResultado(
+        "ubicacion",
+        ETIQUETAS["ubicacion"],
+        PESOS["ubicacion"],
+        100.0 if coincide else 0.0,
+        True,
+        {"ubicacion_vacante": vacante.ubicacion, "ubicacion_esperada": perfil.exp_ubicacion},
+    )
+
+
+def evaluar_criterios(perfil, vacante):
+    """Los 5 criterios para este candidato+vacante. Habilidades siempre
+    aparece (y siempre aplica); los demás solo si hay datos para evaluarlos
+    — pero igual se incluyen en la lista con aplica=False, para que la UI
+    pueda mostrar "no declaraste esta expectativa" en vez de omitirlos."""
+    if perfil is None:
+        return []
+    return [
+        _criterio_habilidades(perfil, vacante),
+        _criterio_experiencia(perfil, vacante),
+        _criterio_salario(perfil, vacante),
+        _criterio_modalidad(perfil, vacante),
+        _criterio_ubicacion(perfil, vacante),
+    ]
 
 
 def compute_match(perfil, vacante):
-    """score = (1 - w) * coincidencia_habilidades + w * coincidencia_expectativas.
-    Si el candidato no definió expectativas, w se redistribuye por completo a
-    habilidades (comportamiento idéntico al de antes de HU-02)."""
-    score_habilidades, coincidencias = _score_habilidades(perfil, vacante)
-    score_expectativas = _score_expectativas(perfil, vacante)
+    """score = promedio ponderado de los criterios que aplican, con los
+    pesos de PESOS renormalizados a 1 entre esos criterios. Devuelve
+    (score 0-1, coincidencias de habilidades) — la forma que ya esperan
+    scoring.py y las vistas."""
+    criterios = evaluar_criterios(perfil, vacante)
+    if not criterios:
+        return 0.0, []
 
-    if score_expectativas is None:
-        return score_habilidades, coincidencias
+    aplicables = [c for c in criterios if c.aplica]
+    peso_total = sum(c.peso for c in aplicables)
+    score = (sum(c.peso * c.score_pct for c in aplicables) / peso_total / 100) if peso_total else 0.0
 
-    score = (1 - PESO_EXPECTATIVAS) * score_habilidades + PESO_EXPECTATIVAS * score_expectativas
+    coincidencias = next(
+        (c.detalle.get("coincidencias", []) for c in criterios if c.criterio == "habilidades"), []
+    )
     return score, coincidencias
 
 
 def explicar_match(perfil, vacante):
-    """HU-07: razones legibles de por qué se recomendó esta vacante.
-    Construidas con los mismos helpers que compute_match usa para el score
-    (_score_habilidades, _modalidad_coincide, _salario_coincide,
-    _ubicacion_coincide) — nunca puede mostrar una razón que el número no
-    respalde, porque no hay una segunda copia de la lógica de comparación."""
+    """HU-07: razones cortas (sin IA, instantáneas) para la tarjeta del
+    dashboard. El desglose completo con explicación por IA de cada
+    criterio vive en vacantes/ai_explicaciones.py y se muestra solo en el
+    detalle de la vacante."""
     if perfil is None:
         return []
 

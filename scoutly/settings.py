@@ -134,3 +134,9 @@ LOGIN_URL = '/login'
 # ver la comparación ahí.
 N8N_SCORING_TOKEN_DEV_DEFAULT = 'dev-local-token-change-me'
 N8N_SCORING_TOKEN = os.environ.get('N8N_SCORING_TOKEN', N8N_SCORING_TOKEN_DEV_DEFAULT)
+
+# Explicaciones por criterio del matching (vacantes/ai_explicaciones.py),
+# vía la API gratuita de Groq (console.groq.com — sin tarjeta de crédito).
+# Sin esta variable, obtener_explicacion() cae directo al texto de
+# respaldo (no genérico, pero sin redactar por IA) — no rompe nada.
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')

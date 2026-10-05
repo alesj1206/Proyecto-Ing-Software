@@ -742,6 +742,91 @@ select:focus {
   color: var(--muted-foreground);
 }
 
+/* Desglose de criterios de matching (detalle de vacante) */
+
+.criterio-row-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.criterio-nombre {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.criterio-peso {
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+}
+
+.criterio-score {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.criterio-bar {
+  margin-top: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  overflow: hidden;
+}
+
+.criterio-bar-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 999px;
+}
+
+.criterio-sin-datos {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.criterio-sin-datos a {
+  color: var(--magneto-purple);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.criterio-detalle {
+  margin-top: 0.5rem;
+}
+
+.criterio-detalle summary {
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--magneto-purple);
+  list-style: none;
+}
+
+.criterio-detalle summary::-webkit-details-marker {
+  display: none;
+}
+
+.criterio-detalle summary::before {
+  content: "▸ ";
+}
+
+.criterio-detalle[open] summary::before {
+  content: "▾ ";
+}
+
+.criterio-detalle p {
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--navy);
+  line-height: 1.6;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--magneto-purple-soft);
+}
+
 /* Tablero Kanban (HU-10) */
 
 .tablero-grid {
