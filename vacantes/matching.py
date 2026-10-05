@@ -65,8 +65,30 @@ def _score_habilidades(perfil, vacante):
     return score, coincidencias
 
 
+# Afinidad entre la modalidad que pide la vacante y la que busca el
+# candidato. No es binario: Híbrido es un punto medio real entre Remoto y
+# Presencial, así que pedir Remoto y encontrar un Híbrido no es lo mismo
+# que encontrar un Presencial estricto (eso sí es la combinación opuesta,
+# 0%). Clave: (vacante.modalidad, perfil.exp_modalidad).
+MODALIDAD_AFINIDAD = {
+    ("Remoto", "Remoto"): 100,
+    ("Presencial", "Presencial"): 100,
+    ("Híbrido", "Híbrido"): 100,
+    ("Híbrido", "Remoto"): 50,
+    ("Remoto", "Híbrido"): 50,
+    ("Híbrido", "Presencial"): 50,
+    ("Presencial", "Híbrido"): 50,
+    ("Remoto", "Presencial"): 0,
+    ("Presencial", "Remoto"): 0,
+}
+
+
 def _modalidad_coincide(perfil, vacante):
     return bool(perfil.exp_modalidad) and perfil.exp_modalidad == vacante.modalidad
+
+
+def _modalidad_afinidad_pct(perfil, vacante):
+    return MODALIDAD_AFINIDAD.get((vacante.modalidad, perfil.exp_modalidad), 0)
 
 
 def _salario_coincide(perfil, vacante):
@@ -174,12 +196,11 @@ def _criterio_modalidad(perfil, vacante):
             es_del_candidato=True,
         )
 
-    coincide = _modalidad_coincide(perfil, vacante)
     return CriterioResultado(
         "modalidad",
         ETIQUETAS["modalidad"],
         PESOS["modalidad"],
-        100.0 if coincide else 0.0,
+        float(_modalidad_afinidad_pct(perfil, vacante)),
         True,
         {"modalidad_vacante": vacante.modalidad, "modalidad_esperada": perfil.exp_modalidad},
     )

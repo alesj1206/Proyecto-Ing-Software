@@ -78,9 +78,18 @@ def _prompt_usuario(criterio):
         ).replace(",", ".")
 
     if c == "modalidad":
+        if criterio.score_pct == 100:
+            nota = "Coinciden exactamente."
+        elif criterio.score_pct == 0:
+            nota = "Son modalidades opuestas (una es 100% presencial y la otra 100% remota), incompatibles."
+        else:
+            nota = (
+                "No coinciden exactamente, pero Híbrido es un punto medio entre Remoto y "
+                "Presencial, así que es una compatibilidad parcial, no una incompatibilidad total."
+            )
         return (
             f"Criterio: modalidad. La vacante es {d['modalidad_vacante']}; "
-            f"el candidato busca {d['modalidad_esperada']}."
+            f"el candidato busca {d['modalidad_esperada']}. {nota}"
         )
 
     if c == "ubicacion":
@@ -107,7 +116,14 @@ def _texto_respaldo(criterio):
     if c == "salario":
         return "El salario ofrecido cumple tu mínimo esperado." if criterio.score_pct >= 100 else "El salario ofrecido no alcanza tu mínimo esperado."
     if c == "modalidad":
-        return f"La vacante es {d['modalidad_vacante']}; buscas {d['modalidad_esperada']}."
+        if criterio.score_pct == 100:
+            return f"La vacante es {d['modalidad_vacante']}, igual a lo que buscas."
+        if criterio.score_pct == 0:
+            return f"La vacante es {d['modalidad_vacante']}; buscas {d['modalidad_esperada']} — modalidades opuestas."
+        return (
+            f"La vacante es {d['modalidad_vacante']}; buscas {d['modalidad_esperada']} — "
+            "no es exacto, pero Híbrido es un punto medio, así que cuenta como compatibilidad parcial."
+        )
     if c == "ubicacion":
         return f"La vacante está en {d['ubicacion_vacante']}; buscas en {d['ubicacion_esperada']}."
     return ""
