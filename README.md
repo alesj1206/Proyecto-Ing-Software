@@ -67,6 +67,69 @@ paleta y el chrome no se sentían como una extensión de Magneto. Se ajustó
 `static/css/scoutly.css` (tokens de color) en todas las pantallas
 existentes, sin tocar el flujo ni las rutas del Sprint 1.
 
+## Matching: 5 criterios + explicación por IA (rediseño Sprint 2)
+
+El score de compatibilidad ya no es solo habilidades: son 5 criterios
+independientes, cada uno con su propio peso, calculados en
+`vacantes/matching.py::evaluar_criterios()`:
+
+| Criterio | Peso | Cómo se mide |
+|---|---|---|
+| Habilidades | 40% | % de los requisitos de la vacante presentes en el CV |
+| Experiencia | 20% | años declarados ÷ años mínimos que pide la vacante |
+| Salario | 15% | qué tan cerca está el salario ofrecido del mínimo esperado |
+| Modalidad | 15% | afinidad por categoría — exacta 100%, cualquier combinación con Híbrido 50% (es un punto medio real), solo Remoto↔Presencial (únicos opuestos) 0% |
+| Ubicación | 10% | coincidencia de ciudad |
+
+Un criterio sin datos suficientes (el candidato no declaró esa
+expectativa, o la vacante no exige una antigüedad mínima) se excluye y su
+peso se reparte proporcionalmente entre los demás — Habilidades nunca se
+excluye.
+
+Cada criterio que aplica trae una **explicación específica generada por
+IA** (Groq, modelo gratuito `qwen/qwen3.8-27b`, `GROQ_API_KEY` en
+`settings.py`), cacheada en `ExplicacionCriterio` — nunca se llama la API
+en cada vista de página, solo cuando el score de ese criterio cambió
+desde la última vez. Sin `GROQ_API_KEY` configurada, cae a un texto de
+respaldo derivado de los mismos datos reales (nunca genérico). Visible en
+el detalle de cada vacante, bajo "Desglose de compatibilidad".
+
+## Vacantes reales de Magneto
+
+Las 9 vacantes mock del Sprint 1 (`vacantes/fixtures/vacantes_raw.json`)
+siguen ahí, pero el dataset se amplió con **16 vacantes reales**
+importadas en vivo de magneto365.com
+(`vacantes/fixtures/vacantes_magneto.json`, ids `mag-001`…`mag-016`) —
+título, empresa, ubicación, modalidad, salario, experiencia mínima,
+descripción y requisitos son datos reales, no inventados.
+
+Cómo se obtuvieron: `vacantes/management/commands/scrape_magneto.py` usa
+Playwright + Chrome (la búsqueda de Magneto es una SPA — el HTML que
+responde el servidor no trae las vacantes, se cargan por JavaScript, así
+que un scraper con `requests` no sirve). El comando busca por término
+("desarrollador", "devops", "QA software", ...), abre el detalle de cada
+resultado y lee el panel renderizado — de ahí salen `Requisitos para
+aplicar a la vacante` (experiencia/educación), `Salario`, `Ubicación`, la
+descripción completa, y la sección `Habilidades` de cada oferta real.
+Esas habilidades reales se cruzan contra `vacantes/skills.py`
+(`HABILIDADES_CONOCIDAS`, ampliado con términos reales encontrados en el
+import: java, spring boot, azure, power bi, machine learning, ci/cd, n8n,
+sap, canva, photoshop, illustrator) para construir `requisitos` — un
+requisito que no esté en ese vocabulario no podría hacer match con
+ningún CV sin importar qué tan real sea el dato.
+
+El `robots.txt` de Magneto permite expresamente crawling (nombra bots de
+IA en su lista de user-agents permitidos) y no bloquea las rutas de
+`/trabajos/`; solo bloquea URLs con query string, que este comando nunca
+usa (toda la navegación es por interacción con la SPA). Aun así es una
+importación puntual y acotada (`--por-termino`), no un scraper continuo.
+
+```bash
+python manage.py scrape_magneto                                    # usa los términos por defecto
+python manage.py scrape_magneto --terminos "desarrollador,devops" --por-termino 5
+python manage.py seed_vacantes                                     # carga el resultado a la base de datos
+```
+
 ## Sprint 1
 
 Cubre las siguientes historias de usuario (deben tener, prioridad alta):

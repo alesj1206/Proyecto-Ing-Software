@@ -19,4 +19,19 @@ HABILIDADES_CONOCIDAS = [
     "css",
     "agile",
     "scrum",
+    # Sprint 2: ampliado con términos reales encontrados al importar vacantes
+    # de Magneto (vacantes/management/commands/scrape_magneto.py) — mismos
+    # criterios que la lista original: términos de uso común en ofertas
+    # colombianas de tecnología, no códigos de módulo demasiado específicos.
+    "java",
+    "spring boot",
+    "azure",
+    "power bi",
+    "machine learning",
+    "ci/cd",
+    "n8n",
+    "sap",
+    "canva",
+    "photoshop",
+    "illustrator",
 ]

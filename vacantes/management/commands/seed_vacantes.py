@@ -1,10 +1,11 @@
-"""Siembra Vacante a partir de vacantes_raw.json.
+"""Siembra Vacante a partir de los fixtures de vacantes/fixtures/.
 
-El dataset incluye a propósito un registro duplicado (mismo id) y uno con
-datos rotos (título vacío), tal como en el Sprint 1 original, para ejercitar
-el filtrado defensivo. A diferencia del original (que filtraba en cada
-lectura), aquí se valida una sola vez al insertar: las vistas ya no repiten
-ese trabajo en cada request.
+vacantes_raw.json es el dataset mock del Sprint 1 — incluye a propósito un
+registro duplicado (mismo id) y uno con datos rotos (título vacío), para
+ejercitar el filtrado defensivo. vacantes_magneto.json (Sprint 2) son
+vacantes reales importadas de magneto365.com — ver
+vacantes/management/commands/scrape_magneto.py para cómo se obtuvieron.
+Los dos se cargan juntos; los ids no chocan (prefijos "vac-" vs "mag-").
 """
 
 import json
@@ -13,7 +14,10 @@ from django.core.management.base import BaseCommand
 
 from vacantes.models import Vacante
 
-FIXTURE_PATH = "vacantes/fixtures/vacantes_raw.json"
+FIXTURE_PATHS = [
+    "vacantes/fixtures/vacantes_raw.json",
+    "vacantes/fixtures/vacantes_magneto.json",
+]
 
 
 def es_vacante_valida(registro):
@@ -30,8 +34,10 @@ class Command(BaseCommand):
     help = "Carga las vacantes de ejemplo, descartando duplicados y registros inválidos."
 
     def handle(self, *args, **options):
-        with open(FIXTURE_PATH, encoding="utf-8") as f:
-            registros = json.load(f)
+        registros = []
+        for ruta in FIXTURE_PATHS:
+            with open(ruta, encoding="utf-8") as f:
+                registros.extend(json.load(f))
 
         vistos = set()
         creadas = 0

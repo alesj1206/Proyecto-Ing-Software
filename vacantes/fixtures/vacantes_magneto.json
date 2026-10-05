@@ -1,0 +1,270 @@
+[
+  {
+    "id": "mag-001",
+    "titulo": "Desarrollador Backend Java- Medellín",
+    "empresa": "ACCENTURE LTDA",
+    "ubicacion": "Medellín",
+    "modalidad": "Híbrido",
+    "salario": null,
+    "requisitos": [
+      "aws",
+      "java"
+    ],
+    "descripcion": "Vacante de Desarrollador Backend Java- Medellín en ACCENTURE LTDA.",
+    "fechaPublicacion": "2026-10-02",
+    "experienciaMinima": 2,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-002",
+    "titulo": "Desarrollador (a) Full Stack",
+    "empresa": "LONDOÑO GOMEZ",
+    "ubicacion": "Medellín",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [
+      "comunicación"
+    ],
+    "descripcion": "Vacante de Desarrollador (a) Full Stack en LONDOÑO GOMEZ.",
+    "fechaPublicacion": "2026-10-01",
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-003",
+    "titulo": "Desarrollador Java Spring Boot y TypeScript con React. Bogotá",
+    "empresa": "Confidencial",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Híbrido",
+    "salario": {
+      "min": 4500000,
+      "max": 5000000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [
+      "aws",
+      "java",
+      "python",
+      "react",
+      "spring boot",
+      "sql",
+      "typescript"
+    ],
+    "descripcion": "Vacante de Desarrollador Java Spring Boot y TypeScript con React. Bogotá en Confidencial.",
+    "fechaPublicacion": "2026-09-29",
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-004",
+    "titulo": "Desarrollador API - Bogotá",
+    "empresa": "DAVIbank",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Híbrido",
+    "salario": {
+      "min": 8000000,
+      "max": 8700000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [],
+    "descripcion": "Vacante de Desarrollador API - Bogotá en DAVIbank.",
+    "fechaPublicacion": "2026-09-22",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-005",
+    "titulo": "Desarrollador Fullstack Senior",
+    "empresa": "Tekus S.A.S",
+    "ubicacion": "Medellín",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [],
+    "descripcion": "Vacante de Desarrollador Fullstack Senior en Tekus S.A.S.",
+    "fechaPublicacion": "2026-08-04",
+    "experienciaMinima": 4,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-006",
+    "titulo": "Desarrollador SAP ABAP y Funcional [Híbrido]",
+    "empresa": "Confidencial",
+    "ubicacion": "Colombia",
+    "modalidad": "Híbrido",
+    "salario": null,
+    "requisitos": [
+      "comunicación",
+      "sap"
+    ],
+    "descripcion": "Requerimientos: Experiencia mínima de 5 años en desarrollo y configuración SAP ABAP. Formación profesional en Ingeniería de Sistemas Ingeniería de Software Ingeniería Electrónica o carreras afines. Especialización en Gerencia de Tecnología o áreas similares. Dominio de módulos SAP como HCM SD y MM. Experiencia en configuración y parametrización SAP. Conocimiento en integración de procesos SAP. Capacidad para elaborar especificaciones funcionales y técnicas. Experiencia en gestión de incidentes y",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-007",
+    "titulo": "Analista de Datos",
+    "empresa": "Confidencial",
+    "ubicacion": "Colombia",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [
+      "machine learning",
+      "n8n",
+      "python",
+      "sql"
+    ],
+    "descripcion": "En Kuepa creemos que los datos no solo sirven para medir lo que hacemos, sino para entender mejor lo que pasa, encontrar oportunidades y construir soluciones que generen impacto. Buscamos un/a Analista de Datos que combine pensamiento analítico, curiosidad y tecnología para transformar información en decisiones, automatizaciones y soluciones inteligentes para nuestro negocio. ¿Cuál será tu propósito? Serás parte del equipo de Employability & Further Education, convirtiendo datos en insights y he",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-008",
+    "titulo": "Analista de Datos Comerciales (Go-to-Market) - Bogotá",
+    "empresa": "ADECCO SERVICIOS COLOMBIA S.A",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Presencial",
+    "salario": {
+      "min": 2721000,
+      "max": 2721000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [],
+    "descripcion": "Vacante de Analista de Datos Comerciales (Go-to-Market) - Bogotá en ADECCO SERVICIOS COLOMBIA S.A.",
+    "fechaPublicacion": "2026-10-01",
+    "experienciaMinima": 2,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-009",
+    "titulo": "Analista de Datos (Ventas e Inventarios)",
+    "empresa": "Confidencial",
+    "ubicacion": "Colombia",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [
+      "excel",
+      "power bi"
+    ],
+    "descripcion": "Analista de Datos Analista BI Excel avanzado Power BI SQL Indicadores comerciales Análisis de ventas Gestión de inventarios Retail Moda ¡Hola! ¿Te apasiona transformar datos en decisiones estratégicas que impulsen el éxito en el dinámico mundo de la moda? ¡Esta oportunidad es para ti! Buscamos un(a) **Analista de Datos** apasionado(a) por descubrir insights valiosos en información de ventas e inventarios. Serás una pieza clave para asegurar la disponibilidad óptima de nuestros pr",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-010",
+    "titulo": "Ingeniero DevOps Junior (SRE)",
+    "empresa": "Confidencial",
+    "ubicacion": "Colombia",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [
+      "ci/cd",
+      "docker",
+      "kubernetes",
+      "python"
+    ],
+    "descripcion": "DevOps SRE CI/CD Kubernetes observabilidad cloud automatización Infrastructure as Code Junior DevOps Engineer Site Reliability Engineer Junior Ingeniero de confiabilidad Platform Engineer Junior ¡Hola! ¿Estás listo para impulsar la confiabilidad de nuestros servicios tecnológicos? 🚀 En nuestro equipo, tendrás la oportunidad de crecer como Junior DevOps Engineer, aplicando tus conocimientos en DevOps y SRE para fortalecer la estabilidad y disponibilidad de nuestras soluciones. Tra",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-011",
+    "titulo": "Ingeniero SRE DevOps",
+    "empresa": "Confidencial",
+    "ubicacion": "Colombia",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [],
+    "descripcion": "Vacante de Ingeniero SRE DevOps en Confidencial.",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-012",
+    "titulo": "Ingeniero DevOps / Cloud",
+    "empresa": "ACCENTURE LTDA",
+    "ubicacion": "Medellín",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [
+      "aws",
+      "azure",
+      "kubernetes"
+    ],
+    "descripcion": "Vacante de Ingeniero DevOps / Cloud en ACCENTURE LTDA.",
+    "fechaPublicacion": "2026-08-31",
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-013",
+    "titulo": "Analista QA Tester (Software Testing)",
+    "empresa": "Confidencial",
+    "ubicacion": "Colombia",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [],
+    "descripcion": "Vacante de Analista QA Tester (Software Testing) en Confidencial.",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-014",
+    "titulo": "Tester QA Junior (Pruebas de Software) - Bogotá",
+    "empresa": "Confidencial",
+    "ubicacion": "Colombia",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [],
+    "descripcion": "Tester QA Junior QA Junior Analista QA Calidad de Software Pruebas de Software Pruebas Funcionales Bogotá Desarrollo de Software Seguimiento de errores Documentación de incidentes Validación de correcciones Buscamos QA Junior para apoyar la calidad de nuestras soluciones tecnológicas, participando en el diseño, ejecución y documentación de pruebas, identificación de incidentes y validación de correcciones, asegurando que las aplicaciones cumplan con los requerimientos y necesidad",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-015",
+    "titulo": "Analista de automatización de pruebas - 34058",
+    "empresa": "Casa Principal",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Presencial",
+    "salario": null,
+    "requisitos": [
+      "azure"
+    ],
+    "descripcion": "Vacante de Analista de automatización de pruebas - 34058 en Casa Principal.",
+    "fechaPublicacion": "2026-09-04",
+    "experienciaMinima": 2,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  },
+  {
+    "id": "mag-016",
+    "titulo": "Practicante UX - UI Designer",
+    "empresa": "Crystal",
+    "ubicacion": "Itagui",
+    "modalidad": "Presencial",
+    "salario": {
+      "min": 1750905,
+      "max": 1750905,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [
+      "canva",
+      "figma",
+      "illustrator",
+      "photoshop"
+    ],
+    "descripcion": "Profesional $ 1.750.905 Itagui - Medellín - Sabaneta Vincúlate con nuestro propósito de existir para ayudar a las personas a expresar su esencia a través de una moda consciente, sé parte de nuestro equipo de practicantes. Funciones principales: Investigación y Análisis: Evaluar la experiencia actual con journey maps, matrices de necesidades y entrevistas para detectar fricciones y oportunidades. Insights y Estrategia: Convertir hallazgos e",
+    "fechaPublicacion": "2026-08-11",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com (importado 2026-10-05)"
+  }
+]
