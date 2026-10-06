@@ -17,7 +17,7 @@ from django.views.decorators.http import require_POST
 
 from .ai_explicaciones import guardar_explicacion, resolver_explicacion
 from .cv_parser import extraer_datos_cv
-from .forms import CVUploadForm, ExpectativasForm, NotificacionesForm
+from .forms import CVUploadForm, ExpectativasForm
 from .matching import compute_match, evaluar_criterios, explicar_match, info_modificador_disponibilidad
 from .models import MatchDiario, Notificacion, Perfil, Postulacion, Vacante
 from .notificaciones import generar_notificaciones_nuevos_matches
@@ -94,9 +94,8 @@ def expectativas_view(request):
         usuario=request.user, defaults={"cv_nombre_archivo": ""}
     )
 
-    if request.method == "POST" and "guardar_expectativas" in request.POST:
+    if request.method == "POST":
         form = ExpectativasForm(request.POST, instance=perfil)
-        notif_form = NotificacionesForm(instance=perfil)
         if form.is_valid():
             form.save()
             # HU-06: las expectativas pesan en el score (matching.py); si el
@@ -105,21 +104,13 @@ def expectativas_view(request):
             if perfil.tiene_cv():
                 recalcular_matches_de_perfil(perfil)
             return redirect("expectativas")
-    elif request.method == "POST" and "guardar_notificaciones" in request.POST:
-        form = ExpectativasForm(instance=perfil)
-        notif_form = NotificacionesForm(request.POST, instance=perfil)
-        if notif_form.is_valid():
-            notif_form.save()
-            messages.success(request, "Preferencia de notificaciones guardada.")
-            return redirect("expectativas")
     else:
         form = ExpectativasForm(instance=perfil)
-        notif_form = NotificacionesForm(instance=perfil)
 
     return render(
         request,
         "vacantes/expectativas.html",
-        {"form": form, "notif_form": notif_form, "perfil": perfil},
+        {"form": form, "perfil": perfil},
     )
 
 

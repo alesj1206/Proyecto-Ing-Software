@@ -8,6 +8,12 @@ por dentro sin que se note desde n8n.
 Detecta "nuevo" comparando el top-3 de hoy contra el top-3 de ayer por
 candidato: una vacante que ya estaba en tu top de ayer no te vuelve a
 notificar solo porque el batch corrió otra vez.
+
+Único canal: correo (al que trae el CV). Se evaluó WhatsApp vía Twilio y
+se descartó a propósito — exige que cada candidato haga un opt-in manual
+("join <código>" por WhatsApp, restricción de Meta para cuentas de prueba
+de Twilio) para que algo le llegue, mientras que un correo con SMTP real
+configurado (ver settings.py) llega sin ningún paso extra de su lado.
 """
 
 import logging
@@ -44,39 +50,7 @@ def enviar_email(perfil, asunto, cuerpo):
         return False
 
 
-def enviar_whatsapp(perfil, mensaje):
-    if not perfil.telefono:
-        return False
-    sid = settings.TWILIO_ACCOUNT_SID
-    token = settings.TWILIO_AUTH_TOKEN
-    numero_origen = settings.TWILIO_WHATSAPP_FROM
-    if not (sid and token and numero_origen):
-        logger.info("WhatsApp sin configurar (falta TWILIO_* en el entorno) — se queda solo en la app.")
-        return False
-    try:
-        import requests
-
-        # Twilio exige E.164 (sin espacios) — el propio placeholder del
-        # formulario ("+57 300 1234567") sugiere escribirlo CON espacios,
-        # así que se limpian aquí en vez de confiar en que el candidato los
-        # omita. No valida el número, solo quita lo que rompería el envío.
-        telefono = perfil.telefono.replace(" ", "").replace("-", "")
-        resp = requests.post(
-            f"https://api.twilio.com/2010-04-01/Accounts/{sid}/Messages.json",
-            auth=(sid, token),
-            data={"From": f"whatsapp:{numero_origen}", "To": f"whatsapp:{telefono}", "Body": mensaje},
-            timeout=10,
-        )
-        resp.raise_for_status()
-        return True
-    except Exception as exc:
-        logger.warning("No se pudo enviar WhatsApp a %s: %s", perfil.telefono, exc)
-        return False
-
-
-def _enviar_por_canal(perfil, vacante, mensaje):
-    if perfil.canal_notificacion == Perfil.CanalNotificacion.WHATSAPP:
-        return enviar_whatsapp(perfil, mensaje)
+def _enviar_notificacion(perfil, vacante, mensaje):
     asunto = f"Scoutly: nuevo match con {vacante.empresa}"
     cuerpo = f"{mensaje}\n\nVelo en Scoutly: /vacantes/{vacante.id}"
     return enviar_email(perfil, asunto, cuerpo)
@@ -119,7 +93,7 @@ def generar_notificaciones_nuevos_matches(fecha=None):
 
             enviada = False
             if perfil.puede_notificar():
-                enviada = _enviar_por_canal(perfil, match.vacante, mensaje)
+                enviada = _enviar_notificacion(perfil, match.vacante, mensaje)
 
             try:
                 Notificacion.objects.create(
@@ -127,7 +101,6 @@ def generar_notificaciones_nuevos_matches(fecha=None):
                     vacante=match.vacante,
                     score_pct=score_pct,
                     mensaje=mensaje,
-                    canal=perfil.canal_notificacion,
                     enviada=enviada,
                     fecha=fecha,
                 )

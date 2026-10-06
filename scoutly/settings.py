@@ -143,11 +143,15 @@ N8N_SCORING_TOKEN = os.environ.get('N8N_SCORING_TOKEN', N8N_SCORING_TOKEN_DEV_DE
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 
 # HU-11: notificaciones de nuevos matches (vacantes/notificaciones.py).
+# Único canal: correo (se evaluó WhatsApp vía Twilio y se descartó —
+# exige que cada candidato haga un opt-in manual antes de poder recibir
+# nada; el correo con SMTP real no le pide ningún paso extra).
 #
-# Email: por defecto usa el backend de consola de Django — el correo no
-# sale a internet, se imprime en la terminal donde corre `runserver`. Eso
-# ya sirve como evidencia para la demo (y Notificacion.enviada queda en
-# True) sin configurar nada. Para enviar correos reales, exportar:
+# Por defecto usa el backend de consola de Django — el correo no sale a
+# internet, se imprime en la terminal donde corre `runserver`. Eso sirve
+# como evidencia para la demo (y Notificacion.enviada queda en True) sin
+# configurar nada. Para que llegue de verdad a una bandeja de entrada,
+# exportar antes de levantar el servidor:
 #   DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 #   EMAIL_HOST / EMAIL_PORT / EMAIL_HOST_USER / EMAIL_HOST_PASSWORD / EMAIL_USE_TLS
 EMAIL_BACKEND = os.environ.get(
@@ -159,11 +163,3 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'notificaciones@scoutly.local')
-
-# WhatsApp vía Twilio (console.twilio.com — cuenta trial gratuita). Sin
-# estas tres variables, enviar_whatsapp() no intenta nada y la
-# notificación queda solo visible dentro de la app (Notificacion.enviada
-# en False) — nunca truena por falta de configuración.
-TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
-TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
-TWILIO_WHATSAPP_FROM = os.environ.get('TWILIO_WHATSAPP_FROM', '')

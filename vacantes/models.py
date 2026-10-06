@@ -44,20 +44,6 @@ class Perfil(models.Model):
     # fecha varían demasiado para que una heurística sea confiable).
     anios_experiencia = models.PositiveIntegerField(null=True, blank=True)
 
-    # HU-11: notificaciones de nuevos matches. El candidato elige por dónde
-    # quiere que le lleguen — el CV trae el correo (`contacto`), pero el
-    # teléfono para WhatsApp no se extrae del CV (mismo motivo que
-    # anios_experiencia: no hay un formato confiable para parsearlo del
-    # texto libre), así que se declara aparte.
-    class CanalNotificacion(models.TextChoices):
-        EMAIL = "email", "Correo electrónico"
-        WHATSAPP = "whatsapp", "WhatsApp"
-
-    telefono = models.CharField(max_length=20, blank=True)
-    canal_notificacion = models.CharField(
-        max_length=20, choices=CanalNotificacion.choices, default=CanalNotificacion.EMAIL
-    )
-
     def __str__(self):
         return f"Perfil de {self.usuario.email}"
 
@@ -81,10 +67,12 @@ class Perfil(models.Model):
         )
 
     def puede_notificar(self):
-        """True si hay a dónde mandarle la notificación por el canal que
-        eligió — correo (del CV) o teléfono (declarado a mano)."""
-        if self.canal_notificacion == self.CanalNotificacion.WHATSAPP:
-            return bool(self.telefono)
+        """True si hay correo (del CV) a dónde mandar la notificación.
+        HU-11 — único canal: correo. Se evaluó WhatsApp vía Twilio pero se
+        descartó: exige que cada candidato haga un opt-in manual (mandar
+        "join <código>" por WhatsApp una vez, restricción de Meta/WhatsApp
+        para cuentas de prueba de Twilio), mientras que el correo llega
+        sin ningún paso extra del lado del candidato."""
         return bool(self.contacto)
 
 
@@ -240,11 +228,10 @@ class Notificacion(models.Model):
     vacante = models.ForeignKey(Vacante, on_delete=models.CASCADE, related_name="notificaciones")
     score_pct = models.PositiveIntegerField()
     mensaje = models.CharField(max_length=255)
-    canal = models.CharField(max_length=20, choices=Perfil.CanalNotificacion.choices)
-    # enviada=False no es un error: pasa cuando el candidato no configuró
-    # a dónde mandarla (puede_notificar()=False), o cuando el canal no
-    # tiene credenciales reales configuradas (settings.py) — de cualquier
-    # forma la notificación queda visible en la campana dentro de la app.
+    # enviada=False no es un error: pasa cuando el candidato no tiene
+    # correo detectado en su CV (Perfil.puede_notificar()=False), o cuando
+    # el envío SMTP falla — de cualquier forma la notificación queda
+    # visible en la campana dentro de la app.
     enviada = models.BooleanField(default=False)
     leida = models.BooleanField(default=False)
     fecha = models.DateField()

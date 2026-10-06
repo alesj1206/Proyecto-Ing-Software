@@ -28,9 +28,9 @@
           <p style="margin-top:0.35rem;font-size:0.75rem;color:var(--muted-foreground);">
             {{ n.fecha|date:"d/m/Y" }} ·
             {% if n.enviada %}
-              enviada por {{ n.get_canal_display|lower }}
+              enviada por correo
             {% else %}
-              solo en la app (sin canal externo configurado)
+              solo en la app (sin correo detectado en tu CV)
             {% endif %}
           </p>
         </div>

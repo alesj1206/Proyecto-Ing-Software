@@ -57,41 +57,20 @@
     </div>
   </form>
 
-  <form method="post" class="card" style="margin-top:1.5rem;">
-    {% csrf_token %}
+  <div class="card" style="margin-top:1.5rem;">
     <p class="label-eyebrow" style="color:var(--magneto-purple);">HU-11 · Notificaciones</p>
-    <h2 style="margin-top:0.5rem;font-size:1.125rem;color:var(--navy);">¿Por dónde te aviso de matches nuevos?</h2>
+    <h2 style="margin-top:0.5rem;font-size:1.125rem;color:var(--navy);">¿Cómo te avisamos de matches nuevos?</h2>
     <p style="margin-top:0.35rem;font-size:0.8125rem;color:var(--muted-foreground);">
       Cuando el workflow diario encuentre una vacante que ayer no estaba en
-      tu top y hoy sí, te llega un aviso por el canal que elijas aquí —
-      además de quedar siempre visible en la campana de arriba.
+      tu top y hoy sí, te llega un correo automático
+      {% if perfil.contacto %}
+        a <strong>{{ perfil.contacto }}</strong> (el de tu hoja de vida)
+      {% else %}
+        — carga tu CV para que detectemos a dónde mandarlo
+      {% endif %}
+      — además de quedar siempre visible en la campana de arriba.
     </p>
-
-    {% if notif_form.non_field_errors %}
-      <div class="form-error-box">{{ notif_form.non_field_errors.0 }}</div>
-    {% endif %}
-
-    <div style="margin-top:1.1rem;display:grid;gap:1.1rem;grid-template-columns:repeat(2,1fr);">
-      <div class="field">
-        <label for="{{ notif_form.canal_notificacion.id_for_label }}">{{ notif_form.canal_notificacion.label }}</label>
-        {{ notif_form.canal_notificacion }}
-      </div>
-      <div class="field">
-        <label for="{{ notif_form.telefono.id_for_label }}">{{ notif_form.telefono.label }}</label>
-        {{ notif_form.telefono }}
-        {% if notif_form.telefono.errors %}<p class="form-error">{{ notif_form.telefono.errors.0 }}</p>{% endif %}
-      </div>
-    </div>
-
-    <p style="margin-top:0.75rem;font-size:0.75rem;color:var(--muted-foreground);">
-      Correo: se usa el de tu hoja de vida ({{ perfil.contacto|default:"aún no detectado, carga tu CV" }}).
-      WhatsApp necesita el número de arriba.
-    </p>
-
-    <div style="margin-top:1rem;">
-      <button type="submit" name="guardar_notificaciones" class="btn btn-outline">Guardar preferencia</button>
-    </div>
-  </form>
+  </div>
 
   <div class="card" style="margin-top:1.5rem;background:var(--magneto-purple-soft);border-color:var(--magneto-purple);">
     <p style="margin:0;font-size:0.8125rem;color:var(--navy);">

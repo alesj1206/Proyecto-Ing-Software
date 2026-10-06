@@ -40,12 +40,15 @@ verdad pasa a ser el batch, no cada request.
 *después* del paso 1 porque necesita comparar el top-3 de hoy (que el paso
 1 acaba de calcular) contra el de ayer. Por cada vacante que entró de
 nueva al top del candidato, crea una `Notificacion` (siempre visible en la
-campana de la app) y trata de enviarla por el canal que el candidato eligió
-en `/expectativas` — correo (`vacantes/notificaciones.py::enviar_email`,
-backend de consola de Django por defecto — se ve en la terminal donde
-corre `runserver`, sin configurar nada) o WhatsApp
-(`enviar_whatsapp`, vía Twilio; sin `TWILIO_*` configurado, se queda solo
-en la app). Ver `vacantes/notificaciones.py` para el detalle.
+campana de la app) y trata de mandarla por correo al que trae el CV
+(`vacantes/notificaciones.py::enviar_email`). Por defecto usa el backend
+de consola de Django — se ve en la terminal donde corre `runserver`, sin
+configurar nada —, pero con SMTP real configurado (`DJANGO_EMAIL_BACKEND`
++ `EMAIL_HOST*` en `settings.py`) llega de verdad a la bandeja de entrada.
+(Se evaluó WhatsApp vía Twilio y se descartó: exige que cada candidato
+haga un opt-in manual por WhatsApp antes de poder recibir nada — el
+correo no le pide ningún paso extra.) Ver `vacantes/notificaciones.py`
+para el detalle.
 
 ## Estado: ya instalado y probado (2026-10-04)
 

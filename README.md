@@ -78,23 +78,24 @@ dentro del cálculo del score. `vacantes/notificaciones.py::generar_notificacion
 compara el top-3 de hoy de cada candidato contra el de ayer
 (`MatchDiario`); por cada vacante que entró de nueva, crea una
 `Notificacion` — siempre visible en la campana de la app — y la envía por
-el canal que el candidato eligió en `/expectativas` (nuevo apartado
-"¿Por dónde te aviso de matches nuevos?"):
+correo al que ya trae el CV (`Perfil.contacto`). Por defecto sale por el
+backend de consola de Django (se ve en la terminal donde corre
+`runserver`, sirve como evidencia sin configurar nada); con
+`DJANGO_EMAIL_BACKEND=...smtp.EmailBackend` + `EMAIL_HOST`/`EMAIL_HOST_USER`/
+`EMAIL_HOST_PASSWORD` llega de verdad a la bandeja de entrada.
 
-- **Correo**: usa el que ya trae el CV (`Perfil.contacto`). Por defecto
-  sale por el backend de consola de Django (se ve en la terminal donde
-  corre `runserver`, sirve como evidencia sin configurar nada); con
-  `DJANGO_EMAIL_BACKEND=...smtp.EmailBackend` + `EMAIL_HOST`/`EMAIL_HOST_USER`/
-  `EMAIL_HOST_PASSWORD` sale de verdad.
-- **WhatsApp**: pide un teléfono nuevo (`Perfil.telefono`, no se extrae del
-  CV — mismo motivo que `anios_experiencia`: no hay un formato confiable
-  para parsearlo de texto libre) y usa la API de Twilio
-  (`TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_WHATSAPP_FROM`).
+Se evaluó también WhatsApp vía Twilio y se descartó a propósito: exige
+que cada candidato haga un opt-in manual (mandar `join <código>` por
+WhatsApp una vez — restricción de Meta para cuentas de prueba de Twilio,
+no algo que Scoutly pueda saltarse) antes de poder recibir nada, mientras
+que el correo no le pide ningún paso extra. Un único canal, tangible y
+sin fricción, es mejor que dos canales donde uno nunca termina de
+configurarse del todo.
 
-Sin las credenciales del canal elegido, `Notificacion.enviada` queda en
-`False` pero la notificación sigue creándose y visible en la app — nunca
-rompe el workflow por falta de configuración externa, mismo patrón que
-`GROQ_API_KEY` en HU-07.
+Sin correo detectado en el CV, o sin SMTP configurado,
+`Notificacion.enviada` queda en `False` pero la notificación sigue
+creándose y visible en la app — nunca rompe el workflow por falta de
+configuración externa, mismo patrón que `GROQ_API_KEY` en HU-07.
 
 **Identidad visual recalibrada contra Magneto real** (ver sección de abajo)
 — esta fue la corrección explícita de la profesora sobre el Sprint 1: la
