@@ -141,6 +141,11 @@ def _parsear_bloque(bloque, titulo):
     elif "remoto" in titulo.lower() or "100% remoto" in cuerpo_lower:
         modalidad = "Remoto"
 
+    # Señal real de Magneto, no inferida: el badge "Requerido con urgencia"
+    # que la propia plataforma pone sobre algunas vacantes. Alimenta el
+    # modificador de disponibilidad (matching.py), no un criterio más.
+    urgente = "requerido con urgencia" in cuerpo_lower
+
     requisitos = _mapear_requisitos(habilidades_crudas, titulo, descripcion)
 
     return {
@@ -148,6 +153,7 @@ def _parsear_bloque(bloque, titulo):
         "empresa": empresa,
         "ubicacion": ubicacion,
         "modalidad": modalidad,
+        "urgente": urgente,
         "salario": (
             {"min": salario_min, "max": salario_max, "moneda": "COP", "periodo": "mensual"}
             if salario_min is not None
@@ -248,11 +254,31 @@ class Command(BaseCommand):
 
                 texto_lista = page.inner_text("body")
                 lineas = [l.strip() for l in texto_lista.split("\n") if l.strip()]
-                titulos = [
-                    lineas[i + 1]
+                indices_titulo = [
+                    i + 1
                     for i, l in enumerate(lineas)
                     if l.startswith("Hace ") and i + 1 < len(lineas) and not lineas[i + 1].startswith("Hace")
                 ]
+                titulos = [lineas[i] for i in indices_titulo]
+                # El badge "Requerido con urgencia" de Magneto solo aparece
+                # en la tarjeta de la lista, no en el panel de detalle — se
+                # captura aquí, antes de hacer click, mirando las líneas de
+                # esa misma tarjeta (hasta la siguiente "Hace "). Si dos
+                # tarjetas comparten el mismo título, page.get_by_text(...,
+                # exact=True).first SIEMPRE hace click en la PRIMERA — así
+                # que la urgencia también se mira solo en la primera
+                # ocurrencia de cada título, para no contagiarle el badge a
+                # una tarjeta distinta que nunca se clickea.
+                primera_posicion = {}
+                for pos, t in enumerate(titulos):
+                    primera_posicion.setdefault(t, pos)
+
+                urgentes = set()
+                for t, pos in primera_posicion.items():
+                    i = indices_titulo[pos]
+                    siguiente = indices_titulo[pos + 1] - 1 if pos + 1 < len(indices_titulo) else len(lineas)
+                    if any("Requerido con urgencia" in lineas[j] for j in range(i, siguiente)):
+                        urgentes.add(t)
 
                 tomados = 0
                 for titulo in titulos:
@@ -267,10 +293,12 @@ class Command(BaseCommand):
                         dato = _parsear_bloque(bloque, titulo)
                         if dato:
                             dato["id"] = f"mag-{indice:03d}"
+                            dato["urgente"] = dato["urgente"] or titulo in urgentes
                             resultados.append(dato)
                             indice += 1
                             tomados += 1
-                            self.stdout.write(f"  [{dato['id']}] {titulo} -> {dato['empresa']} ({dato['modalidad']})")
+                            marca = " [URGENTE]" if dato["urgente"] else ""
+                            self.stdout.write(f"  [{dato['id']}] {titulo} -> {dato['empresa']} ({dato['modalidad']}){marca}")
                     except Exception as exc:
                         self.stdout.write(self.style.WARNING(f"  omitida '{titulo}': {exc}"))
                     # volver a repetir la búsqueda para el siguiente click —

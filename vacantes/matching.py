@@ -16,6 +16,18 @@ PESOS = {
     "ubicacion": 0.10,
 }
 
+# Disponibilidad NO es un 6º criterio ponderado — es un modificador que solo
+# ajusta el score final cuando la vacante está marcada como urgente por
+# Magneto ("Requerido con urgencia", vacante.urgente) Y el candidato declaró
+# su disponibilidad. Si la vacante no es urgente, o el candidato no la
+# declaró, el modificador es 0 — Disponibilidad se queda sin efecto, igual
+# que hoy.
+MODIFICADOR_DISPONIBILIDAD = {
+    "inmediata": 0.05,
+    "dos_semanas": 0.0,
+    "un_mes": -0.05,
+}
+
 ETIQUETAS = {
     "habilidades": "Habilidades",
     "experiencia": "Experiencia",
@@ -241,11 +253,38 @@ def evaluar_criterios(perfil, vacante):
     ]
 
 
-def compute_match(perfil, vacante):
-    """score = promedio ponderado de los criterios que aplican, con los
-    pesos de PESOS renormalizados a 1 entre esos criterios. Devuelve
-    (score 0-1, coincidencias de habilidades) — la forma que ya esperan
-    scoring.py y las vistas."""
+def info_modificador_disponibilidad(perfil, vacante):
+    """Para mostrar en la UI por qué (si acaso) Disponibilidad movió el
+    score. Siempre devuelve un dict — aplica=False cuando el modificador no
+    tuvo efecto (vacante no urgente, o candidato sin disponibilidad
+    declarada), para que la pantalla pueda explicar por qué no se vio nada,
+    en vez de simplemente omitirlo en silencio."""
+    if not vacante.urgente:
+        return {"aplica": False, "bono_pct": 0, "motivo": "Esta vacante no está marcada como urgente."}
+    if not perfil.exp_disponibilidad:
+        return {
+            "aplica": False,
+            "bono_pct": 0,
+            "motivo": "Esta vacante es urgente, pero no declaraste tu disponibilidad.",
+        }
+    bono = MODIFICADOR_DISPONIBILIDAD.get(perfil.exp_disponibilidad, 0.0)
+    return {
+        "aplica": True,
+        "bono_pct": round(bono * 100),
+        "disponibilidad": perfil.get_exp_disponibilidad_display(),
+    }
+
+
+def compute_match(perfil, vacante, modificador=None):
+    """score = promedio ponderado de los criterios que aplican (con los
+    pesos de PESOS renormalizados a 1 entre esos criterios), ajustado por
+    el modificador de disponibilidad (ver info_modificador_disponibilidad).
+    Devuelve (score 0-1, coincidencias de habilidades) — la forma que ya
+    esperan scoring.py y las vistas.
+
+    modificador: si el caller ya lo calculó (p. ej. detalle_view, que
+    también lo necesita para mostrarlo en la UI), se lo pasa aquí en vez de
+    dejar que se recalcule una segunda vez con los mismos perfil/vacante."""
     criterios = evaluar_criterios(perfil, vacante)
     if not criterios:
         return 0.0, []
@@ -253,6 +292,11 @@ def compute_match(perfil, vacante):
     aplicables = [c for c in criterios if c.aplica]
     peso_total = sum(c.peso for c in aplicables)
     score = (sum(c.peso * c.score_pct for c in aplicables) / peso_total / 100) if peso_total else 0.0
+
+    if modificador is None:
+        modificador = info_modificador_disponibilidad(perfil, vacante)
+    if modificador["aplica"]:
+        score = max(0.0, min(1.0, score + modificador["bono_pct"] / 100))
 
     coincidencias = next(
         (c.detalle.get("coincidencias", []) for c in criterios if c.criterio == "habilidades"), []

@@ -56,12 +56,15 @@ class Perfil(models.Model):
         return bool(self.cv_nombre_archivo)
 
     def tiene_expectativas(self):
-        """True si hay al menos una expectativa que matching.py realmente usa
-        para el score. exp_disponibilidad queda fuera a propósito: se guarda
-        y se muestra en el perfil, pero el motor de scoring no la lee (no
-        hay una fecha límite por vacante contra la cual compararla), así que
-        no cuenta como "usada en tu ranking de hoy"."""
-        return bool(self.exp_salario_min or self.exp_modalidad or self.exp_ubicacion)
+        """True si hay al menos una expectativa que matching.py puede llegar
+        a usar para el score. exp_disponibilidad entró aquí cuando se agregó
+        el modificador de "vacante urgente" (matching.py) — antes de eso no
+        afectaba el score y quedaba fuera a propósito; ahora sí puede sumar
+        o restar puntos, igual que los otros tres, así que cuenta igual
+        aunque su efecto dependa de que la vacante concreta sea urgente."""
+        return bool(
+            self.exp_salario_min or self.exp_modalidad or self.exp_ubicacion or self.exp_disponibilidad
+        )
 
 
 class Vacante(models.Model):
@@ -93,6 +96,12 @@ class Vacante(models.Model):
     # exige una antigüedad mínima, así que el criterio no aplica para ella
     # (se excluye del promedio ponderado en vez de contar como 0%).
     experiencia_minima = models.PositiveIntegerField(null=True, blank=True)
+
+    # Señal real de Magneto ("Requerido con urgencia"). No es un criterio
+    # más del promedio ponderado — es un modificador: solo ajusta el score
+    # final cuando la vacante es urgente Y el candidato declaró su
+    # disponibilidad (matching.py::_modificador_disponibilidad).
+    urgente = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-fecha_publicacion"]

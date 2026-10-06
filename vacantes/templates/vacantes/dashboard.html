@@ -76,7 +76,10 @@
     <li>
       <a href="{% url 'vacante_detalle' vacante.id %}" class="job-row">
         <div>
-          <h3 style="font-size:1rem;color:var(--navy);">{{ vacante.titulo }}</h3>
+          <h3 style="font-size:1rem;color:var(--navy);">
+            {{ vacante.titulo }}
+            {% if vacante.urgente %}<span class="badge-urgente">Urgente</span>{% endif %}
+          </h3>
           <div class="job-meta">
             <span>{{ vacante.empresa }}</span>
             <span>{{ vacante.ubicacion }}</span>

@@ -9,7 +9,12 @@
     <div style="margin-top:1.5rem;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:2rem;">
       <div style="max-width:40rem;">
         <p class="label-eyebrow">{{ vacante.empresa }}</p>
-        <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">{{ vacante.titulo }}</h1>
+        <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">
+          {{ vacante.titulo }}
+          {% if vacante.urgente %}
+            <span class="badge-urgente">Requerido con urgencia</span>
+          {% endif %}
+        </h1>
         <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.4rem 1.5rem;font-size:0.875rem;color:var(--muted-foreground);">
           <span>{{ vacante.ubicacion }}</span>
           <span>{{ vacante.modalidad }}</span>
@@ -52,6 +57,12 @@
           <p style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">
             Calculada sobre las habilidades registradas en tu hoja de vida.
           </p>
+          {% if modificador.aplica %}
+          <p style="margin-top:0.5rem;font-size:0.75rem;font-weight:600;color:{% if modificador.bono_pct > 0 %}var(--brand){% elif modificador.bono_pct < 0 %}#c0392b{% else %}var(--muted-foreground){% endif %};">
+            {% if modificador.bono_pct > 0 %}▲ {{ modificador.bono_pct }}%{% elif modificador.bono_pct < 0 %}▼ {{ modificador.bono_pct }}%{% else %}Sin cambio{% endif %}
+            por tu disponibilidad ({{ modificador.disponibilidad }}) frente a una vacante urgente.
+          </p>
+          {% endif %}
         </div>
       </div>
       {% else %}

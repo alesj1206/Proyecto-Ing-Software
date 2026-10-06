@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 from .ai_explicaciones import guardar_explicacion, resolver_explicacion
 from .cv_parser import extraer_datos_cv
 from .forms import CVUploadForm, ExpectativasForm
-from .matching import compute_match, evaluar_criterios, explicar_match
+from .matching import compute_match, evaluar_criterios, explicar_match, info_modificador_disponibilidad
 from .models import MatchDiario, Perfil, Postulacion, Vacante
 from .scoring import recalcular_matches_de_perfil, recalcular_matches_todos
 
@@ -165,11 +165,13 @@ def detalle_view(request, vacante_id):
     match = None
     criterios = []
     postulacion = None
+    modificador = None
     if request.user.is_authenticated:
         perfil = _perfil_con_cv(request.user)
         if perfil:
             criterios_resultado = evaluar_criterios(perfil, vacante)
-            score, coincidencias = compute_match(perfil, vacante)
+            modificador = info_modificador_disponibilidad(perfil, vacante)
+            score, coincidencias = compute_match(perfil, vacante, modificador=modificador)
             # El detalle de habilidades ya trae "faltantes" calculado —
             # evita recalcularlo aquí con una segunda lista por comprensión
             # que podría divergir si _criterio_habilidades cambia su lógica.
@@ -232,7 +234,13 @@ def detalle_view(request, vacante_id):
     return render(
         request,
         "vacantes/detalle.html",
-        {"vacante": vacante, "match": match, "criterios": criterios, "postulacion": postulacion},
+        {
+            "vacante": vacante,
+            "match": match,
+            "criterios": criterios,
+            "postulacion": postulacion,
+            "modificador": modificador,
+        },
     )
 
 

@@ -69,6 +69,7 @@ class Command(BaseCommand):
                     "descripcion": registro["descripcion"],
                     "fecha_publicacion": registro["fechaPublicacion"],
                     "experiencia_minima": registro.get("experienciaMinima"),
+                    "urgente": registro.get("urgente", False),
                 },
             )
             creadas += 1
