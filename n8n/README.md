@@ -1,23 +1,34 @@
-# HU-06 — workflow de n8n: ranking diario de "Matches de hoy"
+# HU-06 + HU-11 — workflow de n8n: ranking diario + notificación de matches nuevos
 
-Este workflow reemplaza el cálculo del ranking "en vivo" por uno que corre
-automáticamente una vez al día (criterio de aceptación de HU-06) y queda
-persistido en `MatchDiario` (`vacantes/models.py`). El dashboard lee de ahí;
-si nadie ha corrido el workflow hoy todavía, `dashboard_view` lo calcula y
-lo guarda al vuelo para esa persona, así que el ranking nunca se ve vacío
-— pero la fuente de verdad pasa a ser el batch, no cada request.
-
-## Qué hace el workflow
+El documento del reto (Magneto, "Idea 4: Workflow con n8n") pide que n8n
+orqueste **ingesta, normalización, scoring y notificación** como pasos
+explícitos — no un solo paso que hace todo por dentro. Este workflow tiene
+dos nodos HTTP Request reales y separados para eso, cada uno verificable
+por su cuenta en el panel de ejecuciones de n8n:
 
 ```
-Cada día a las 6am  →  POST /api/recalcular-matches
-(Schedule Trigger)      (HTTP Request, header X-Scoutly-Token)
+Cada día a las 6am  →  1. Recalcular matches  →  2. Generar notificaciones
+(Schedule Trigger)        (scoring, HU-06)          (HU-11)
 ```
 
-El endpoint recorre todos los perfiles con CV cargado, recalcula su score
-contra todas las vacantes (`vacantes/scoring.py::recalcular_matches_todos`)
-y reemplaza las filas de `MatchDiario` del día. Devuelve un resumen JSON
-(`perfiles_procesados`, `matches_guardados`).
+**Paso 1 — scoring** (`POST /api/recalcular-matches`): recorre todos los
+perfiles con CV cargado, recalcula su score contra todas las vacantes
+(`vacantes/scoring.py::recalcular_matches_todos`) y reemplaza las filas de
+`MatchDiario` del día. El dashboard lee de ahí; si nadie ha corrido el
+workflow hoy todavía, `dashboard_view` lo calcula y lo guarda al vuelo para
+esa persona, así que el ranking nunca se ve vacío — pero la fuente de
+verdad pasa a ser el batch, no cada request.
+
+**Paso 2 — notificación** (`POST /api/generar-notificaciones`): corre
+*después* del paso 1 porque necesita comparar el top-3 de hoy (que el paso
+1 acaba de calcular) contra el de ayer. Por cada vacante que entró de
+nueva al top del candidato, crea una `Notificacion` (siempre visible en la
+campana de la app) y trata de enviarla por el canal que el candidato eligió
+en `/expectativas` — correo (`vacantes/notificaciones.py::enviar_email`,
+backend de consola de Django por defecto — se ve en la terminal donde
+corre `runserver`, sin configurar nada) o WhatsApp
+(`enviar_whatsapp`, vía Twilio; sin `TWILIO_*` configurado, se queda solo
+en la app). Ver `vacantes/notificaciones.py` para el detalle.
 
 ## Estado: ya instalado y probado (2026-10-04)
 
@@ -37,11 +48,18 @@ no tenía credenciales accesibles) y el workflow quedó importado y
    (`POST /rest/workflows/{id}/run`) para confirmarlo de punta a punta: el
    log de Django mostró `POST /api/recalcular-matches HTTP/1.1 200` viniendo
    del contenedor, y `MatchDiario` quedó actualizado.
+6. (2026-10-05) Se agregó el segundo nodo (HU-11) con el mismo método —
+   `PATCH /rest/workflows/{id}` por API, sin tocar el navegador — y se
+   volvió a disparar una ejecución real: el log de Django mostró los dos
+   POST en cadena (`/api/recalcular-matches` seguido de
+   `/api/generar-notificaciones`), confirmando que n8n corre los dos pasos
+   en el orden correcto.
 
 Si quieres verlo en la interfaz (para capturas del informe, por ejemplo):
 abre http://localhost:5678 e inicia sesión con las credenciales de
 `~/n8n-vacantes/.env`. El workflow se llama **"Scoutly - Matches diarios
-(HU-06)"** y debe aparecer **Active**.
+(HU-06 + HU-11)"**, debe aparecer **Active**, y al abrirlo se ven los 3
+nodos en cadena (trigger → scoring → notificaciones).
 
 Para volver a importar manualmente desde cero (si recreas la instancia de
 nuevo): Menú (⋮) → **Import from File** → este archivo
@@ -64,15 +82,20 @@ Django tiene que escuchar en todas las interfaces, no solo loopback:
 
 ## Probar sin esperar al Schedule Trigger
 
-Dentro de n8n, con el workflow abierto: botón **Test workflow** (ejecuta el
-nodo HTTP Request una vez, de inmediato). O desde la terminal, sin n8n:
+Dentro de n8n, con el workflow abierto: botón **Test workflow** (ejecuta los
+dos nodos HTTP Request en cadena, de inmediato). O desde la terminal, sin
+n8n (en orden — el segundo necesita que el primero ya haya corrido hoy):
 
 ```bash
 curl -X POST -H "X-Scoutly-Token: dev-local-token-change-me" \
   http://localhost:8000/api/recalcular-matches
 
+curl -X POST -H "X-Scoutly-Token: dev-local-token-change-me" \
+  http://localhost:8000/api/generar-notificaciones
+
 # o, sin levantar n8n ni el servidor, directo en Django:
 .venv/bin/python manage.py recalcular_matches
+.venv/bin/python manage.py shell -c "from vacantes.notificaciones import generar_notificaciones_nuevos_matches; print(generar_notificaciones_nuevos_matches())"
 ```
 
 ## Evidencia para el informe

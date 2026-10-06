@@ -15,5 +15,11 @@ urlpatterns = [
         views.cambiar_estado_postulacion_view,
         name="cambiar_estado_postulacion",
     ),
+    path("notificaciones", views.notificaciones_view, name="notificaciones"),
     path("api/recalcular-matches", views.recalcular_matches_api, name="recalcular_matches_api"),
+    path(
+        "api/generar-notificaciones",
+        views.generar_notificaciones_api,
+        name="generar_notificaciones_api",
+    ),
 ]

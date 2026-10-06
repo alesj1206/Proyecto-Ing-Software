@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Notificaciones | Scoutly{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="padding-top:3rem;padding-bottom:3.5rem;">
+  <p class="label-eyebrow" style="color:var(--magneto-purple);">HU-11 · Trazabilidad</p>
+  <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">Notificaciones</h1>
+  <p style="margin-top:0.5rem;max-width:34rem;color:var(--muted-foreground);">
+    Aquí llegan los matches nuevos que detecta el workflow diario — vacantes
+    que entraron a tu top de hoy y ayer no estaban ahí.
+  </p>
+
+  {% if not perfil %}
+  <div class="cta-banner" style="margin-top:1.75rem;">
+    <div>
+      <p style="margin:0;font-weight:600;color:var(--navy);">Aún no has cargado tu hoja de vida</p>
+      <p style="margin:0.25rem 0 0;font-size:0.875rem;color:var(--muted-foreground);">Cárgala para empezar a recibir notificaciones de match.</p>
+    </div>
+    <a href="{% url 'onboarding' %}" class="btn btn-brand">Cargar CV</a>
+  </div>
+  {% elif notificaciones %}
+  <div style="margin-top:1.75rem;display:flex;flex-direction:column;gap:0.75rem;">
+    {% for n in notificaciones %}
+    <a href="{% url 'vacante_detalle' n.vacante.id %}" class="card" style="display:block;text-decoration:none;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+        <div>
+          <p style="margin:0;font-size:0.875rem;color:var(--navy);">{{ n.mensaje }}</p>
+          <p style="margin-top:0.35rem;font-size:0.75rem;color:var(--muted-foreground);">
+            {{ n.fecha|date:"d/m/Y" }} ·
+            {% if n.enviada %}
+              enviada por {{ n.get_canal_display|lower }}
+            {% else %}
+              solo en la app (sin canal externo configurado)
+            {% endif %}
+          </p>
+        </div>
+        <span class="badge-match" style="flex-shrink:0;"><span class="dot"></span> {{ n.score_pct }}%</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="margin-top:1.75rem;color:var(--muted-foreground);">
+    Todavía no tienes notificaciones. Aparecerán aquí cuando el workflow diario
+    encuentre una vacante nueva que no estaba en tu ranking de ayer.
+  </p>
+  {% endif %}
+</div>
+{% endblock %}

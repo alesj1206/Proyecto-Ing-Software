@@ -43,11 +43,19 @@
           {% endif %}
         </div>
         {% if user.is_authenticated %}
-        <form action="{% url 'logout' %}" method="post" style="display:flex;align-items:center;gap:1rem;">
-          {% csrf_token %}
-          <span style="font-size:0.85rem;color:var(--muted-foreground);">{{ user.email }}</span>
-          <button type="submit" class="btn-link">Cerrar sesión</button>
-        </form>
+        <div style="display:flex;align-items:center;gap:1.25rem;">
+          <a href="{% url 'notificaciones' %}" class="campana-notificaciones" aria-label="Notificaciones">
+            🔔
+            {% if notificaciones_sin_leer %}
+              <span class="campana-contador">{{ notificaciones_sin_leer }}</span>
+            {% endif %}
+          </a>
+          <form action="{% url 'logout' %}" method="post" style="display:flex;align-items:center;gap:1rem;">
+            {% csrf_token %}
+            <span style="font-size:0.85rem;color:var(--muted-foreground);">{{ user.email }}</span>
+            <button type="submit" class="btn-link">Cerrar sesión</button>
+          </form>
+        </div>
         {% endif %}
       </div>
     </header>

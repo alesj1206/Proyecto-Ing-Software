@@ -1,5 +1,5 @@
 {
-  "name": "Scoutly - Matches diarios (HU-06)",
+  "name": "Scoutly - Matches diarios (HU-06 + HU-11)",
   "nodes": [
     {
       "parameters": {
@@ -38,10 +38,33 @@
         }
       },
       "id": "http-request-1",
-      "name": "Recalcular matches (Scoutly)",
+      "name": "1. Recalcular matches (scoring)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.containers.internal:8000/api/generar-notificaciones",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Scoutly-Token",
+              "value": "dev-local-token-change-me"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "http-request-2",
+      "name": "2. Generar notificaciones",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [740, 300]
     }
   ],
   "connections": {
@@ -49,7 +72,18 @@
       "main": [
         [
           {
-            "node": "Recalcular matches (Scoutly)",
+            "node": "1. Recalcular matches (scoring)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Recalcular matches (scoring)": {
+      "main": [
+        [
+          {
+            "node": "2. Generar notificaciones",
             "type": "main",
             "index": 0
           }
@@ -59,6 +93,6 @@
   },
   "pinData": {},
   "meta": {
-    "instanceId": "scoutly-hu06"
+    "instanceId": "scoutly-hu06-hu11"
   }
 }

@@ -44,6 +44,20 @@ class Perfil(models.Model):
     # fecha varían demasiado para que una heurística sea confiable).
     anios_experiencia = models.PositiveIntegerField(null=True, blank=True)
 
+    # HU-11: notificaciones de nuevos matches. El candidato elige por dónde
+    # quiere que le lleguen — el CV trae el correo (`contacto`), pero el
+    # teléfono para WhatsApp no se extrae del CV (mismo motivo que
+    # anios_experiencia: no hay un formato confiable para parsearlo del
+    # texto libre), así que se declara aparte.
+    class CanalNotificacion(models.TextChoices):
+        EMAIL = "email", "Correo electrónico"
+        WHATSAPP = "whatsapp", "WhatsApp"
+
+    telefono = models.CharField(max_length=20, blank=True)
+    canal_notificacion = models.CharField(
+        max_length=20, choices=CanalNotificacion.choices, default=CanalNotificacion.EMAIL
+    )
+
     def __str__(self):
         return f"Perfil de {self.usuario.email}"
 
@@ -65,6 +79,13 @@ class Perfil(models.Model):
         return bool(
             self.exp_salario_min or self.exp_modalidad or self.exp_ubicacion or self.exp_disponibilidad
         )
+
+    def puede_notificar(self):
+        """True si hay a dónde mandarle la notificación por el canal que
+        eligió — correo (del CV) o teléfono (declarado a mano)."""
+        if self.canal_notificacion == self.CanalNotificacion.WHATSAPP:
+            return bool(self.telefono)
+        return bool(self.contacto)
 
 
 class Vacante(models.Model):
@@ -203,3 +224,43 @@ class ExplicacionCriterio(models.Model):
 
     def __str__(self):
         return f"{self.perfil} / {self.vacante} / {self.criterio}: {self.score_pct:.0f}%"
+
+
+class Notificacion(models.Model):
+    """HU-11 — "Idea 4" del documento de reto (magneto): el workflow de n8n
+    orquesta ingesta → normalización → scoring → **notificación**, en ese
+    orden, como pasos explícitos y separados. Esta fila es lo que produce
+    el último paso: se crea cuando aparece un match genuinamente NUEVO en
+    el top del candidato (uno que ayer no estaba ahí), para no
+    renotificar el mismo match día tras día solo porque el batch volvió a
+    correr — ver vacantes/notificaciones.py::generar_notificaciones_nuevos_matches.
+    """
+
+    perfil = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name="notificaciones")
+    vacante = models.ForeignKey(Vacante, on_delete=models.CASCADE, related_name="notificaciones")
+    score_pct = models.PositiveIntegerField()
+    mensaje = models.CharField(max_length=255)
+    canal = models.CharField(max_length=20, choices=Perfil.CanalNotificacion.choices)
+    # enviada=False no es un error: pasa cuando el candidato no configuró
+    # a dónde mandarla (puede_notificar()=False), o cuando el canal no
+    # tiene credenciales reales configuradas (settings.py) — de cualquier
+    # forma la notificación queda visible en la campana dentro de la app.
+    enviada = models.BooleanField(default=False)
+    leida = models.BooleanField(default=False)
+    fecha = models.DateField()
+    creada_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["perfil", "vacante", "fecha"], name="una_notificacion_por_match_por_dia"
+            )
+        ]
+        # La campana (context_processors.py::notificaciones_sin_leer) hace
+        # este COUNT en cada página autenticada del sitio — índice para que
+        # ese costo por request sea un lookup, no un escaneo de tabla.
+        indexes = [models.Index(fields=["perfil", "leida"])]
+        ordering = ["-creada_en"]
+
+    def __str__(self):
+        return f"{self.perfil} ← {self.vacante} ({self.fecha})"

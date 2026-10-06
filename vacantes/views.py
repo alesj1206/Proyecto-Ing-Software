@@ -13,9 +13,10 @@ from django.views.decorators.http import require_POST
 
 from .ai_explicaciones import guardar_explicacion, resolver_explicacion
 from .cv_parser import extraer_datos_cv
-from .forms import CVUploadForm, ExpectativasForm
+from .forms import CVUploadForm, ExpectativasForm, NotificacionesForm
 from .matching import compute_match, evaluar_criterios, explicar_match, info_modificador_disponibilidad
-from .models import MatchDiario, Perfil, Postulacion, Vacante
+from .models import MatchDiario, Notificacion, Perfil, Postulacion, Vacante
+from .notificaciones import generar_notificaciones_nuevos_matches
 from .scoring import recalcular_matches_de_perfil, recalcular_matches_todos
 
 TOP_MATCHES = 3
@@ -89,8 +90,9 @@ def expectativas_view(request):
         usuario=request.user, defaults={"cv_nombre_archivo": ""}
     )
 
-    if request.method == "POST":
+    if request.method == "POST" and "guardar_expectativas" in request.POST:
         form = ExpectativasForm(request.POST, instance=perfil)
+        notif_form = NotificacionesForm(instance=perfil)
         if form.is_valid():
             form.save()
             # HU-06: las expectativas pesan en el score (matching.py); si el
@@ -99,10 +101,22 @@ def expectativas_view(request):
             if perfil.tiene_cv():
                 recalcular_matches_de_perfil(perfil)
             return redirect("expectativas")
+    elif request.method == "POST" and "guardar_notificaciones" in request.POST:
+        form = ExpectativasForm(instance=perfil)
+        notif_form = NotificacionesForm(request.POST, instance=perfil)
+        if notif_form.is_valid():
+            notif_form.save()
+            messages.success(request, "Preferencia de notificaciones guardada.")
+            return redirect("expectativas")
     else:
         form = ExpectativasForm(instance=perfil)
+        notif_form = NotificacionesForm(instance=perfil)
 
-    return render(request, "vacantes/expectativas.html", {"form": form, "perfil": perfil})
+    return render(
+        request,
+        "vacantes/expectativas.html",
+        {"form": form, "notif_form": notif_form, "perfil": perfil},
+    )
 
 
 @login_required
@@ -275,6 +289,26 @@ def postular_view(request, vacante_id):
 
 
 @login_required
+def notificaciones_view(request):
+    """HU-11: bandeja de notificaciones del candidato. Entrar a la página
+    marca como leídas las que estaban sin leer — mismo patrón que
+    cualquier bandeja (Gmail, notificaciones del celular, etc.)."""
+    perfil = _perfil_con_cv(request.user)
+    notificaciones = (
+        Notificacion.objects.filter(perfil=perfil).select_related("vacante")
+        if perfil
+        else Notificacion.objects.none()
+    )
+    notificaciones = list(notificaciones)
+
+    sin_leer_ids = [n.id for n in notificaciones if not n.leida]
+    if sin_leer_ids:
+        Notificacion.objects.filter(id__in=sin_leer_ids).update(leida=True)
+
+    return render(request, "vacantes/notificaciones.html", {"notificaciones": notificaciones, "perfil": perfil})
+
+
+@login_required
 def tablero_view(request):
     """HU-10: tablero Kanban de las postulaciones del candidato, agrupadas
     por estado en las 4 columnas mínimas que pide la historia."""
@@ -320,24 +354,32 @@ def cambiar_estado_postulacion_view(request, postulacion_id):
     return redirect("tablero")
 
 
-@csrf_exempt
-@require_POST
-def recalcular_matches_api(request):
-    """HU-06: punto de entrada que dispara el workflow de n8n (Schedule
-    Trigger → HTTP Request, una vez al día). csrf_exempt porque la llamada
-    no viene de un navegador con sesión — la autenticación es el token
-    compartido, no la cookie de sesión."""
+def _token_n8n_autorizado(request):
+    """Compartido entre los dos pasos del workflow de n8n (scoring y
+    notificación) — misma política de autorización para ambos: con
+    DEBUG=False el valor de desarrollo (conocido, está en el repo) no
+    sirve como secreto real, y la comparación es en tiempo constante.
+    Devuelve un JsonResponse de error si falla, o None si está autorizado."""
     token_configurado = settings.N8N_SCORING_TOKEN
-    # Con DEBUG=False (producción/demo pública), el valor de desarrollo
-    # está en el repo en texto plano — aceptar peticiones contra él sería
-    # un secreto público. Si nadie puso N8N_SCORING_TOKEN real, el endpoint
-    # se cierra en vez de quedar "protegido" por una contraseña conocida.
     if not settings.DEBUG and token_configurado == settings.N8N_SCORING_TOKEN_DEV_DEFAULT:
         return JsonResponse({"error": "N8N_SCORING_TOKEN no configurado"}, status=503)
 
     token_recibido = request.headers.get("X-Scoutly-Token", "")
     if not token_configurado or not hmac.compare_digest(token_recibido, token_configurado):
         return JsonResponse({"error": "no autorizado"}, status=401)
+    return None
+
+
+@csrf_exempt
+@require_POST
+def recalcular_matches_api(request):
+    """HU-06: primer paso del workflow de n8n (Schedule Trigger → HTTP
+    Request #1 → este endpoint). csrf_exempt porque la llamada no viene de
+    un navegador con sesión — la autenticación es el token compartido, no
+    la cookie de sesión."""
+    error = _token_n8n_autorizado(request)
+    if error:
+        return error
 
     resultado = recalcular_matches_todos()
     return JsonResponse(
@@ -346,5 +388,29 @@ def recalcular_matches_api(request):
             "fecha": resultado["fecha"].isoformat(),
             "perfiles_procesados": resultado["perfiles_procesados"],
             "matches_guardados": resultado["matches_guardados"],
+        }
+    )
+
+
+@csrf_exempt
+@require_POST
+def generar_notificaciones_api(request):
+    """HU-11: segundo paso del workflow de n8n (HTTP Request #2, después
+    del de scoring) — "ingesta → normalización → scoring → notificación"
+    como pasos separados y auditables, no uno solo que hace todo por
+    dentro. Debe correr DESPUÉS de recalcular_matches_api en el mismo
+    workflow, porque compara el top de hoy (que ese primer paso acaba de
+    calcular) contra el de ayer."""
+    error = _token_n8n_autorizado(request)
+    if error:
+        return error
+
+    resultado = generar_notificaciones_nuevos_matches()
+    return JsonResponse(
+        {
+            "ok": True,
+            "fecha": resultado["fecha"].isoformat(),
+            "notificaciones_creadas": resultado["notificaciones_creadas"],
+            "notificaciones_enviadas": resultado["notificaciones_enviadas"],
         }
     )

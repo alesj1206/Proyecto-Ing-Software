@@ -68,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'vacantes.context_processors.notificaciones_sin_leer',
             ],
         },
     },
@@ -140,3 +141,29 @@ N8N_SCORING_TOKEN = os.environ.get('N8N_SCORING_TOKEN', N8N_SCORING_TOKEN_DEV_DE
 # Sin esta variable, obtener_explicacion() cae directo al texto de
 # respaldo (no genérico, pero sin redactar por IA) — no rompe nada.
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+
+# HU-11: notificaciones de nuevos matches (vacantes/notificaciones.py).
+#
+# Email: por defecto usa el backend de consola de Django — el correo no
+# sale a internet, se imprime en la terminal donde corre `runserver`. Eso
+# ya sirve como evidencia para la demo (y Notificacion.enviada queda en
+# True) sin configurar nada. Para enviar correos reales, exportar:
+#   DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+#   EMAIL_HOST / EMAIL_PORT / EMAIL_HOST_USER / EMAIL_HOST_PASSWORD / EMAIL_USE_TLS
+EMAIL_BACKEND = os.environ.get(
+    'DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend'
+)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'notificaciones@scoutly.local')
+
+# WhatsApp vía Twilio (console.twilio.com — cuenta trial gratuita). Sin
+# estas tres variables, enviar_whatsapp() no intenta nada y la
+# notificación queda solo visible dentro de la app (Notificacion.enviada
+# en False) — nunca truena por falta de configuración.
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
+TWILIO_WHATSAPP_FROM = os.environ.get('TWILIO_WHATSAPP_FROM', '')

@@ -7,6 +7,14 @@ de Magneto. Construida en **Python + Django**.
 > y en el tag de git `sprint-1`. Este README documenta el estado actual
 > (Sprint 2 en curso); no lo sobrescribe, lo continúa.
 
+> **Contexto del reto (Magneto, "Profile Manager — Reto de Ingeniería"):**
+> a este equipo le correspondió la **Idea 4** del documento oficial:
+> *"Workflow con n8n (vacantes -> ranking diario -> notificación)"*, que
+> especifica explícitamente que **n8n debe orquestar ingesta,
+> normalización, scoring y notificación** como pasos separados. Por eso
+> HU-11 (notificaciones) no es un "extra" de Sprint 3 opcional — es parte
+> del enunciado central del reto, y se adelantó a Sprint 2 por esa razón.
+
 ## Sprint 2 (en curso)
 
 Punto de partida: todo lo del Sprint 1, sin remover alcance.
@@ -18,6 +26,7 @@ Punto de partida: todo lo del Sprint 1, sin remover alcance.
 | HU-07 | Entender por qué me recomendaron una vacante | Should-have | ✅ Hecho — sección "¿Por qué te la recomendamos?" en el detalle |
 | HU-08 | Postularme (simulado) a una vacante | Should-have | ✅ Hecho — botón "Postularme" en el detalle |
 | HU-10 | Tablero de estado de cada proceso | Should-have | ✅ Hecho — `/postulaciones`, Kanban de 4 columnas |
+| HU-11 | Notificación cuando hay un match nuevo | Should-have (Sprint 3 → adelantada) | ✅ Hecho — ver [`n8n/README.md`](n8n/README.md) y la sección de abajo |
 
 **HU-06 — cómo quedó armado.** El scoring ya no se calcula en cada
 request: `vacantes/scoring.py::recalcular_matches_todos()` recorre todos
@@ -59,6 +68,33 @@ botón se reemplaza por un badge con la fecha y el estado actual en vez de
 duplicar la fila. El estado lo mueve el propio candidato desde
 `/postulaciones` — "simulado" significa que no hay bandeja del lado de la
 empresa todavía, eso queda fuera de este sprint.
+
+**HU-11 — cómo quedó armada.** El workflow de n8n (ver
+[`n8n/README.md`](n8n/README.md)) tiene un **segundo nodo HTTP Request**
+después del de scoring — `POST /api/generar-notificaciones`, separado a
+propósito del de HU-06 para que "notificación" sea un paso propio y
+auditable en el panel de ejecuciones de n8n, no algo escondido dentro del
+cálculo del score. `vacantes/notificaciones.py::generar_notificaciones_nuevos_matches`
+compara el top-3 de hoy de cada candidato contra el de ayer
+(`MatchDiario`); por cada vacante que entró de nueva, crea una
+`Notificacion` — siempre visible en la campana de la app — y la envía por
+el canal que el candidato eligió en `/expectativas` (nuevo apartado
+"¿Por dónde te aviso de matches nuevos?"):
+
+- **Correo**: usa el que ya trae el CV (`Perfil.contacto`). Por defecto
+  sale por el backend de consola de Django (se ve en la terminal donde
+  corre `runserver`, sirve como evidencia sin configurar nada); con
+  `DJANGO_EMAIL_BACKEND=...smtp.EmailBackend` + `EMAIL_HOST`/`EMAIL_HOST_USER`/
+  `EMAIL_HOST_PASSWORD` sale de verdad.
+- **WhatsApp**: pide un teléfono nuevo (`Perfil.telefono`, no se extrae del
+  CV — mismo motivo que `anios_experiencia`: no hay un formato confiable
+  para parsearlo de texto libre) y usa la API de Twilio
+  (`TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_WHATSAPP_FROM`).
+
+Sin las credenciales del canal elegido, `Notificacion.enviada` queda en
+`False` pero la notificación sigue creándose y visible en la app — nunca
+rompe el workflow por falta de configuración externa, mismo patrón que
+`GROQ_API_KEY` en HU-07.
 
 **Identidad visual recalibrada contra Magneto real** (ver sección de abajo)
 — esta fue la corrección explícita de la profesora sobre el Sprint 1: la
