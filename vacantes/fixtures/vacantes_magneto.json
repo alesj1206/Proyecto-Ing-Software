@@ -1,166 +1,218 @@
 [
   {
-    "id": "mag-001",
+    "titulo": "Desarrollador/a de negocios Salesforce 1625889648-109",
+    "empresa": "Servicio de Empleo Comfama",
+    "ubicacion": "Medellín",
+    "modalidad": "Híbrido",
+    "urgente": false,
+    "salario": {
+      "min": 10000000,
+      "max": 10000000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [],
+    "descripcion": "Apto para personas con discapacidad $ 10.000.000 Medellín Importante empresa ubicada en Medellín, solicita para su equipo de trabajo, personal con experiencia mínima de cinco (5) años para desempeñar el cargo de Desarrollador/a de negocios Salesforce. Formación académica: Profesional en administración, ciencias sociales o ingeniería. Funciones específicas: -Mantener con rigor el CRM que permita la visibilidad y realidad de la cuenta, oportunidades y contactos a la compañía y su líder directo. -I",
+    "fechaPublicacion": "2026-10-04",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com",
+    "id": "mag-3d310952ae"
+  },
+  {
+    "titulo": "Desarrollador de Software - Bogotá",
+    "empresa": "TRAJECTORY INC COLOMBIA SAS",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Presencial",
+    "urgente": false,
+    "salario": null,
+    "requisitos": [],
+    "descripcion": "Bogotá, D.C. En Trajectory Inc., somos una compañía canadiense especializada en servicios profesionales para soluciones ERP, CRM e integraciones en plataformas cloud como NetSuite, Boomi y otras tecnologías complementarias. Desde nuestra llegada a Colombia en 2019, como parte de nuestra expansión en Latinoamérica, hemos acompañado a diversas empresas en su crecimiento y transformación digital. 🚀 ¿Qué harás en este rol? Crear, mantener y optimizar personalizaciones en NetSuite Apoyar en la resolu",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": 1,
+    "fuente": "magneto365.com",
+    "id": "mag-74bec152b8"
+  },
+  {
+    "titulo": "Desarrollador Odoo Norte de Bogotá",
+    "empresa": "Confidencial",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Presencial",
+    "urgente": false,
+    "salario": {
+      "min": 4000000,
+      "max": 4000000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [],
+    "descripcion": "$ 4.000.000 Bogotá, D.C. Desarrollador Odoo – Bogotá Importante empresa se encuentra en búsqueda de un Desarrollador Odoo para fortalecer su equipo de tecnología. La persona seleccionada será responsable de desarrollar, personalizar y mantener la plataforma Odoo, garantizando su correcto funcionamiento, integración con otros sistemas y alineación con los procesos de la compañía. Ubicación: Bogotá Experiencia: Mínimo 2 años Vacantes: 1 Salario: + variable por comisión Jornada: Lunes a viernes Hor",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": 2,
+    "fuente": "magneto365.com",
+    "id": "mag-1b9243cbb7"
+  },
+  {
     "titulo": "Desarrollador Backend Java- Medellín",
     "empresa": "ACCENTURE LTDA",
     "ubicacion": "Medellín",
     "modalidad": "Híbrido",
+    "urgente": false,
     "salario": null,
     "requisitos": [
       "aws",
       "java"
     ],
-    "descripcion": "Vacante de Desarrollador Backend Java- Medellín en ACCENTURE LTDA.",
+    "descripcion": "Medellín Accenture es una compañía global líder en servicios profesionales, con soluciones en estrategia y consultoría, tecnología, operaciones y capacidades digitales que impulsan a nuestros clientes a alcanzar su máximo potencial. En nuestro equipo de #Tecnología, acompañamos a organizaciones de todas las industrias en su transformación digital, ayudándolas a adoptar tecnologías emergentes que habilitan innovación, eficiencia y resultados reales. Actualmente nos encontramos en la búsqueda de u",
     "fechaPublicacion": "2026-10-02",
     "experienciaMinima": 2,
-    "fuente": "magneto365.com (importado 2026-10-05)"
+    "fuente": "magneto365.com",
+    "id": "mag-288cff75b9"
   },
   {
-    "id": "mag-002",
-    "titulo": "Desarrollador (a) Full Stack",
-    "empresa": "LONDOÑO GOMEZ",
-    "ubicacion": "Medellín",
+    "titulo": "Analista BI (Datos) - Medellín",
+    "empresa": "Jose Raul Serna Rendon",
+    "ubicacion": "Sabaneta",
     "modalidad": "Presencial",
-    "salario": null,
-    "requisitos": [
-      "comunicación"
-    ],
-    "descripcion": "Vacante de Desarrollador (a) Full Stack en LONDOÑO GOMEZ.",
-    "fechaPublicacion": "2026-10-01",
-    "experienciaMinima": 3,
-    "fuente": "magneto365.com (importado 2026-10-05)"
-  },
-  {
-    "id": "mag-003",
-    "titulo": "Desarrollador Java Spring Boot y TypeScript con React. Bogotá",
-    "empresa": "Confidencial",
-    "ubicacion": "Bogotá, D.C.",
-    "modalidad": "Híbrido",
+    "urgente": false,
     "salario": {
-      "min": 4500000,
-      "max": 5000000,
+      "min": 4000000,
+      "max": 4000000,
       "moneda": "COP",
       "periodo": "mensual"
     },
     "requisitos": [
-      "aws",
-      "java",
-      "python",
-      "react",
-      "spring boot",
-      "sql",
-      "typescript"
-    ],
-    "descripcion": "Vacante de Desarrollador Java Spring Boot y TypeScript con React. Bogotá en Confidencial.",
-    "fechaPublicacion": "2026-09-29",
-    "experienciaMinima": 3,
-    "fuente": "magneto365.com (importado 2026-10-05)"
-  },
-  {
-    "id": "mag-004",
-    "titulo": "Desarrollador API - Bogotá",
-    "empresa": "DAVIbank",
-    "ubicacion": "Bogotá, D.C.",
-    "modalidad": "Híbrido",
-    "salario": {
-      "min": 8000000,
-      "max": 8700000,
-      "moneda": "COP",
-      "periodo": "mensual"
-    },
-    "requisitos": [],
-    "descripcion": "Vacante de Desarrollador API - Bogotá en DAVIbank.",
-    "fechaPublicacion": "2026-09-22",
-    "experienciaMinima": null,
-    "fuente": "magneto365.com (importado 2026-10-05)"
-  },
-  {
-    "id": "mag-005",
-    "titulo": "Desarrollador Fullstack Senior",
-    "empresa": "Tekus S.A.S",
-    "ubicacion": "Medellín",
-    "modalidad": "Presencial",
-    "salario": null,
-    "requisitos": [],
-    "descripcion": "Vacante de Desarrollador Fullstack Senior en Tekus S.A.S.",
-    "fechaPublicacion": "2026-08-04",
-    "experienciaMinima": 4,
-    "fuente": "magneto365.com (importado 2026-10-05)"
-  },
-  {
-    "id": "mag-006",
-    "titulo": "Desarrollador SAP ABAP y Funcional [Híbrido]",
-    "empresa": "Confidencial",
-    "ubicacion": "Colombia",
-    "modalidad": "Híbrido",
-    "salario": null,
-    "requisitos": [
-      "comunicación",
-      "sap"
-    ],
-    "descripcion": "Requerimientos: Experiencia mínima de 5 años en desarrollo y configuración SAP ABAP. Formación profesional en Ingeniería de Sistemas Ingeniería de Software Ingeniería Electrónica o carreras afines. Especialización en Gerencia de Tecnología o áreas similares. Dominio de módulos SAP como HCM SD y MM. Experiencia en configuración y parametrización SAP. Conocimiento en integración de procesos SAP. Capacidad para elaborar especificaciones funcionales y técnicas. Experiencia en gestión de incidentes y",
-    "fechaPublicacion": "2026-10-05",
-    "experienciaMinima": null,
-    "fuente": "magneto365.com (importado 2026-10-05)"
-  },
-  {
-    "id": "mag-007",
-    "titulo": "Analista de Datos",
-    "empresa": "Confidencial",
-    "ubicacion": "Colombia",
-    "modalidad": "Presencial",
-    "salario": null,
-    "requisitos": [
-      "machine learning",
-      "n8n",
+      "power bi",
       "python",
       "sql"
     ],
-    "descripcion": "En Kuepa creemos que los datos no solo sirven para medir lo que hacemos, sino para entender mejor lo que pasa, encontrar oportunidades y construir soluciones que generen impacto. Buscamos un/a Analista de Datos que combine pensamiento analítico, curiosidad y tecnología para transformar información en decisiones, automatizaciones y soluciones inteligentes para nuestro negocio. ¿Cuál será tu propósito? Serás parte del equipo de Employability & Further Education, convirtiendo datos en insights y he",
+    "descripcion": "$ 4.000.000 Sabaneta - Medellín - Itagui - La Estrella Analista BI (Datos) - Medellín Palabras clave: Analista de Datos Analista BI Power BI SQL Python dashboards inteligencia de negocios análisis comercial Analista de Inteligencia de Negocios Business Intelligence Analyst Se requiere un Analista de Datos para transformar información empresarial en decisiones estratégicas, contribuyendo directamente a la rentabilidad del negocio. El candidato seleccionado será responsable de analizar datos compl",
     "fechaPublicacion": "2026-10-05",
-    "experienciaMinima": null,
-    "fuente": "magneto365.com (importado 2026-10-05)"
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com",
+    "id": "mag-1016b4e0e3"
   },
   {
-    "id": "mag-008",
-    "titulo": "Analista de Datos Comerciales (Go-to-Market) - Bogotá",
+    "titulo": "Analista de datos Bogota",
+    "empresa": "ACTIVOS S.A.S",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Presencial",
+    "urgente": false,
+    "salario": {
+      "min": 1750905,
+      "max": 1750905,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [
+      "excel",
+      "sql"
+    ],
+    "descripcion": "$ 1.750.905 Bogotá, D.C. Formación Académica: Técnico en Sistemas, Tecnólogo en Sistemas, Ingeniero de Sistemas o Carreras afines. Experiencia: 1 Año de manejo de aplicaciones de ofimática y bases de datos, Macros. Debe tener conocimientos en: Excel Avanzado · Macros. · Tablas Dinámicas. Bases de Datos · Análisis de Datos. SQL · Diseño de Consultas Gestión de Datos. Lógica de Programación · Conceptos básicos. FUNCIONES: Cargue, validación y actualización de bases de datos en sistemas internos. A",
+    "fechaPublicacion": "2026-10-05",
+    "experienciaMinima": 1,
+    "fuente": "magneto365.com",
+    "id": "mag-06c20923cd"
+  },
+  {
+    "titulo": "Analista De Datos (facilities) - Bogota",
     "empresa": "ADECCO SERVICIOS COLOMBIA S.A",
     "ubicacion": "Bogotá, D.C.",
     "modalidad": "Presencial",
+    "urgente": false,
     "salario": {
-      "min": 2721000,
-      "max": 2721000,
+      "min": 2800000,
+      "max": 3400000,
       "moneda": "COP",
       "periodo": "mensual"
     },
     "requisitos": [],
-    "descripcion": "Vacante de Analista de Datos Comerciales (Go-to-Market) - Bogotá en ADECCO SERVICIOS COLOMBIA S.A.",
-    "fechaPublicacion": "2026-10-01",
-    "experienciaMinima": 2,
-    "fuente": "magneto365.com (importado 2026-10-05)"
+    "descripcion": "$ 2.800.000 a $ 3.400.000 Bogotá, D.C. ¿Te apasiona el análisis de información y la generación de insights que apoyen la toma de decisiones estratégicas? Nos encontramos en la búsqueda de un Analista de Datos con experiencia en análisis financiero y presupuestal, capaz de transformar grandes volúmenes de información en reportes, indicadores y tableros de control que contribuyan al cumplimiento de los objetivos organizacionales. La persona seleccionada será responsable de recopilar, depurar, anal",
+    "fechaPublicacion": "2026-10-02",
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com",
+    "id": "mag-cade7bd1e1"
   },
   {
-    "id": "mag-009",
-    "titulo": "Analista de Datos (Ventas e Inventarios)",
+    "titulo": "Analista de Datos (Facilities)",
     "empresa": "Confidencial",
-    "ubicacion": "Colombia",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Híbrido",
+    "urgente": false,
+    "salario": {
+      "min": 2800000,
+      "max": 3400000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [],
+    "descripcion": "$ 2.800.000 a $ 3.400.000 Bogotá, D.C. ¿Te apasiona el análisis de información y la generación de insights que apoyen la toma de decisiones estratégicas? Nos encontramos en la búsqueda de un Analista de Datos con experiencia en análisis financiero y presupuestal, capaz de transformar grandes volúmenes de información en reportes, indicadores y tableros de control que contribuyan al cumplimiento de los objetivos organizacionales. La persona seleccionada será responsable de recopilar, depurar, anal",
+    "fechaPublicacion": "2026-10-01",
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com",
+    "id": "mag-95593cabe9"
+  },
+  {
+    "titulo": "Ingeniero SRE DevOps",
+    "empresa": "STRATEGIC POINTS S.A.S",
+    "ubicacion": "Medellín",
     "modalidad": "Presencial",
+    "urgente": false,
     "salario": null,
     "requisitos": [
-      "excel",
-      "power bi"
+      "ci/cd",
+      "kubernetes"
     ],
-    "descripcion": "Analista de Datos Analista BI Excel avanzado Power BI SQL Indicadores comerciales Análisis de ventas Gestión de inventarios Retail Moda ¡Hola! ¿Te apasiona transformar datos en decisiones estratégicas que impulsen el éxito en el dinámico mundo de la moda? ¡Esta oportunidad es para ti! Buscamos un(a) **Analista de Datos** apasionado(a) por descubrir insights valiosos en información de ventas e inventarios. Serás una pieza clave para asegurar la disponibilidad óptima de nuestros pr",
-    "fechaPublicacion": "2026-10-05",
-    "experienciaMinima": null,
-    "fuente": "magneto365.com (importado 2026-10-05)"
+    "descripcion": "Medellín Ingeniero SRE DevOps Palabras clave: Ingeniero SRE DevOps Site Reliability Engineer Ingeniero SRE Ingeniero DevOps Ingeniero de Confiabilidad Observabilidad Kubernetes IaC Métricas DORA SLO SLI Cloud Computing CI/CD Se requiere un Ingeniero SRE DevOps para fortalecer la confiabilidad de servicios críticos. El rol concentra la gestión de disponibilidad, resiliencia y observabilidad de la plataforma. Se busca experiencia en Site Reliability Engineering, manejo de incidentes y automatizaci",
+    "fechaPublicacion": "2026-09-22",
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com",
+    "id": "mag-3d1901c541"
   },
   {
-    "id": "mag-010",
-    "titulo": "Ingeniero DevOps Junior (SRE)",
-    "empresa": "Confidencial",
-    "ubicacion": "Colombia",
+    "titulo": "Ingeniero DevOps / Cloud",
+    "empresa": "ACCENTURE LTDA",
+    "ubicacion": "Medellín",
     "modalidad": "Presencial",
+    "urgente": false,
+    "salario": null,
+    "requisitos": [
+      "aws",
+      "azure",
+      "kubernetes"
+    ],
+    "descripcion": "Medellín Accenture es una compañía global líder en servicios profesionales, con soluciones en estrategia y consultoría, tecnología, operaciones y capacidades digitales que impulsan a nuestros clientes a alcanzar su máximo potencial. En nuestro equipo de #Tecnología, impulsamos la adopción de plataformas cloud y prácticas DevOps que permiten acelerar la entrega de soluciones innovadoras y altamente confiables. Actualmente nos encontramos en la búsqueda de un Ingeniero DevOps / Cloud. La persona s",
+    "fechaPublicacion": "2026-08-31",
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com",
+    "id": "mag-455aa0485e"
+  },
+  {
+    "titulo": "Ingeniero/a DevOps CI/CD para personas con o sin discapacidad 1625889648-108",
+    "empresa": "Servicio de Empleo Comfama",
+    "ubicacion": "Medellín",
+    "modalidad": "Presencial",
+    "urgente": false,
+    "salario": {
+      "min": 6000000,
+      "max": 6000000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [
+      "ci/cd"
+    ],
+    "descripcion": "Apto para personas con discapacidad $ 6.000.000 Medellín Importante empresa ubicada en Antioquia, solicita para su equipo de trabajo, personal con experiencia mínima de dos (2) años para desempeñar el cargo de Ingeniero/a DevOps CI/CD. Formación académica: Ingeniero/a en sistemas o carreras afines. Funciones específicas: Velar porque el equipo asignado disponga de los skills suficientes para cumplir con el objetivo de cada servicio. Evaluar periódicamente la precisión de las necesidades pactadas",
+    "fechaPublicacion": "2026-09-22",
+    "experienciaMinima": null,
+    "fuente": "magneto365.com",
+    "id": "mag-ce1751d3c8"
+  },
+  {
+    "titulo": "Ingeniero DevOps Junior (SRE)",
+    "empresa": "STRATEGIC POINTS S.A.S",
+    "ubicacion": "Medellín",
+    "modalidad": "Presencial",
+    "urgente": false,
     "salario": null,
     "requisitos": [
       "ci/cd",
@@ -168,88 +220,113 @@
       "kubernetes",
       "python"
     ],
-    "descripcion": "DevOps SRE CI/CD Kubernetes observabilidad cloud automatización Infrastructure as Code Junior DevOps Engineer Site Reliability Engineer Junior Ingeniero de confiabilidad Platform Engineer Junior ¡Hola! ¿Estás listo para impulsar la confiabilidad de nuestros servicios tecnológicos? 🚀 En nuestro equipo, tendrás la oportunidad de crecer como Junior DevOps Engineer, aplicando tus conocimientos en DevOps y SRE para fortalecer la estabilidad y disponibilidad de nuestras soluciones. Tra",
-    "fechaPublicacion": "2026-10-05",
-    "experienciaMinima": null,
-    "fuente": "magneto365.com (importado 2026-10-05)"
+    "descripcion": "Medellín Ingeniero DevOps Junior (SRE) Palabras clave: DevOps SRE CI/CD Kubernetes observabilidad cloud automatización Infrastructure as Code Junior DevOps Engineer Site Reliability Engineer Junior Ingeniero de confiabilidad Platform Engineer Junior ¡Hola! ¿Estás listo para impulsar la confiabilidad de nuestros servicios tecnológicos? 🚀 En nuestro equipo, tendrás la oportunidad de crecer como Junior DevOps Engineer, aplicando tus conocimientos en DevOps y SRE para fortalecer la estabilidad y dis",
+    "fechaPublicacion": "2026-09-28",
+    "experienciaMinima": 1,
+    "fuente": "magneto365.com",
+    "id": "mag-b80a714bef"
   },
   {
-    "id": "mag-011",
-    "titulo": "Ingeniero SRE DevOps",
-    "empresa": "Confidencial",
-    "ubicacion": "Colombia",
-    "modalidad": "Presencial",
-    "salario": null,
-    "requisitos": [],
-    "descripcion": "Vacante de Ingeniero SRE DevOps en Confidencial.",
-    "fechaPublicacion": "2026-10-05",
-    "experienciaMinima": null,
-    "fuente": "magneto365.com (importado 2026-10-05)"
-  },
-  {
-    "id": "mag-012",
-    "titulo": "Ingeniero DevOps / Cloud",
-    "empresa": "ACCENTURE LTDA",
-    "ubicacion": "Medellín",
-    "modalidad": "Presencial",
-    "salario": null,
-    "requisitos": [
-      "aws",
-      "azure",
-      "kubernetes"
-    ],
-    "descripcion": "Vacante de Ingeniero DevOps / Cloud en ACCENTURE LTDA.",
-    "fechaPublicacion": "2026-08-31",
-    "experienciaMinima": 3,
-    "fuente": "magneto365.com (importado 2026-10-05)"
-  },
-  {
-    "id": "mag-013",
     "titulo": "Analista QA Tester (Software Testing)",
     "empresa": "Confidencial",
-    "ubicacion": "Colombia",
-    "modalidad": "Presencial",
-    "salario": null,
-    "requisitos": [],
-    "descripcion": "Vacante de Analista QA Tester (Software Testing) en Confidencial.",
-    "fechaPublicacion": "2026-10-05",
-    "experienciaMinima": null,
-    "fuente": "magneto365.com (importado 2026-10-05)"
-  },
-  {
-    "id": "mag-014",
-    "titulo": "Tester QA Junior (Pruebas de Software) - Bogotá",
-    "empresa": "Confidencial",
-    "ubicacion": "Colombia",
-    "modalidad": "Presencial",
-    "salario": null,
-    "requisitos": [],
-    "descripcion": "Tester QA Junior QA Junior Analista QA Calidad de Software Pruebas de Software Pruebas Funcionales Bogotá Desarrollo de Software Seguimiento de errores Documentación de incidentes Validación de correcciones Buscamos QA Junior para apoyar la calidad de nuestras soluciones tecnológicas, participando en el diseño, ejecución y documentación de pruebas, identificación de incidentes y validación de correcciones, asegurando que las aplicaciones cumplan con los requerimientos y necesidad",
-    "fechaPublicacion": "2026-10-05",
-    "experienciaMinima": null,
-    "fuente": "magneto365.com (importado 2026-10-05)"
-  },
-  {
-    "id": "mag-015",
-    "titulo": "Analista de automatización de pruebas - 34058",
-    "empresa": "Casa Principal",
     "ubicacion": "Bogotá, D.C.",
     "modalidad": "Presencial",
+    "urgente": false,
     "salario": null,
     "requisitos": [
-      "azure"
+      "azure",
+      "python"
     ],
-    "descripcion": "Vacante de Analista de automatización de pruebas - 34058 en Casa Principal.",
-    "fechaPublicacion": "2026-09-04",
-    "experienciaMinima": 2,
-    "fuente": "magneto365.com (importado 2026-10-05)"
+    "descripcion": "Bogotá, D.C. Analista QA Tester (Software Testing) Palabras clave: Analista QA Tester Automatización de Pruebas Pruebas de Software QA Tester Aseguramiento de Calidad Servicios Digitales Desarrollo de Software Postman JMeter SoapUI Python Azure APIs Bases de datos Pruebas de Regresión 🚀 ¡Únete a nuestro equipo como QA Tester y lleva la calidad del software al siguiente nivel! Si te apasiona la tecnología y buscas un rol donde tus hallazgos impulsen soluciones confiables, ¡este es tu lugar! Como ",
+    "fechaPublicacion": "2026-09-16",
+    "experienciaMinima": 4,
+    "fuente": "magneto365.com",
+    "id": "mag-08517fa95d"
   },
   {
-    "id": "mag-016",
+    "titulo": "Tester QA Junior (Pruebas de Software) - Bogotá",
+    "empresa": "CROYDON COLOMBIA S.A",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Presencial",
+    "urgente": false,
+    "salario": {
+      "min": 2300000,
+      "max": 2518000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [],
+    "descripcion": "$ 2.300.000 a $ 2.518.000 Bogotá, D.C. Tester QA Junior (Pruebas de Software) - Bogotá Palabras clave: Tester QA Junior QA Junior Analista QA Calidad de Software Pruebas de Software Pruebas Funcionales Bogotá Desarrollo de Software Seguimiento de errores Documentación de incidentes Validación de correcciones Buscamos QA Junior para apoyar la calidad de nuestras soluciones tecnológicas, participando en el diseño, ejecución y documentación de pruebas, identificación de incidentes y validación de c",
+    "fechaPublicacion": "2026-08-31",
+    "experienciaMinima": 1,
+    "fuente": "magneto365.com",
+    "id": "mag-7e7e0aff98"
+  },
+  {
+    "titulo": "Analista QA (Soporte funcional) - Sector Financiero",
+    "empresa": "VALCREDIT SAS",
+    "ubicacion": "Bogotá, D.C.",
+    "modalidad": "Presencial",
+    "urgente": false,
+    "salario": {
+      "min": 2000000,
+      "max": 2600000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [],
+    "descripcion": "$ 2.000.000 a $ 2.600.000 Bogotá, D.C. Analista QA (Soporte funcional) - Sector Financiero Palabras clave: Analista QA Analista de Soporte QA Analista de Calidad de Software QA Analyst Analista de Pruebas Soporte funcional Sector financiero Tecnología financiera Desarrollo de software Servicios digitales Gestión de incidencias Pruebas de software Plataformas digitales Gestión de bugs Contrato indefinido VALCREDIT continúa fortaleciendo su equipo de innovación con la incorporación de un Analista ",
+    "fechaPublicacion": "2026-09-17",
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com",
+    "id": "mag-62f99eb9cc"
+  },
+  {
+    "titulo": "CEID Analista QA 1626523752-5",
+    "empresa": "Servicio de Empleo Comfama",
+    "ubicacion": "Medellín",
+    "modalidad": "Presencial",
+    "urgente": false,
+    "salario": {
+      "min": 5200000,
+      "max": 5200000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [],
+    "descripcion": "$ 5.200.000 Medellín Empresa del sector retail requiere para su equipo de trabajo profesional en Ingeniería de Sistemas, Ingeniería de Software, Informática o carreras afines que cuente con Misión del cargo: Garantizar la calidad de los desarrollos de software mediante el diseño, ejecución y automatización de pruebas, identificando oportunidades de mejora, gestionando defectos y asegurando el correcto funcionamiento de las aplicaciones y servicios tecnológicos de la organización. Funciones espec",
+    "fechaPublicacion": "2026-09-16",
+    "experienciaMinima": 3,
+    "fuente": "magneto365.com",
+    "id": "mag-8ebf5b1a45"
+  },
+  {
+    "titulo": "Diseñador/a UX/UI para personas con o sin discapacidad 1626436242-56",
+    "empresa": "Servicio de Empleo Comfama",
+    "ubicacion": "Medellín",
+    "modalidad": "Presencial",
+    "urgente": false,
+    "salario": {
+      "min": 10000000,
+      "max": 10000000,
+      "moneda": "COP",
+      "periodo": "mensual"
+    },
+    "requisitos": [
+      "comunicación"
+    ],
+    "descripcion": "$ 10.000.000 Medellín Importante empresa del sector servicios solicita un/a Diseñador/a UX/UI para personas con o sin discapacidad con dos (2) años de experiencia en el área de tecnología financiera. Formación académica: Profesional o especialista en Diseño, Diseño Gráfico, Diseño de Interacción, Ingeniería de Diseño de Producto, Comunicación Digital o áreas afines. Requerimientos y/o conocimientos para el cargo: - Habilidad para articular decisiones de diseño con equipos funcionales, líderes té",
+    "fechaPublicacion": "2026-06-24",
+    "experienciaMinima": 2,
+    "fuente": "magneto365.com",
+    "id": "mag-d8caaf601d"
+  },
+  {
     "titulo": "Practicante UX - UI Designer",
     "empresa": "Crystal",
     "ubicacion": "Itagui",
     "modalidad": "Presencial",
+    "urgente": false,
     "salario": {
       "min": 1750905,
       "max": 1750905,
@@ -262,9 +339,10 @@
       "illustrator",
       "photoshop"
     ],
-    "descripcion": "Profesional $ 1.750.905 Itagui - Medellín - Sabaneta Vincúlate con nuestro propósito de existir para ayudar a las personas a expresar su esencia a través de una moda consciente, sé parte de nuestro equipo de practicantes. Funciones principales: Investigación y Análisis: Evaluar la experiencia actual con journey maps, matrices de necesidades y entrevistas para detectar fricciones y oportunidades. Insights y Estrategia: Convertir hallazgos e",
+    "descripcion": "Profesional $ 1.750.905 Itagui - Medellín - Sabaneta Vincúlate con nuestro propósito de existir para ayudar a las personas a expresar su esencia a través de una moda consciente, sé parte de nuestro equipo de practicantes. Funciones principales: Investigación y Análisis: Evaluar la experiencia actual con journey maps, matrices de necesidades y entrevistas para detectar fricciones y oportunidades. Insights y Estrategia: Convertir hallazgos en insights accionables que orienten decisiones de diseño ",
     "fechaPublicacion": "2026-08-11",
     "experienciaMinima": null,
-    "fuente": "magneto365.com (importado 2026-10-05)"
+    "fuente": "magneto365.com",
+    "id": "mag-4ce882b3b4"
   }
 ]

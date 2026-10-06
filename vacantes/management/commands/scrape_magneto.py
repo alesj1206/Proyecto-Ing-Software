@@ -18,8 +18,10 @@ Respeto al sitio: el robots.txt de Magneto permite expresamente crawling
 las rutas de /trabajos/ — solo bloquea URLs con query string ("?"), que
 este comando nunca usa (toda la navegación es por interacción con la SPA,
 no por URL). Aun así, el comando hace un número acotado de peticiones
-(--por-termino, con tope razonable) y espera entre cada una — no es un
-scraper continuo ni agresivo, es una importación puntual.
+(--por-termino, con tope razonable) y espera entre cada una — una sesión
+acotada (5 términos, ~20 vacantes), aunque ahora corre automáticamente
+una vez al día (HU-11/n8n, primer paso del workflow, antes del scoring)
+en vez de ser solo manual.
 
 Uso:
     python manage.py scrape_magneto
@@ -27,6 +29,7 @@ Uso:
     python manage.py scrape_magneto --out vacantes/fixtures/vacantes_magneto.json
 """
 
+import hashlib
 import json
 import re
 import time
@@ -91,6 +94,19 @@ def _limpiar_descripcion(desc_cruda, titulo, empresa):
     if len(desc) < 40:
         desc = f"Vacante de {titulo} en {empresa}."
     return desc[:500]
+
+
+def _id_estable(titulo, empresa):
+    """mag-<hash> en vez de mag-<posición en la corrida>: el comando ahora
+    corre todos los días (HU-11/n8n) y cada corrida reordena o filtra
+    resultados distinto — un id posicional le asignaría el mismo "mag-003"
+    a una vacante real distinta de un día para otro, y Postulacion /
+    MatchDiario / Notificacion que ya apuntaban a ese id quedarían
+    pegadas a la vacante equivocada. El hash de título+empresa es estable:
+    la misma publicación real vuelve a mapear al mismo id siempre, sin
+    tener que llevar estado entre corridas."""
+    clave = _normalizar(f"{titulo}|{empresa}")
+    return f"mag-{hashlib.sha1(clave.encode('utf-8')).hexdigest()[:10]}"
 
 
 def _parsear_bloque(bloque, titulo):
@@ -203,8 +219,22 @@ class Command(BaseCommand):
         finally:
             # Guardar lo recolectado pase lo que pase — un corte de red a
             # mitad de camino no debe tirar también el trabajo ya hecho.
-            with open(options["out"], "w", encoding="utf-8") as f:
-                json.dump(resultados, f, ensure_ascii=False, indent=2)
+            # PERO solo si de verdad se recolectó algo: si Chrome ni
+            # siquiera logró lanzar (CommandError antes del primer
+            # resultado), resultados queda vacío — sobreescribir el
+            # fixture con [] borraría el dataset real ya importado en
+            # corridas anteriores. Ahora que esto corre solo, sin
+            # supervisión, una vez al día (HU-11/n8n), un mal día de Chrome
+            # en el host no debe destruir lo que ya se tenía.
+            if resultados:
+                with open(options["out"], "w", encoding="utf-8") as f:
+                    json.dump(resultados, f, ensure_ascii=False, indent=2)
+            else:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"No se recolectó ninguna vacante — se deja {options['out']} sin tocar."
+                    )
+                )
 
         self.stdout.write(
             self.style.SUCCESS(f"{len(resultados)} vacantes reales guardadas en {options['out']}.")
@@ -214,7 +244,6 @@ class Command(BaseCommand):
     def _scrapear(self, options, terminos, por_termino, resultados):
         from playwright.sync_api import sync_playwright
 
-        indice = 1
         with sync_playwright() as p:
             try:
                 browser = p.chromium.launch(executable_path=options["chrome"], headless=True, args=["--no-sandbox"])
@@ -292,10 +321,9 @@ class Command(BaseCommand):
                         bloque = texto[max(0, idx - 400):idx + 3000]
                         dato = _parsear_bloque(bloque, titulo)
                         if dato:
-                            dato["id"] = f"mag-{indice:03d}"
+                            dato["id"] = _id_estable(dato["titulo"], dato["empresa"])
                             dato["urgente"] = dato["urgente"] or titulo in urgentes
                             resultados.append(dato)
-                            indice += 1
                             tomados += 1
                             marca = " [URGENTE]" if dato["urgente"] else ""
                             self.stdout.write(f"  [{dato['id']}] {titulo} -> {dato['empresa']} ({dato['modalidad']}){marca}")

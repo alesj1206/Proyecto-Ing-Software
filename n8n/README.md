@@ -1,15 +1,32 @@
-# HU-06 + HU-11 — workflow de n8n: ranking diario + notificación de matches nuevos
+# HU-06 + HU-11 — workflow de n8n: ingesta real + ranking diario + notificación
 
 El documento del reto (Magneto, "Idea 4: Workflow con n8n") pide que n8n
 orqueste **ingesta, normalización, scoring y notificación** como pasos
 explícitos — no un solo paso que hace todo por dentro. Este workflow tiene
-dos nodos HTTP Request reales y separados para eso, cada uno verificable
+tres nodos HTTP Request reales y separados para eso, cada uno verificable
 por su cuenta en el panel de ejecuciones de n8n:
 
 ```
-Cada día a las 6am  →  1. Recalcular matches  →  2. Generar notificaciones
-(Schedule Trigger)        (scoring, HU-06)          (HU-11)
+Cada día       0. Importar vacantes   1. Recalcular matches   2. Generar
+a las 6am  →   (ingesta real de   →   (scoring, HU-06)    →   notificaciones
+(Schedule         Magneto)                                       (HU-11)
+ Trigger)
 ```
+
+**Paso 0 — ingesta** (`POST /api/importar-vacantes`): corre el scraper real
+de magneto365.com (`vacantes/management/commands/scrape_magneto.py`, vía
+Playwright + Chrome) y siembra el resultado
+(`vacantes/management/commands/seed_vacantes.py`) — así el scoring del
+paso 1 ya ve vacantes frescas el mismo día. Usa ids estables por contenido
+(`mag-<hash(título+empresa)>`, no por posición en la corrida): la misma
+publicación real de Magneto siempre mapea al mismo id aunque el orden de
+los resultados cambie de un día a otro, para que una `Postulacion` /
+`MatchDiario` / `Notificacion` que ya apunta a esa vacante no quede pegada
+a una vacante distinta tras la siguiente corrida. **Es el paso lento**: un
+navegador real con esperas entre búsquedas, puede tardar varios minutos
+(~3-4 min en esta máquina, a veces más si hay otras cosas corriendo) — por
+eso su nodo en n8n tiene un timeout de 10 min (`600000`), muy por encima de
+los 15s de los otros dos, que solo hacen trabajo de base de datos.
 
 **Paso 1 — scoring** (`POST /api/recalcular-matches`): recorre todos los
 perfiles con CV cargado, recalcula su score contra todas las vacantes
@@ -54,12 +71,22 @@ no tenía credenciales accesibles) y el workflow quedó importado y
    POST en cadena (`/api/recalcular-matches` seguido de
    `/api/generar-notificaciones`), confirmando que n8n corre los dos pasos
    en el orden correcto.
+7. (2026-10-05) Se agregó el nodo de ingesta (paso 0) con el mismo método.
+   Primer intento con timeout de 4 min: el scraping real tardó un poco más
+   (~4:20 min esa corrida) y n8n marcó el nodo como fallido por timeout del
+   lado del cliente — aunque Django sí había terminado el trabajo del lado
+   del servidor (el POST completó con 200 igual, solo que después de que
+   n8n ya se había rendido). Se subió el timeout del nodo a 10 min
+   (`600000`) y se repitió la ejecución: los 3 nodos corrieron en cadena
+   sin error, confirmado en el log de Django (`/api/importar-vacantes` →
+   `/api/recalcular-matches` → `/api/generar-notificaciones`, los tres 200,
+   mismo segundo).
 
 Si quieres verlo en la interfaz (para capturas del informe, por ejemplo):
 abre http://localhost:5678 e inicia sesión con las credenciales de
 `~/n8n-vacantes/.env`. El workflow se llama **"Scoutly - Matches diarios
-(HU-06 + HU-11)"**, debe aparecer **Active**, y al abrirlo se ven los 3
-nodos en cadena (trigger → scoring → notificaciones).
+(HU-06 + HU-11, ingesta real)"**, debe aparecer **Active**, y al abrirlo se
+ven los 4 nodos en cadena (trigger → ingesta → scoring → notificaciones).
 
 Para volver a importar manualmente desde cero (si recreas la instancia de
 nuevo): Menú (⋮) → **Import from File** → este archivo
@@ -83,10 +110,14 @@ Django tiene que escuchar en todas las interfaces, no solo loopback:
 ## Probar sin esperar al Schedule Trigger
 
 Dentro de n8n, con el workflow abierto: botón **Test workflow** (ejecuta los
-dos nodos HTTP Request en cadena, de inmediato). O desde la terminal, sin
-n8n (en orden — el segundo necesita que el primero ya haya corrido hoy):
+tres nodos HTTP Request en cadena, de inmediato — cuenta con que el primero
+por sí solo puede tardar varios minutos). O desde la terminal, sin n8n (en
+orden — cada uno depende de que el anterior ya haya corrido):
 
 ```bash
+curl -X POST -H "X-Scoutly-Token: dev-local-token-change-me" \
+  http://localhost:8000/api/importar-vacantes   # lento: scraping real
+
 curl -X POST -H "X-Scoutly-Token: dev-local-token-change-me" \
   http://localhost:8000/api/recalcular-matches
 
@@ -94,6 +125,7 @@ curl -X POST -H "X-Scoutly-Token: dev-local-token-change-me" \
   http://localhost:8000/api/generar-notificaciones
 
 # o, sin levantar n8n ni el servidor, directo en Django:
+.venv/bin/python manage.py scrape_magneto && .venv/bin/python manage.py seed_vacantes
 .venv/bin/python manage.py recalcular_matches
 .venv/bin/python manage.py shell -c "from vacantes.notificaciones import generar_notificaciones_nuevos_matches; print(generar_notificaciones_nuevos_matches())"
 ```

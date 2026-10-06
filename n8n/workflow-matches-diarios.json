@@ -1,5 +1,5 @@
 {
-  "name": "Scoutly - Matches diarios (HU-06 + HU-11)",
+  "name": "Scoutly - Matches diarios (HU-06 + HU-11, ingesta real)",
   "nodes": [
     {
       "parameters": {
@@ -23,6 +23,29 @@
     {
       "parameters": {
         "method": "POST",
+        "url": "http://host.containers.internal:8000/api/importar-vacantes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Scoutly-Token",
+              "value": "dev-local-token-change-me"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "http-request-0",
+      "name": "0. Importar vacantes (ingesta)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
         "url": "http://host.containers.internal:8000/api/recalcular-matches",
         "sendHeaders": true,
         "headerParameters": {
@@ -41,7 +64,7 @@
       "name": "1. Recalcular matches (scoring)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [480, 300]
+      "position": [680, 300]
     },
     {
       "parameters": {
@@ -64,11 +87,22 @@
       "name": "2. Generar notificaciones",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [740, 300]
+      "position": [900, 300]
     }
   ],
   "connections": {
     "Cada día a las 6am": {
+      "main": [
+        [
+          {
+            "node": "0. Importar vacantes (ingesta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "0. Importar vacantes (ingesta)": {
       "main": [
         [
           {

@@ -70,11 +70,11 @@ duplicar la fila. El estado lo mueve el propio candidato desde
 empresa todavía, eso queda fuera de este sprint.
 
 **HU-11 — cómo quedó armada.** El workflow de n8n (ver
-[`n8n/README.md`](n8n/README.md)) tiene un **segundo nodo HTTP Request**
-después del de scoring — `POST /api/generar-notificaciones`, separado a
-propósito del de HU-06 para que "notificación" sea un paso propio y
-auditable en el panel de ejecuciones de n8n, no algo escondido dentro del
-cálculo del score. `vacantes/notificaciones.py::generar_notificaciones_nuevos_matches`
+[`n8n/README.md`](n8n/README.md)) tiene un **tercer nodo HTTP Request**
+al final de la cadena — `POST /api/generar-notificaciones`, separado a
+propósito de los de ingesta y scoring para que "notificación" sea un paso
+propio y auditable en el panel de ejecuciones de n8n, no algo escondido
+dentro del cálculo del score. `vacantes/notificaciones.py::generar_notificaciones_nuevos_matches`
 compara el top-3 de hoy de cada candidato contra el de ayer
 (`MatchDiario`); por cada vacante que entró de nueva, crea una
 `Notificacion` — siempre visible en la campana de la app — y la envía por
@@ -133,11 +133,22 @@ el detalle de cada vacante, bajo "Desglose de compatibilidad".
 ## Vacantes reales de Magneto
 
 Las 9 vacantes mock del Sprint 1 (`vacantes/fixtures/vacantes_raw.json`)
-siguen ahí, pero el dataset se amplió con **16 vacantes reales**
-importadas en vivo de magneto365.com
-(`vacantes/fixtures/vacantes_magneto.json`, ids `mag-001`…`mag-016`) —
-título, empresa, ubicación, modalidad, salario, experiencia mínima,
-descripción y requisitos son datos reales, no inventados.
+siguen ahí, pero el dataset se amplió con vacantes reales importadas en
+vivo de magneto365.com (`vacantes/fixtures/vacantes_magneto.json`, ids
+`mag-<hash>`) — título, empresa, ubicación, modalidad, salario,
+experiencia mínima, descripción y requisitos son datos reales, no
+inventados. Desde el 2026-10-05 esta importación ya no es solo manual:
+es el **paso 0 ("ingesta")** del workflow de n8n, corre automáticamente
+cada día antes del scoring — ver [`n8n/README.md`](n8n/README.md).
+
+El id de cada vacante real es un hash estable de título+empresa
+(`_id_estable()` en `scrape_magneto.py`), no una posición en la corrida —
+necesario justo porque ahora corre sola todos los días: con un id
+posicional ("mag-003"), una corrida que encuentra los resultados en otro
+orden le reasignaría ese id a una vacante real distinta, y una
+`Postulacion` o `MatchDiario` que ya apuntaba a "mag-003" quedaría
+pegada a la vacante equivocada. Con el hash, la misma publicación real
+siempre cae en el mismo id, corra cuando corra.
 
 Cómo se obtuvieron: `vacantes/management/commands/scrape_magneto.py` usa
 Playwright + Chrome (la búsqueda de Magneto es una SPA — el HTML que
@@ -157,8 +168,10 @@ ningún CV sin importar qué tan real sea el dato.
 El `robots.txt` de Magneto permite expresamente crawling (nombra bots de
 IA en su lista de user-agents permitidos) y no bloquea las rutas de
 `/trabajos/`; solo bloquea URLs con query string, que este comando nunca
-usa (toda la navegación es por interacción con la SPA). Aun así es una
-importación puntual y acotada (`--por-termino`), no un scraper continuo.
+usa (toda la navegación es por interacción con la SPA). Aun corriendo
+automáticamente todos los días, sigue siendo una sesión acotada
+(`--por-termino`, 5 términos, ~20 vacantes) — una corrida diaria, no un
+scraper continuo ni agresivo contra el sitio.
 
 ```bash
 python manage.py scrape_magneto                                    # usa los términos por defecto

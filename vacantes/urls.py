@@ -16,6 +16,11 @@ urlpatterns = [
         name="cambiar_estado_postulacion",
     ),
     path("notificaciones", views.notificaciones_view, name="notificaciones"),
+    path(
+        "api/importar-vacantes",
+        views.importar_vacantes_api,
+        name="importar_vacantes_api",
+    ),
     path("api/recalcular-matches", views.recalcular_matches_api, name="recalcular_matches_api"),
     path(
         "api/generar-notificaciones",

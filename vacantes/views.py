@@ -1,9 +1,13 @@
 import hmac
+import threading
 from concurrent.futures import ThreadPoolExecutor
+from io import StringIO
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.db import IntegrityError, connections
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -370,13 +374,67 @@ def _token_n8n_autorizado(request):
     return None
 
 
+#  n8n documenta su propio timeout de 10 min para este endpoint porque el
+# scraping real puede tardar más de lo esperado (ver n8n/README.md) — eso
+# significa que un reintento (manual, o de n8n tras un timeout aparente
+# del lado del cliente mientras Django seguía trabajando) puede solaparse
+# con una corrida que ya está en curso. Dos scrape_magneto concurrentes
+# lanzarían dos Chrome y pisarían el mismo archivo de fixture al escribir.
+# Un lock in-process basta: el deployment real de este proyecto es un
+# único proceso de `runserver`, no varios workers.
+_importar_vacantes_lock = threading.Lock()
+
+
+@csrf_exempt
+@require_POST
+def importar_vacantes_api(request):
+    """Paso 0 del workflow de n8n ("ingesta", antes de "normalización →
+    scoring → notificación" — Idea 4 del documento del reto): corre el
+    scraper real de magneto365.com (scrape_magneto) y siembra el resultado
+    (seed_vacantes). Va ANTES de recalcular_matches_api en la cadena del
+    workflow para que el scoring del día ya vea las vacantes frescas.
+
+    Bloqueante y lento (un navegador real, con esperas entre búsquedas —
+    puede tardar un par de minutos): aceptable para una corrida diaria
+    nocturna/madrugada, no para llamarlo en el camino caliente de una
+    request de usuario. El nodo de n8n para este endpoint necesita un
+    timeout bastante más alto que los otros dos (ver n8n/README.md)."""
+    error = _token_n8n_autorizado(request)
+    if error:
+        return error
+
+    if not _importar_vacantes_lock.acquire(blocking=False):
+        return JsonResponse({"error": "ya hay una importación de vacantes en curso"}, status=409)
+
+    try:
+        antes = Vacante.objects.count()
+        buffer = StringIO()
+        try:
+            call_command("scrape_magneto", stdout=buffer)
+            call_command("seed_vacantes", stdout=buffer)
+        except CommandError as exc:
+            return JsonResponse({"error": str(exc)}, status=502)
+        despues = Vacante.objects.count()
+    finally:
+        _importar_vacantes_lock.release()
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "vacantes_antes": antes,
+            "vacantes_despues": despues,
+            "vacantes_nuevas": despues - antes,
+        }
+    )
+
+
 @csrf_exempt
 @require_POST
 def recalcular_matches_api(request):
-    """HU-06: primer paso del workflow de n8n (Schedule Trigger → HTTP
-    Request #1 → este endpoint). csrf_exempt porque la llamada no viene de
-    un navegador con sesión — la autenticación es el token compartido, no
-    la cookie de sesión."""
+    """HU-06: segundo paso del workflow de n8n (después de importar_vacantes_api
+    — "ingesta" — y antes de generar_notificaciones_api — "notificación").
+    csrf_exempt porque la llamada no viene de un navegador con sesión — la
+    autenticación es el token compartido, no la cookie de sesión."""
     error = _token_n8n_autorizado(request)
     if error:
         return error
