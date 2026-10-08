@@ -2,3 +2,4 @@ django
 pypdf
 requests
 playwright
+python-dotenv

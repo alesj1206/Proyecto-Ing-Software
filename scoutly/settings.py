@@ -13,8 +13,18 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Variables de entorno locales (SMTP real para HU-11, tokens, etc.) — vive
+# en BASE_DIR/.env, nunca en git (.gitignore ya excluye .env*). Cada quien
+# en el equipo arma el suyo a partir de .env.example. Si el archivo no
+# existe (p. ej. en otra máquina sin configurar), load_dotenv() no hace
+# nada — os.environ.get(..., default) de abajo sigue cayendo a los valores
+# por defecto (backend de consola, etc.), no rompe nada.
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
