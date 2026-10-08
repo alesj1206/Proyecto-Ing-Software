@@ -448,6 +448,52 @@ select:focus {
   background: var(--brand);
 }
 
+/* Historial de matches (HU-06, vista de ranking diario) */
+
+.delta-pct {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.delta-pct.subio {
+  background: #e6f4ea;
+  color: #1e7b34;
+}
+
+.delta-pct.bajo {
+  background: #fdecea;
+  color: #a4302a;
+}
+
+.delta-pct.igual {
+  background: var(--surface-strong);
+  color: var(--muted-foreground);
+}
+
+.delta-pct.nuevo {
+  background: var(--magneto-purple-soft);
+  color: var(--magneto-purple);
+}
+
+.puesto-ranking {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+}
+
 .skill-chip {
   display: inline-block;
   background: var(--surface-strong);

@@ -1,6 +1,7 @@
 import hmac
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 from io import StringIO
 
 from django.conf import settings
@@ -164,6 +165,101 @@ def dashboard_view(request):
             "total_vacantes": len(todas_vacantes),
             "modalidades": Vacante.Modalidad.choices,
             "modalidad_activa": modalidad_activa,
+        },
+    )
+
+
+TOP_HISTORIAL = 10
+
+
+@login_required
+def historial_view(request):
+    """HU-06 (ampliación): el dashboard solo muestra "hoy" — esta vista
+    deja ver el ranking diario como lo que realmente es, una serie de
+    snapshots guardados por el workflow de n8n (un MatchDiario por
+    perfil+vacante+fecha), no un número que solo existe en el momento en
+    que alguien entra a la página. Selector de fecha + el top de ese día,
+    con el cambio de score contra el snapshot inmediatamente anterior que
+    sí tenga datos (no necesariamente "ayer" en el calendario — si el
+    workflow no corrió un día, simplemente no hay snapshot ese día, y la
+    comparación salta al que sí exista)."""
+    perfil = _perfil_con_cv(request.user)
+    if not perfil:
+        return render(request, "vacantes/historial.html", {"perfil": None})
+
+    fechas_disponibles = list(
+        MatchDiario.objects.filter(perfil=perfil)
+        .values_list("fecha", flat=True)
+        .distinct()
+        .order_by("-fecha")
+    )
+
+    if not fechas_disponibles:
+        # Mismo caso que el dashboard: nadie ha corrido el workflow todavía
+        # para este perfil (recién cargó su CV) — se calcula una vez aquí
+        # para que el historial no arranque completamente vacío.
+        recalcular_matches_de_perfil(perfil, fecha=timezone.localdate())
+        fechas_disponibles = list(
+            MatchDiario.objects.filter(perfil=perfil)
+            .values_list("fecha", flat=True)
+            .distinct()
+            .order_by("-fecha")
+        )
+
+    fecha_str = request.GET.get("fecha")
+    fecha_sel = None
+    if fecha_str:
+        try:
+            fecha_sel = date.fromisoformat(fecha_str)
+        except ValueError:
+            fecha_sel = None
+    if fecha_sel not in fechas_disponibles:
+        fecha_sel = fechas_disponibles[0] if fechas_disponibles else None
+
+    ranking = []
+    fecha_anterior = None
+    if fecha_sel:
+        fecha_anterior = next((f for f in fechas_disponibles if f < fecha_sel), None)
+
+        top = list(
+            MatchDiario.objects.filter(perfil=perfil, fecha=fecha_sel)
+            .select_related("vacante")
+            .order_by("-score")[:TOP_HISTORIAL]
+        )
+        scores_anteriores = {}
+        if fecha_anterior:
+            scores_anteriores = dict(
+                MatchDiario.objects.filter(
+                    perfil=perfil, fecha=fecha_anterior, vacante_id__in=[m.vacante_id for m in top]
+                ).values_list("vacante_id", "score")
+            )
+
+        for i, m in enumerate(top, start=1):
+            score_pct = round(m.score * 100)
+            score_pct_anterior = (
+                round(scores_anteriores[m.vacante_id] * 100)
+                if m.vacante_id in scores_anteriores
+                else None
+            )
+            ranking.append(
+                {
+                    "puesto": i,
+                    "vacante": m.vacante,
+                    "score_pct": score_pct,
+                    "es_nuevo": score_pct_anterior is None,
+                    "delta_pct": (score_pct - score_pct_anterior) if score_pct_anterior is not None else None,
+                }
+            )
+
+    return render(
+        request,
+        "vacantes/historial.html",
+        {
+            "perfil": perfil,
+            "fechas_disponibles": fechas_disponibles,
+            "fecha_sel": fecha_sel,
+            "fecha_anterior": fecha_anterior,
+            "ranking": ranking,
         },
     )
 

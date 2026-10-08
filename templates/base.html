@@ -36,6 +36,7 @@
           {% if user.is_authenticated %}
           <nav class="app-nav">
             <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Vacantes</a>
+            <a href="{% url 'historial' %}" class="{% if request.resolver_match.url_name == 'historial' %}active{% endif %}">Historial</a>
             <a href="{% url 'perfil' %}" class="{% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">Mi hoja de vida</a>
             <a href="{% url 'expectativas' %}" class="{% if request.resolver_match.url_name == 'expectativas' %}active{% endif %}">Mis expectativas</a>
             <a href="{% url 'tablero' %}" class="{% if request.resolver_match.url_name == 'tablero' %}active{% endif %}">Mis postulaciones</a>

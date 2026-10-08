@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Historial de matches | Scoutly{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="padding-top:3rem;padding-bottom:3.5rem;">
+  <p class="label-eyebrow" style="color:var(--magneto-purple);">HU-06 · Ranking diario</p>
+  <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">Historial de matches</h1>
+  <p style="margin-top:0.5rem;max-width:36rem;color:var(--muted-foreground);">
+    Cada vez que el workflow de n8n corre (una vez al día), guarda una
+    foto de tu ranking completo — no solo el de hoy. Aquí puedes ver
+    cualquier día anterior y cómo cambió el % de compatibilidad de cada
+    vacante frente al snapshot anterior.
+  </p>
+
+  {% if not perfil %}
+  <div class="cta-banner" style="margin-top:1.75rem;">
+    <div>
+      <p style="margin:0;font-weight:600;color:var(--navy);">Aún no has cargado tu hoja de vida</p>
+      <p style="margin:0.25rem 0 0;font-size:0.875rem;color:var(--muted-foreground);">Cárgala para que el workflow empiece a guardarte un ranking diario.</p>
+    </div>
+    <a href="{% url 'onboarding' %}" class="btn btn-brand">Cargar CV</a>
+  </div>
+  {% elif not fechas_disponibles %}
+  <p style="margin-top:1.75rem;color:var(--muted-foreground);">
+    Todavía no hay ningún snapshot guardado para tu perfil — debería
+    aparecer uno apenas corra el workflow diario.
+  </p>
+  {% else %}
+
+  <form method="get" style="margin-top:1.75rem;display:flex;align-items:center;gap:0.75rem;">
+    <label for="fecha-select" style="font-size:0.875rem;font-weight:600;color:var(--navy);">Ver el ranking del:</label>
+    <select id="fecha-select" name="fecha" onchange="this.form.submit()">
+      {% for f in fechas_disponibles %}
+        <option value="{{ f|date:'Y-m-d' }}" {% if f == fecha_sel %}selected{% endif %}>
+          {{ f|date:"d/m/Y" }}{% if forloop.first %} (más reciente){% endif %}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  <p style="margin-top:1rem;font-size:0.8125rem;color:var(--muted-foreground);">
+    {% if fecha_anterior %}
+      Comparado contra el snapshot anterior disponible: {{ fecha_anterior|date:"d/m/Y" }}.
+    {% else %}
+      Este es el snapshot más antiguo que tenemos de tu perfil — no hay uno anterior con qué comparar.
+    {% endif %}
+  </p>
+
+  <ul class="job-list" style="margin-top:1.25rem;">
+    {% for item in ranking %}
+    <li>
+      <a href="{% url 'vacante_detalle' item.vacante.id %}" class="job-row">
+        <div style="display:flex;align-items:center;gap:0.9rem;">
+          <span class="puesto-ranking">{{ item.puesto }}</span>
+          <div>
+            <h3 style="font-size:1rem;color:var(--navy);">
+              {{ item.vacante.titulo }}
+              {% if item.vacante.urgente %}<span class="badge-urgente">Urgente</span>{% endif %}
+            </h3>
+            <div class="job-meta">
+              <span>{{ item.vacante.empresa }}</span>
+              <span>{{ item.vacante.ubicacion }}</span>
+              <span>{{ item.vacante.modalidad }}</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          {% if item.es_nuevo %}
+            <span class="delta-pct nuevo">nuevo</span>
+          {% elif item.delta_pct > 0 %}
+            <span class="delta-pct subio">▲ {{ item.delta_pct }}%</span>
+          {% elif item.delta_pct < 0 %}
+            <span class="delta-pct bajo">▼ {{ item.delta_pct }}%</span>
+          {% else %}
+            <span class="delta-pct igual">— sin cambio</span>
+          {% endif %}
+          <p style="margin:0;font-size:1.05rem;font-weight:700;color:var(--navy);min-width:3.5rem;text-align:right;">{{ item.score_pct }}%</p>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+{% endblock %}
