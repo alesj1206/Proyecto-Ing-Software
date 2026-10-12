@@ -3,27 +3,26 @@
 
 {% block content %}
 <div class="container-narrow" style="padding-top:3rem;padding-bottom:3.5rem;">
-  <p class="label-eyebrow" style="color:var(--magneto-purple);">HU-06 · Ranking diario</p>
+  <p class="label-eyebrow" style="color:var(--magneto-purple);">Ranking diario</p>
   <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">Historial de matches</h1>
   <p style="margin-top:0.5rem;max-width:36rem;color:var(--muted-foreground);">
-    Cada vez que el workflow de n8n corre (una vez al día), guarda una
-    foto de tu ranking completo — no solo el de hoy. Aquí puedes ver
-    cualquier día anterior y cómo cambió el % de compatibilidad de cada
-    vacante frente al snapshot anterior.
+    Una vez al día guardamos una foto de tu ranking completo — no solo el
+    de hoy. Aquí puedes ver cualquier día anterior y cómo cambió el % de
+    compatibilidad de cada vacante frente a la foto anterior.
   </p>
 
   {% if not perfil %}
   <div class="cta-banner" style="margin-top:1.75rem;">
     <div>
       <p style="margin:0;font-weight:600;color:var(--navy);">Aún no has cargado tu hoja de vida</p>
-      <p style="margin:0.25rem 0 0;font-size:0.875rem;color:var(--muted-foreground);">Cárgala para que el workflow empiece a guardarte un ranking diario.</p>
+      <p style="margin:0.25rem 0 0;font-size:0.875rem;color:var(--muted-foreground);">Cárgala para que empecemos a guardarte un ranking diario.</p>
     </div>
     <a href="{% url 'onboarding' %}" class="btn btn-brand">Cargar CV</a>
   </div>
   {% elif not fechas_disponibles %}
   <p style="margin-top:1.75rem;color:var(--muted-foreground);">
-    Todavía no hay ningún snapshot guardado para tu perfil — debería
-    aparecer uno apenas corra el workflow diario.
+    Todavía no hay ninguna foto de tu ranking guardada — debería aparecer
+    una apenas hagamos la siguiente actualización diaria.
   </p>
   {% else %}
 
@@ -40,9 +39,9 @@
 
   <p style="margin-top:1rem;font-size:0.8125rem;color:var(--muted-foreground);">
     {% if fecha_anterior %}
-      Comparado contra el snapshot anterior disponible: {{ fecha_anterior|date:"d/m/Y" }}.
+      Comparado contra la foto anterior disponible: {{ fecha_anterior|date:"d/m/Y" }}.
     {% else %}
-      Este es el snapshot más antiguo que tenemos de tu perfil — no hay uno anterior con qué comparar.
+      Esta es la foto más antigua que tenemos de tu perfil — no hay una anterior con qué comparar.
     {% endif %}
   </p>
 
