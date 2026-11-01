@@ -1,6 +1,6 @@
 from django.contrib.auth import login, logout
 from django.shortcuts import redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
 
 from .forms import LoginForm, RegistroForm
 
@@ -22,10 +22,17 @@ def login_view(request):
     )
 
 
-@require_POST
+@require_http_methods(["GET", "POST"])
 def registro_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
+
+    if request.method == "GET":
+        return render(
+            request,
+            "accounts/login.html",
+            {"login_form": LoginForm(), "registro_form": RegistroForm(), "modo": "registro"},
+        )
 
     registro_form = RegistroForm(request.POST)
     if registro_form.is_valid():
