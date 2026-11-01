@@ -1,0 +1,477 @@
+descripcion: 'Set de PRUEBA: 8 vacantes nuevas, etiquetadas antes de correr el extractor y nunca usadas para ajustarlo. Mismo
+  formato que extraccion.yaml. PENDIENTE: revisión del equipo.'
+casos:
+- id: mag-1090558
+  titulo: Analista de datos Bogota
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Técnico en Sistemas, Tecnólogo en Sistemas, Ingeniero de Sistemas
+    tipo: obligatorio
+  - texto: manejo de aplicaciones de ofimática y bases de datos
+    tipo: obligatorio
+  - texto: Excel Avanzado
+    tipo: obligatorio
+  - texto: Tablas Dinámicas
+    tipo: obligatorio
+  - texto: SQL
+    tipo: obligatorio
+  - texto: Lógica de Programación
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Técnico
+    $ 1.750.905
+    Bogotá, D.C.
+    Formación Académica: Técnico en Sistemas, Tecnólogo en Sistemas, Ingeniero de Sistemas o Carreras afines. Experiencia: 1 Año de manejo de aplicaciones de ofimática y bases de datos, Macros. Debe tener conocimientos en: Excel Avanzado · Macros. · Tablas Dinámicas. Bases de Datos · Análisis de Datos. SQL · Diseño de Consultas Gestión de Datos. Lógica de Programación · Conceptos básicos. FUNCIONES: Cargue, validación y actualización de bases de datos en sistemas internos. Administración y seguimiento de información en plataformas de gestión. Generación de reportes, informes e indicadores de gestión. Cruce, depuración y análisis de información para diferentes áreas. Actualización de datos y generación de insumos para procesos operativos. Validación de información y detección de inconsistencias en los procesos. Generación de guías, etiquetas e informes requeridos para la operación. Apoyo tecnológico y administrativo a las diferentes áreas de la compañía. Control y seguimiento de procesos, cumpliendo tiempos y estándares establecidos. Horarios: turnos rotativos. ( 6 am Inicia el primero, y el último a las 9 pm), de Lunes a viernes, disponibilidad para los Sábados 42 horas a la semana. Modalidad: Presencial Salario: $1,750,905 + prestaciones de Ley Pagos quincenales
+- id: mag-1087256
+  titulo: Desarrollador/a de negocios Salesforce 1625889648-109
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Profesional en administración, ciencias sociales o ingeniería
+    tipo: obligatorio
+  - texto: Experiencia mínima de cuatro (4) años en ventas de servicios Salesforce
+    tipo: obligatorio
+  - texto: Conocimientos en ventas
+    tipo: obligatorio
+  - texto: Conocimientos básicos en gestión de proyectos
+    tipo: obligatorio
+  - texto: Marketing Digital y servicio al cliente
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    Apto para personas con discapacidad
+    5 años de experiencia, Profesional
+    $ 10.000.000
+    Medellín
+
+    Importante empresa ubicada en Medellín, solicita para su equipo de trabajo, personal con experiencia mínima de cinco (5) años para desempeñar el cargo de Desarrollador/a de negocios Salesforce.
+
+    Formación académica: Profesional en administración, ciencias sociales o ingeniería.
+
+    Funciones específicas:
+
+    -Mantener con rigor el CRM que permita la visibilidad y realidad de la cuenta, oportunidades y contactos a la compañía y su líder directo.
+
+    -Investigar y analizar el mercado objetivo para identificar nuevas oportunidades de negocio que se alineen con las soluciones de la empresa.
+
+    -Identificar y prospectar activamente empresas en sectores objetivo, enfocándose en los perfiles de buyer persona más relevantes (Directores de TI, Infraestructura, Transformación Digital, etc.).
+
+    Conocimientos:
+
+    -Formación como profesional en administración, ciencias sociales o ingeniería.
+
+    -Experiencia mínima de cuatro (4) años en ventas de servicios Salesforce (Sales y Service), ejecución de estrategias comerciales y de marketing.
+
+    -Conocimientos en ventas.
+
+    -Conocimientos básicos en gestión de proyectos.
+
+    -Conocimientos en Marketing Digital y servicio al cliente.
+
+    Salario: $10.000.000 + prestaciones de ley.
+
+    Horarios: Lunes a jueves de 7:30 a.m. a 5:00 p.m., y viernes de 7:30 a.m. a 4:30 p.m.
+
+    Tipo de contrato: Indefinido, con prestaciones sociales.
+
+    Lugar de trabajo: Medellín, modalidad híbrida.
+
+    Proceso de Selección
+
+    Tu próxima oportunidad laboral puede estar a pocos pasos. Para postularte:
+
+    Haz clic en el botón "Postularme".
+    Inicia sesión o crea tu cuenta en Magneto, registra tu hoja de vida y responde las preguntas del proceso.
+    Revisa tu correo electrónico para conocer el estado de tu postulación.
+    Si avanzas, completa las pruebas y/o entrevistas solicitadas.
+
+    El equipo del Servicio de Empleo Comfama evaluará tu perfil, si se ajusta a la vacante y pasas los filtros, lo enviará a la empresa y ellos te contactarán para continuar el proceso. Recuerda que no debes pagar para participar de procesos de selección. Así dirás #MeProtejodelfraude
+
+    Sobre Nosotros
+
+    El Servicio de Empleo Comfama es la plataforma de intermediación que conecta el talento de las personas y las necesidades de las empresas. Como agencia transnacional, presta el servicio para empresas ubicadas en Antioquia, y en el extranjero que requieren talento colombiano. Somos prestador autorizado Resolución 0017 del 14 de enero de 2026 del Servicio Público de Empleo.
+
+    Palabras clave:
+
+    Salesforce, 1625889648-109
+- id: mag-1121313
+  titulo: Auxiliar Contable (NIIF y Excel)
+  etiquetas:
+  - Software contable
+  - Excel avanzado
+  - NIIF
+  - Organización
+  - Atención al detalle
+  insuficiente: false
+  esperados:
+  - texto: tecnólogo en contabilidad o estudiante universitario de contaduría pública
+    tipo: obligatorio
+  - texto: experiencia mínima de un año desempeñándose en áreas contables
+    tipo: obligatorio
+  - texto: manejo de software contable
+    tipo: obligatorio
+  - texto: dominio de Excel avanzado
+    tipo: obligatorio
+  - texto: conocimiento en NIIF y normatividad tributaria colombiana
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Tecnólogo
+    $ 2.500.000
+    Bogotá, D.C.
+    Auxiliar Contable (NIIF y Excel)
+    Palabras clave:
+    Auxiliar contable
+    Asistente contable
+    Técnico contable
+    Accounting Assistant
+    Software contable
+    Excel avanzado
+    NIIF
+    Normatividad tributaria colombiana
+
+    ¡Haz que cada registro contable aporte claridad y confianza! Buscamos un Auxiliar contable apasionado por asegurar transacciones organizadas y veraces, con un impacto directo en el cumplimiento fiscal y financiero. Como Asistente contable, tendrás la oportunidad de fortalecer tus habilidades mientras apoyas la gestión económica con total precisión. ¡Postúlate hoy y crece con nosotros! 😊
+
+    Responsabilidades:
+    Brindar apoyo operativo y administrativo al área contable y financiera.
+    Asegurar el registro oportuno veraz y organizado de las transacciones económicas.
+    Cumplir con la normatividad fiscal y contable vigente en cada proceso.
+    Utilizar herramientas tecnológicas para la gestión de datos financieros.
+    Requerimientos:
+    Ser tecnólogo en contabilidad o estudiante universitario de contaduría pública.
+    Acreditar una experiencia mínima de un año desempeñándose en áreas contables.
+    Demostrar manejo de software contable.
+    Contar con dominio de Excel avanzado.
+    Poseer conocimiento en NIIF y normatividad tributaria colombiana.
+    Nivel de educación:
+    Tecnólogo
+    Sectores laborales:
+    Contabilidad finanzas impuestos y afines
+    Cargo:
+    Auxiliar
+    Otras habilidades:
+    Habilidades técnicas:
+    Software contable
+    Excel avanzado
+    NIIF
+    Habilidades interpersonales:
+    Organización
+    Atención al detalle
+- id: mag-1121624
+  titulo: Asesora Comercial (cosmética) - Madrid
+  etiquetas:
+  - Cuidado facial
+  - Exhibición comercial
+  - Orientación al cliente
+  - Trabajo en equipo
+  insuficiente: false
+  esperados:
+  - texto: Formación académica de Bachiller
+    tipo: obligatorio
+  - texto: Mínimo 3 meses de experiencia formal y certificable en ventas de productos de belleza
+    tipo: obligatorio
+  - texto: Experiencia en ventas en el sector retail
+    tipo: obligatorio
+  - texto: Experiencia en servicio y atención al cliente en punto de venta
+    tipo: obligatorio
+  - texto: Disponibilidad para laborar en horarios rotativos
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    3 meses de experiencia, Bachillerato completo hasta Tecnólogo
+    $ 1.750.950 a $ 2.000.000
+    Madrid
+    Asesora Comercial (Cosmética) - Ibague
+    Palabras clave:
+    Asesora Comercial
+    Asesora de Ventas
+    Asesora de Belleza
+    Consultora de Belleza
+    ventas de productos de belleza
+    cosmética
+    retail
+    atención al cliente
+    punto de venta
+    cierre de ventas
+    exhibición
+    portafolio comercial
+
+    Se requiere Asesora Comercial para fortalecer la venta de productos de belleza en punto de venta mediante asesoría personalizada y cierre de ventas. El cargo busca experiencia en cosmética y retail para orientar decisiones de compra, mantener la exhibición y gestionar el portafolio comercial.
+
+    Responsabilidades:
+    Atender y asesorar a los clientes de forma oportuna cordial y personalizada en la elección de productos.
+    Apoyar la gestión comercial y el cierre de ventas en el sector retail.
+    Realizar la exhibición organización y surtido de productos en el punto de venta según los estándares de la marca.
+    Mantener la fidelización de clientes a través de un servicio memorable y conocimiento del portafolio.
+    Requerimientos:
+    Formación académica de Bachiller.
+    Mínimo 3 meses de experiencia formal y certificable en ventas de productos de belleza y cosmética.
+    Experiencia en ventas en el sector retail.
+    Experiencia en servicio y atención al cliente en punto de venta.
+    Disponibilidad para laborar en horarios rotativos de domingo a domingo.
+    Nivel de educación:
+    Bachiller
+    Sectores laborales:
+    Ventas
+    Servicio al cliente y afines
+    Cargo:
+    Asistente
+    Otras habilidades:
+    Habilidades técnicas:
+    Cuidado facial
+    Exhibición comercial
+    Habilidades interpersonales:
+    Orientación al cliente
+    Trabajo en equipo
+- id: mag-1120341
+  titulo: Auxiliar De Enfermería _ UCI
+  etiquetas:
+  - Manejo Excel
+  - Software salud
+  - Trabajo en equipo
+  insuficiente: false
+  esperados:
+  - texto: Técnico Auxiliar en Enfermería
+    tipo: obligatorio
+  - texto: Registro RETHUS vigente
+    tipo: obligatorio
+  - texto: Experiencia mínina de 1 año en servicios de UCI-UCE
+    tipo: obligatorio
+  - texto: Reanimación cardiopulmonar básico (RCP)
+    tipo: obligatorio
+  - texto: Atención a víctimas de violencia sexual
+    tipo: obligatorio
+  - texto: Humanización
+    tipo: obligatorio
+  - texto: trabajo bajo presión
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Técnico hasta Tecnólogo
+    $ 2.502.720
+    Medellín
+
+    En Grupo ICOR creemos que cada atención transforma vidas. 💙
+
+    Buscamos Auxiliares de Enfermería apasionados por el servicio, comprometidos con la seguridad del paciente y con la capacidad de actuar con excelencia en entornos de alta complejidad.
+
+
+
+    ¿Cuál será tu propósito?
+
+    Brindar atención integral y segura a pacientes en la Unidad de Cuidados Intensivos, apoyando los procesos asistenciales y garantizando una atención humanizada, oportuna y de alta calidad, bajo los lineamientos institucionales y protocolos de seguridad del paciente.
+
+
+
+    Perfil requerido:
+
+    Técnico Auxiliar en Enfermería
+    Registro RETHUS vigente
+    Experiencia mínina de 1 año en servicios de UCI-UCE
+    Cursos actualizados:
+
+    Humanización
+
+    Atención a víctimas de violencia sexual
+
+    Reanimación cardiopulmonar básico (RCP)
+
+    Atención del paciente en cuidado intensivo
+
+    Dolor y cuidado paliativo
+
+    Gestión del duelo
+
+    Capacidad de respuesta, trabajo bajo presión y orientación al detalle
+
+
+
+    Responsabilidades del cargo:
+
+    Brindar cuidado básico y apoyo en procedimientos de enfermería en UCI.
+    Cumplir y apoyar en la ejecución de protocolos clínicos y normas de bioseguridad.
+    Asegurar el registro adecuado de la información en historias clínicas.
+    Apoyar la administración de medicamentos y monitorización de pacientes bajo supervisión del profesional de enfermería.
+    Contribuir al trabajo en equipo interdisciplinario en la atención del paciente crítico.
+
+    Condiciones de la vacante:
+
+    📌 Ubicación: Medellín – Clínica AMA
+
+    🕒 Horarios: Turnos rotativos
+
+    💰 Salario: $2.502.720 más auxilio de transporte
+
+    📄 Tipo de contrato: a término indefinido
+
+
+
+    ✨ Te ofrecemos estabilidad laboral, aprendizaje continuo y la oportunidad de crecer en una organización enfocada en la calidad y la humanización del servicio.
+
+
+
+    🚀 Postúlate ahora … Queremos contar contigo para seguir construyendo una atención segura, cálida y humana.
+- id: mag-1116047
+  titulo: Diseñador Grafico Galax - Medellín
+  etiquetas:
+  - Illustrator
+  - Photoshop
+  - After Effects
+  - IA
+  insuficiente: true
+  esperados: []
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    3 años de experiencia, Profesional
+    Salario a convenir
+    Medellín - Envigado - Itagui
+
+    Vincúlate con nuestro propósito de existir para ayudar a las personas a expresar su esencia a través de una moda consciente, sé parte de nuestro equipo de diseñadores, aquí tu objetivo será desarrollar piezas gráficas (on y off), con base en el direccionamiento de las diferentes áreas de la organización que lo requieran, con el fin de materializar las necesidades planteadas por ellos.
+
+    Funciones:
+
+    1. Elaborar piezas gráficas con base en el brief o la orden de trabajo suministrada  por el cliente interno, revisando antecedentes y ampliando la información necesaria, con el fin de dar respuesta oportuna al requerimiento.
+
+    2. Desarrollar conceptos para campañas especiales, mediante el trabajo conjunto del equipo,  con el fin de generar propuestas coherentes y alineadas con las áreas que los solicitaron, para pasar a aprobación.
+
+    3. Investigar tendencias de moda,  de diseño gráfico y digital, a través de las herramientas que brinda la compañía y otros medios, con el fin de mantenerse actualizados y realizar nuevas propuestas que sean de interés para la compañía.
+
+    4. Dirigir las necesidades del área hacia la consecución de metas desde el montaje de cronogramas de trabajo semanales para la marca
+
+    5. Realizar investigación de tendencias de moda, gráficas"
+- id: mag-1120628
+  titulo: AUXILIAR ADMINISTRATIVO EN COMPRAS
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: técnico en áreas administrativas, abastecimiento, inventarios, logística
+    tipo: obligatorio
+  - texto: mínimo 6 meses en cargos relacionados
+    tipo: obligatorio
+  - texto: Manejo de Microsoft Office y Excel intermedio
+    tipo: obligatorio
+  - texto: Conocimientos en cotizaciones, cuadros comparativos, órdenes de compra
+    tipo: obligatorio
+  - texto: Deseable manejo de SAP e Isolución
+    tipo: deseable
+  - texto: persona organizada, responsable, proactiva
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    6 meses de experiencia, Técnico hasta Profesional
+    $ 2.000.000
+    Bogotá, D.C.
+
+    ¿Tienes experiencia en procesos administrativos, compras y seguimiento a proveedores? ¡Esta oportunidad puede ser para ti!
+
+    Importante compañía se encuentra en búsqueda de un Auxiliar Administrativo de Compras, con capacidad de organización, atención al detalle y seguimiento, para apoyar los procesos de abastecimiento y adquisición de materiales e insumos.
+
+    Principales responsabilidades
+
+    Recibir y gestionar requisiciones de materiales y servicios.
+
+    Solicitar cotizaciones y elaborar cuadros comparativos de precios y condiciones comerciales.
+
+    Gestionar órdenes de compra y realizar seguimiento a proveedores.
+
+    Verificar tiempos de entrega y hacer seguimiento a pedidos pendientes.
+
+    Revisar facturas de proveedores y apoyar su radicación en contabilidad.
+
+    Controlar entradas de repuestos y mantener actualizado el inventario.
+
+    Hacer seguimiento a existencias, consumos y rotación de referencias.
+
+    Apoyar la recepción de mercancía y verificarla frente a las órdenes de compra.
+
+    ✅ ¿Qué buscamos?
+
+    Formación: técnico en áreas administrativas, abastecimiento, inventarios, logística o carreras afines.
+
+    Experiencia: mínimo 6 meses en cargos relacionados; deseable experiencia en compras.
+
+    Manejo de Microsoft Office y Excel intermedio.
+
+    Conocimientos en cotizaciones, cuadros comparativos, órdenes de compra, seguimiento a proveedores y recepción de facturas.
+
+    Deseable manejo de SAP e Isolución.
+
+    Buscamos una persona organizada, responsable, proactiva y con orientación al cumplimiento de los procesos.
+
+    💰 Condiciones laborales
+
+    Salario: $2.000.000 mensuales.
+
+    Contrato: obra o labor.
+
+    Modalidad: 100 % presencial.
+
+    Horario: administrativo.
+
+    Lugar de trabajo: Bogotá.
+
+    🚀 ¡Postúlate!
+
+    Si tienes experiencia en procesos de compras y deseas fortalecer tu trayectoria en el área administrativa y de abastecimiento, queremos conocer tu perfil.
+
+    Palabras clave:
+
+    AUXILIAR, COMPRAS, ADMINISTRATIVO, PRODUCCION
+- id: mag-1120592
+  titulo: Practicante de Auxiliar Administrativo
+  etiquetas:
+  - Microsoft Office
+  - Herramientas ofimáticas
+  - Sistema ASIS
+  - Atención al usuario
+  - Servicio al cliente
+  insuficiente: true
+  esperados: []
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    Técnico hasta Tecnólogo
+    Salario a convenir
+    Medellín - Envigado - Itagui - Bello
+
+    La Universidad de San Buenaventura, seccional Medellín, se encuentra en búsqueda de un nuevo talento que desee hacer parte de nuestra comunidad como Aprendiz Auxiliar Administrativo.
+
+    Objetivo del rol: Apoyar la operación de la unidad, contribuyendo a la gestión administrativa, la atención al usuario y la actualización de información. Este rol ofrece la oportunidad de adquirir experiencia laboral práctica, fortaleciendo competencias en herramientas ofimáticas.
+
+    Principales responsabilidades:
+
+    Brindar orientación e información sobre trámites y servicios jurídicos.
+    Gestionar el archivo físico y digital de expedientes, procesos y documentos legales.
+    Elaborar, transcribir y organizar oficios, memoriales, cartas y demás documentos requeridos.
+    Radicar, recibir y distribuir correspondencia interna y externa.
+    Actualizar bases de datos y registros de usuarios, casos y procesos.
+    Programar y coordinar citas, reuniones y audiencias.
+    Realizar seguimiento al estado de procesos y trámites jurídicos.
+    Apoyar la recepción y verificación de documentos aportados por los usuarios.
+    Mantener la confidencialidad y custodia de la información y documentación jurídica.
+    Gestionar la digitalización, organización y conservación de expedientes.
+    Apoyar a los profesionales del derecho en labores administrativas y logísticas.
+    Elaborar informes y reportes relacionados con la gestión del consultorio jurídico.
+
+    Detalles de la oferta:
+
+    Cargo: Aprendiz / Practicante Administrativo
+
+    Sector: Administración y Educación Superior
+
+    Ciudad: Medellín - Bello
+
+    Tipo de contrato: Contrato de aprendizaje
+
+    Modalidad: Presencial
+
+    ¡Te invitamos a ser parte de nuestra comunidad Bonaventuriana!

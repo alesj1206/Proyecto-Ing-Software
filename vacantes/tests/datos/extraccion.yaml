@@ -1,0 +1,1343 @@
+descripcion: 'Vacantes públicas de magneto365.com (scrapeadas el 2026-11-01), recortadas a su descripción, sin datos de contacto.
+  `esperados` = lo que una persona extraería como requisito, etiquetado por el builder a partir del texto crudo, sin mirar
+  la salida del extractor. PENDIENTE: revisión del equipo (spec §10).'
+casos:
+- id: mag-1115173
+  titulo: ANALISTA DE DATOS - EXCEL AVANZADO + POWER BI
+  etiquetas:
+  - Capacidad analítica
+  - Dominio de Excel
+  - Dominio de PowerBI
+  - Agilidad
+  - Trabajo en equipo
+  insuficiente: false
+  esperados:
+  - texto: Tecnólogo o profesional en Ingeniería Industrial, Administración, Finanzas, Sistemas
+    tipo: obligatorio
+  - texto: Excel avanzado indispensable
+    tipo: obligatorio
+  - texto: Power BI intermedio/avanzado
+    tipo: obligatorio
+  - texto: Experiencia construyendo y automatizando informes gerenciales y KPIs
+    tipo: obligatorio
+  - texto: Capacidad para analizar ventas, inventarios
+    tipo: obligatorio
+  - texto: Deseable conocimiento de SQL
+    tipo: deseable
+  - texto: Excelente atención al detalle
+    tipo: obligatorio
+  - texto: Experiencia deseable en retail
+    tipo: deseable
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Técnico hasta Profesional
+    $ 2.800.000
+    Medellín
+
+    Buscamos una persona con excelente capacidad analítica y alto dominio de Excel y Power BI, capaz de transformar información de ventas, inventarios, logística, cartera y gastos en reportes claros para la toma de decisiones.
+
+    Perfil que buscamos:
+
+    Tecnólogo o profesional en Ingeniería Industrial, Administración, Finanzas, Sistemas, Analítica de Datos o carreras afines.
+
+    Excel avanzado indispensable: tablas dinámicas, BUSCARX, SUMAR.SI.CONJUNTO, manejo de bases, Power Query y cruces de información.
+
+    Power BI intermedio/avanzado: dashboards, modelado, Power Query y DAX.
+
+    Experiencia construyendo y automatizando informes gerenciales y KPIs.
+
+    Capacidad para analizar ventas, inventarios, rotación, gastos y cartera.
+
+    Deseable conocimiento de SQL.
+
+    Excelente atención al detalle y capacidad para detectar inconsistencias.
+
+    Experiencia deseable en retail, moda, ecommerce o inventarios.
+
+    Salario: $2.800.000 + prestaciones de ley
+
+    Modalidad: Presencial
+
+    Experiencia: mínimo 1–2 años
+- id: mag-1113439
+  titulo: Analista De Datos / Conocimiento En Google Sheets Y Google Bigquery
+  etiquetas:
+  - Ingles
+  - Excel avanzado
+  - Google Sheets
+  - Google BigQuery
+  insuficiente: false
+  esperados:
+  - texto: Profesional en Ingeniería Industrial, Administración, Sistemas
+    tipo: obligatorio
+  - texto: Nivel avanzado en Excel y Google Sheets
+    tipo: obligatorio
+  - texto: consultas en Google BigQuery
+    tipo: obligatorio
+  - texto: Habilidad para comunicarte con modelos de IA
+    tipo: obligatorio
+  - texto: Inglés Intermedio
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Profesional
+    Salario a convenir
+    Bogotá, D.C.
+    📌 INFORMACION DE LA VACANTE
+    ✈️Analista de Datos / Conocimiento en Google Sheets y Google BigQuery
+
+    📍 Bogotá
+    Reconocida empresa líder en servicios aeroportuarios (operaciones en tierra) se encuentra en la búsqueda de un/a Analista de Datos / Conocimiento en Google Sheets y Google BigQuery para unirse a su equipo de trabajo en Bogotá.
+
+    🔎 Objetivo del cargo
+    Desarrollar e implementar aplicativos ofimáticos que eficienticen y/o automaticen los procesos de carga. Preparar el informe de los indicadores derivados de las operaciones con el fin de realizar el seguimiento a cada una de los mismos asegurando que los procedimientos se realicen adecuadamente.
+
+    👉 Principales funciones
+    Desarrollar e implementar aplicativos ofimáticos para la automatización de procesos de carga.
+    Facilitar el seguimiento y control de los KPIs, asegurando el cumplimiento de metas operativas
+    Brindar soporte técnico y capacitación sobre los aplicativos desarrollados.
+    Optimizar los procesos de carga del, mediante el desarrollo de herramientas ofimáticas, que permitan mejorar la eficiencia de los procedimientos.
+    Reducir tiempos operativos, minimizar errores manuales y aumentar la eficiencia en la gestión de la información.
+    Garantizar información confiable y oportuna para la toma de decisiones estratégicas y operativas.
+    Mantener la mejora de los tiempos, y la calidad de los procesos
+    Garantizar el uso adecuado de las herramientas y maximizar su impacto en la operación.
+    Reducción de tiempos operativos y disminución de errores manuales.
+
+    ✅ Requisitos
+    Profesional en Ingeniería Industrial, Administración, Sistemas o carreras afines (estudiantes de últimos semestres o recién graduados con experiencia relevante).
+    Nivel avanzado en Excel y Google Sheets.
+    Capacidad para realizar consultas en Google BigQuery.
+    Habilidad para comunicarte con modelos de IA (ChatGPT, Claude, Gemini)
+    Inglés Intermedio.
+    💼 Condiciones laborales
+
+    💰 Salario: Remuneración competitiva+ auxilio extralegal + auxilio de transporte ($249.095) + prestaciones de ley.
+
+    🕘 Horario:  Lunes a viernes 8:00 a 5:00 am. Sábados, horario de medio día
+    📑 Tipo de contrato: Indefinido.
+    🚀 Crecimiento: Oportunidad de desarrollo profesional y plan de carrera.
+    📌 Contratación inmediata
+
+    Si cumples con el perfil, ¡no dudes en postularte! 🙌
+- id: mag-1090491
+  titulo: Analista de Datos
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: profesional en Ingeniería de Sistemas, Ingeniería Industrial, Economía, Estadística
+    tipo: obligatorio
+  - texto: Mínimo 2 años de experiencia comprobable en análisis de datos
+    tipo: obligatorio
+  - texto: Power BI (desarrollo de tableros), Power Apps y Power Automate
+    tipo: obligatorio
+  - texto: Python y SQL
+    tipo: obligatorio
+  - texto: Modelado de datos y diseño de arquitecturas de información
+    tipo: deseable
+  - texto: Experiencia previa en el sector financiero o fiduciario
+    tipo: deseable
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    2 años de experiencia, Profesional
+    $ 4.000.000
+    Bogotá, D.C.
+
+    En Activos S.A buscamos un/a Analista de Datos para integrarse al equipo del sector fiduciario. El objetivo del cargo es generar, consolidar y analizar información financiera y operativa, optimizando procesos mediante la automatización, el modelado de datos y el desarrollo de soluciones analíticas de alto impacto para la organización.
+
+    Responsabilidades Principales:
+
+    • Análisis e Información: Generar, consolidar y analizar datos financieros y operativos para soportar la toma de decisiones
+
+    . • Visualización: Diseñar, desarrollar y mantener reportes y dashboards interactivos en Power BI.
+
+    • Automatización: Automatizar flujos de trabajo y procesos operativos utilizando Python y Power Platform (Power Apps y Power Automate).
+
+    • Gestión de Datos: Consultar, extraer y gestionar grandes volúmenes de datos mediante SQL y arquitecturas en Data Lake.
+
+    • Soporte de Gestión: Apoyar cierres financieros, seguimiento presupuestal y control de indicadores clave del negocio.
+
+    • Atención a Requerimientos: Responder de manera oportuna a las solicitudes de información y análisis de las distintas áreas de la organización. Requisitos del Perfil:
+
+    • Formación académica: profesional en Ingeniería de Sistemas, Ingeniería Industrial, Economía, Estadística, Matemáticas, Desarrollo de Software o carreras afines.
+
+    • Experiencia: Mínimo 2 años de experiencia comprobable en análisis de datos, automatización de procesos o desarrollo de soluciones analíticas.
+
+    • Conocimientos técnicos obligatorios: o Power Platform: Power BI (desarrollo de tableros), Power Apps y Power Automate. o Lenguajes y Consultas: Python y SQL.
+
+    • Conocimientos deseables: o Modelado de datos y diseño de arquitecturas de información. o Gestión y consulta de Data Lake y análisis de grandes volúmenes de datos (Big Data). o Experiencia previa en el sector financiero o fiduciario. Condiciones Laborales:
+
+    • Salario: $4.570.618
+
+    • Modalidad: Teletrabajo (100% remoto)
+
+    • Jornada: Lunes a viernes.
+
+    • Tipo de contrato: Contrato por obra o labor.
+- id: mag-1120684
+  titulo: DESARROLLADOR/DISEÑADOR DE PRODUCTO JUNIOR
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Técnico, tecnólogo o estudiante de carreras profesionales
+    tipo: obligatorio
+  - texto: Ingeniería Mecánica
+    tipo: obligatorio
+  - texto: Mínimo 1 año de experiencia en modelado y diseño de productos
+    tipo: obligatorio
+  - texto: Experiencia o conocimientos en empresas del sector metalmecánico
+    tipo: obligatorio
+  - texto: Manejo de software de modelado 3D
+    tipo: obligatorio
+  - texto: Conocimiento de Rhinoceros (deseable)
+    tipo: deseable
+  - texto: herramientas de Inteligencia Artificial
+    tipo: obligatorio
+  - texto: Conocimientos básicos de materiales metálicos
+    tipo: obligatorio
+  - texto: Trabajo en equipo
+    tipo: obligatorio
+  - texto: Comunicación asertiva
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Técnico hasta Profesional
+    $ 2.416.000 a $ 2.500.000
+    Medellín
+    Desarrollador de Producto Junior - Medellín
+
+    Sector que brinda soluciones innovadoras para el sector metalmecánico!
+
+    Nos encontramos en la búsqueda de un Desarrollador de Producto Junior, una persona apasionada por el diseño y modelado 3D, con interés en la innovación, el uso de herramientas tecnológicas y la aplicación de soluciones apoyadas en inteligencia artificial.
+
+    ¿Cuál será tu propósito?
+
+    Apoyar el diseño y desarrollo de productos metálicos mediante el modelado 3D, la generación de propuestas técnicas y la construcción de soluciones innovadoras que respondan a las necesidades de los clientes y proyectos de la compañía.
+
+    Requisitos
+
+    Técnico, tecnólogo o estudiante de carreras profesionales relacionadas con:
+    Diseño Industrial
+    Diseño de Producto
+    Ingeniería Mecánica
+    Ingeniería de Diseño
+    Ingeniería de Producción o afines.
+    Mínimo 1 año de experiencia en modelado y diseño de productos (incluyendo prácticas y experiencias formativas aplicables).
+    Experiencia o conocimientos en empresas del sector metalmecánico, mobiliario metálico o industrias relacionadas.
+    Manejo de software de modelado 3D.
+    Conocimiento de Rhinoceros (deseable) o experiencia en herramientas similares como SolidWorks, Inventor, AutoCAD o SketchUp.
+    Interés y conocimientos en herramientas de Inteligencia Artificial, uso de chatbots o interacción con agentes de IA.
+    Conocimientos básicos de materiales metálicos y procesos de fabricación.
+
+    Funciones principales
+
+    Desarrollar modelos y diseños de productos en 3D.
+    Apoyar la creación y optimización de soluciones para proyectos y clientes.
+    Elaborar propuestas técnicas y ajustes de diseño según requerimientos.
+    Participar en procesos de innovación y mejora continua.
+    Trabajar de manera articulada con las áreas comerciales y operativas.
+    Realizar visitas ocasionales a proyectos cuando sea requerido.
+
+    Competencias
+
+    Trabajo en equipo.
+    Comunicación asertiva.
+    Creatividad e innovación.
+    Atención al detalle.
+    Capacidad de aprendizaje.
+    Apertura para recibir y comprender diferentes puntos de vista.
+
+    Condiciones laborales
+
+    Ubicación: Itagüí, Antioquia
+    Modalidad: Presencial.
+    Horario: Lunes a viernes de 8:00 a.m. a 5:30 p.m. (1 hora de almuerzo).
+    Contrato: Término indefinido directamente con la compañía.
+    Salario: $2.419.000 + prestaciones de ley.
+    Posibilidad de modalidad híbrida (1 día en casa) una vez se evidencie autonomía y desempeño en el cargo.
+- id: mag-1118919
+  titulo: Desarrollador TI Santa Marta- 10194
+  etiquetas:
+  - Creatividad e Innovación
+  - Aceleración de IA
+  - Trabajo en equipo
+  insuficiente: false
+  esperados:
+  - texto: Profesional graduado/a en ingeneria de sistemas
+    tipo: obligatorio
+  - texto: Dominio en lenguajes de programación
+    tipo: obligatorio
+  - texto: Dominio en Bases de datos
+    tipo: obligatorio
+  - texto: Herramientas de calidad de código
+    tipo: obligatorio
+  - texto: Seguridad informática, desarrollo seguro
+    tipo: obligatorio
+  - texto: Arquitectura de Microservicios
+    tipo: obligatorio
+  - texto: Gestión de repositorios y versionamiento de código
+    tipo: obligatorio
+  - texto: XML, JSON
+    tipo: obligatorio
+  - texto: Manejo de arquitectura de software
+    tipo: obligatorio
+  - texto: Conocimiento e implementacion de IA
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    3 años de experiencia, Profesional hasta Especialización/ Maestría
+    Salario a convenir
+    Santa Marta
+
+    Estamos en busca de un/a Desarrollador/a TI- Santa Marta que pueda, mantener e implementar componentes de software siguiendo los lineamientos de arquitectura y estándares definidos por la Gerencia, mediante la codificación técnica de requerimientos y la aplicación de buenas prácticas de programación, el trabajo colaborativo con el equipo de desarrollo, con el fin de entregar soluciones tecnológicas eficientes, seguras y escalables las cuales respondan a las necesidades operativas del negocio.
+
+    Responsabilidades:
+    Analizar requerimientos funcionales para transformarlos en soluciones de software viables, alineadas con la arquitectura definida por el líder técnico.
+    Desarrollar y mantener componentes de software asegurando calidad, eficiencia, seguridad y compatibilidad con el ecosistema tecnológico institucional.
+    Participar en las ceremonias del equipo ágil, aportando desde su conocimiento técnico para asegurar entregables de calidad.
+    Requerimientos:
+    Profesional graduado/a en ingeneria de sistemas o afines al rol.
+    Dominio en lenguajes de programación  (Angular, Java, Html5, Javascript, Typescript, CSS,NodeJS, PHP, PL/SQL, Forms, Reports)
+    Dominio en Bases de datos ( Oracle, MySQL, Mongo DB)
+    Manejo de  Herramientas de calidad de código (ej. Sonarqube)
+    Conocimientos de Seguridad informática, desarrollo seguro (ej. Top 10 OWASP)
+    Manejo de Arquitectura de Microservicios (Java Spring Boot)
+    Gestión de repositorios y versionamiento de código
+    Dominio de aplicaciones orientadas a servicios, protocolos y lenguajes de comunicación como XML, JSON
+    Manejo de arquitectura de software
+    Conocimiento e implementacion de IA
+    Condiciones:
+    Contrato a término indefinido directamente con Seguros Bolívar.
+    Horario: lunes a viernes de 8:00 AM a 5:30PM
+    Modalidad de trabajo hibrido en la ciudad de Santa Marta
+    Salario competitivo + beneficios
+    🚀¡No te quedes por fuera! Antes de postularte, asegúrate de tener tu hoja de vida completa en los módulos 1, 2 y 3.  Además, es fundamental responder las preguntas filtro de esta vacante. ⚠ De lo contrario, tu aplicación quedará en estado “pendiente” y no será considerada.
+    👁‍🗨Puedes revisar el estado de tu postulación en la sección postulaciones.
+    Consultora de selección: María José Moreno
+    Id del proceso: 10194
+
+    Si buscas un entorno dinámico enfocado en la innovación y el crecimiento profesional, ¡esta oportunidad es para ti! ¡Postúlate ahora!
+- id: mag-1114776
+  titulo: Desarrolladores Vinculacion Inmediata
+  etiquetas: []
+  insuficiente: true
+  esperados:
+  - texto: COPNIA
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Tecnólogo hasta Profesional
+    $ 2.400.000 a $ 3.000.000
+    Bogotá, D.C.
+
+    Importante empresa del sector Petrolero esta en busqueda de su proximo WEB DEVELOPER AND CLOUD PLATFORM para la ciudad de Bogotá.
+
+    SE RECIBEN TECNICOS,TECNOLOGOS,PROFESIONALES O ESTUDIANTES ULTIMO SEMESTRE CONTAR CON COPNIA OBLIGATORIO
+
+    FUNCIONES:
+
+    1. Hacer equipo con los especialistas de negocio con actitud propositiva para identificación de necesidades (evolutivos) para cliente interno y externo. 2. Participar en el diseño conceptual de soluciones y plataformas Tecnológicas.
+
+    3. Configurar, Parametrizar y construir o extender funcionalidades de las herramientas para la gestión de contenidos empresariales de los clientes.
+
+    4. Diseñar y desarrollar programas de formación destinados al usuario final.
+
+    5. Participar en el diseño de nuevos servicios, contribuyendo a la definición de la arquitectura técnica y rendimiento estándar.
+
+    6. Especificar las actividades necesarias para mantener las aplicaciones.
+
+    7. Realizar pruebas de funcionalidad, rendimiento y manejabilidad de las aplicaciones.
+
+    CONDICIONES LABORALES:
+
+    SALARIO: $2.400.000 +Aux no salarial de $700.000 se valida experiencia
+
+    HORARIO: Lunes a Viernes
+
+    VINCULACION INMEDITA!!
+- id: mag-1121542
+  titulo: Auxiliar Contable
+  etiquetas:
+  - Facturación electrónica
+  - Excel intermedio
+  - ERP contable
+  - Conciliaciones bancarias
+  - Organización
+  - Atención al detalle
+  - Aprendizaje rápido
+  insuficiente: false
+  esperados:
+  - texto: técnico tecnólogo o estudiante activo de Contaduría Pública
+    tipo: obligatorio
+  - texto: Mínimo 1 año de experiencia desempeñando funciones de Auxiliar Contable
+    tipo: obligatorio
+  - texto: Dominio de Excel intermedio
+    tipo: obligatorio
+  - texto: software contable ERP portales bancarios y la plataforma DIAN
+    tipo: obligatorio
+  - texto: atención al detalle organización orientación al logro
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    2 años de experiencia, Técnico hasta Profesional
+    $ 2.100.000
+    Bogotá, D.C.
+    Auxiliar Contable (Cartera y Facturación)
+    Se requiere Auxiliar Contable para asegurar la continuidad de la facturación electrónica, el control de cartera, el recaudo y las conciliaciones bancarias, con impacto directo en la oportunidad de los registros financieros y el cierre contable. Se busca un perfil técnico para gestionar cuentas por cobrar y aplicación de pagos mediante herramientas especializadas, fortaleciendo la experiencia en procesos contables integrales.
+    Responsabilidades:
+    Expedir verificar y enviar oportunamente las facturas electrónicas a clientes a través del ERP y validar su aceptación.
+    Realizar seguimiento constante a las cuentas por cobrar gestión de cobro y aplicar los recaudos correspondientes mediante recibos de caja.
+    Apoyar en conciliaciones bancarias causación de facturas de proveedores y organización de soportes contables para el cierre del periodo.
+    Requerimientos:
+    Formación como técnico tecnólogo o estudiante activo de Contaduría Pública Administración de Empresas o áreas afines.
+    Mínimo 1 año de experiencia desempeñando funciones de Auxiliar Contable con experiencia directa en facturación electrónica y seguimiento a cartera.
+    Dominio de Excel intermedio que incluya tablas dinámicas fórmulas de búsqueda como BUSCARV y XLOOKUP y cruce de información.
+    Manejo comprobado de software contable ERP portales bancarios y la plataforma DIAN para facturación electrónica.
+    Demostrar atención al detalle organización orientación al logro de recaudo y capacidad de aprendizaje rápido.
+    Nivel de educación:
+    Técnico
+    Sectores laborales:
+    Contabilidad finanzas impuestos y afines
+    Cargo:
+    Auxiliar
+    Otras habilidades:
+    Habilidades técnicas:
+    Facturación electrónica
+    Excel intermedio
+    ERP contable
+    Conciliaciones bancarias
+    Habilidades interpersonales:
+    Organización
+    Atención al detalle
+    Aprendizaje rápido
+- id: mag-1121365
+  titulo: AUXILIAR CONTABLE MEDELLIN
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Título de Técnico o Tecnólogo en Contabilidad y Finanzas
+    tipo: obligatorio
+  - texto: Mínimo 1 año de experiencia en cargos contables
+    tipo: obligatorio
+  - texto: software contable como World Office, Siigo o Helisa
+    tipo: obligatorio
+  - texto: Excel intermedio
+    tipo: obligatorio
+  - texto: normatividad tributaria colombiana, NIIF
+    tipo: obligatorio
+  - texto: experiencia como Asistente Contable, orden, responsabilidad y atención al detalle
+    tipo: deseable
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Técnico hasta Profesional
+    Salario a convenir
+    Medellín
+
+    Auxiliar Contable (Tributario) – Medellín – 1 año de experiencia
+
+    ¿Eres técnico o tecnólogo en contabilidad y quieres crecer en el área contable y tributaria? Buscamos un Auxiliar Contable en Medellín para apoyar la gestión contable y fiscal de clientes empresariales. Aquí fortalecerás tu experiencia en impuestos, NIIF y cierres contables, trabajando con empresas de distintos sectores.
+
+    ¿Qué te ofrecemos?
+
+    Contrato a término fijo.
+    Trabajo presencial en Medellín.
+    Aprendizaje constante en impuestos, NIIF, información exógena y medios magnéticos.
+    Experiencia atendiendo clientes empresariales de diferentes sectores.
+    Crecimiento profesional dentro de la organización.
+
+    ¿Qué harás?
+
+    Causar y registrar operaciones contables de acuerdo con la normativa vigente.
+    Realizar conciliaciones bancarias y de cuentas por cobrar y por pagar.
+    Apoyar la preparación y presentación de declaraciones tributarias, información exógena y medios magnéticos.
+    Apoyar los cierres contables mensuales y anuales.
+    Organizar y archivar la documentación contable y financiera.
+    Colaborar en la aplicación de las NIIF.
+    Brindar soporte en auditorías internas y externas.
+
+    ¿Qué necesitas?
+
+    Título de Técnico o Tecnólogo en Contabilidad y Finanzas, Gestión Contable y Financiera o carreras afines.
+    Mínimo 1 año de experiencia en cargos contables o afines.
+    Manejo de software contable como World Office, Siigo o Helisa.
+    Excel intermedio.
+    Conocimiento de la normatividad tributaria colombiana, NIIF, información exógena y medios magnéticos.
+
+    Valoramos: experiencia como Asistente Contable, orden, responsabilidad y atención al detalle.
+
+    Palabras clave: Auxiliar Contable Medellín, Asistente Contable, Auxiliar Tributario, Técnico Contable, NIIF, conciliaciones bancarias, información exógena, World Office, Siigo, Excel.
+- id: mag-1120586
+  titulo: ASISTENTE CONTABLE-348565
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: tecnólogos con al menos 12 meses de experiencia comprobable en áreas contables
+    tipo: obligatorio
+  - texto: capacidad de análisis, la atención al detalle
+    tipo: deseable
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Básica primaria hasta Bachillerato completo
+    $ 1.750.905
+    Marinilla
+    Descripción de la oferta
+
+    SENCO LATIN AMERICA S.A.S busca incorporar a su equipo de trabajo un Asistente Contable comprometido con la excelencia y el orden financiero. Esta es una oportunidad ideal para profesionales que deseen fortalecer su trayectoria en una organización dinámica, asumiendo un rol clave para garantizar la precisión y transparencia de nuestra información económica.
+
+    El candidato seleccionado tendrá como misión principal asegurar que los registros financieros de la compañía se mantengan actualizados, organizados y debidamente respaldados. Para lograrlo, será responsable de registrar de manera sistemática y diaria las transacciones comerciales, incluyendo compras, ventas, pagos y cobros en nuestro software contable. Asimismo, deberá verificar rigurosamente que cada movimiento cuente con su respectivo soporte físico o digital, garantizando la integridad de la información.
+
+    Dentro de sus funciones, realizará conciliaciones periódicas entre los libros contables internos y los extractos bancarios, asegurando la coherencia en las cuentas por pagar y cobrar. Brindará un apoyo fundamental en la gestión de obligaciones fiscales, el cálculo de impuestos, retenciones y el soporte en la elaboración de estados financieros bajo la supervisión del contador público. Adicionalmente, será responsable de la custodia y clasificación del archivo financiero, facilitando la eficiencia en auditorías y revisiones.
+
+    Buscamos tecnólogos con al menos 12 meses de experiencia comprobable en áreas contables. Valoramos la capacidad de análisis, la atención al detalle y el compromiso con el cumplimiento de los procesos internos.
+
+    Ofrecemos una vinculación laboral con jornada en horario diurno, ubicada en la Vereda Belén Km. 38+200 Metros Autopista Medellín-Bogotá, en el municipio de Marinilla, Antioquia. La remuneración salarial será definida según el perfil y la experiencia del candidato. Si buscas un entorno profesional donde tu trabajo impacte directamente en la salud financiera de la empresa, te invitamos a formar parte de nuestro equipo.
+
+    Objetivo del cargo
+
+    El objetivo principal de un auxiliar contable es garantizar que la información financiera y económica de una empresa sea precisa, ordenada, actualizada y esté debidamente respaldada
+
+    Funciones del cargo
+
+    • Registrar operaciones: Ingresar de forma sistemática y diaria las transacciones comerciales, como compras, ventas, pagos y cobros, en el software contable de la empresa.
+    • Verificar soportes: Comprobar que cada movimiento contable cuente con su respectivo documento físico o digital válido (facturas, recibos, comprobantes).
+    • Realizar conciliaciones: Cruzar la información de los libros contables internos con los extractos bancarios y cuentas por pagar o cobrar para evitar diferencias.
+    • Apoyar en obligaciones fiscales y reportes: Organizar la información para el cálculo de impuestos, retenciones, nómina y la elaboración de estados financieros bajo la supervisión de un contador público.
+    • Mantener el archivo al día: Custodiar y clasificar la documentación financiera para facilitar las auditorías internas o revisiones de entidades de control
+- id: mag-1121628
+  titulo: Asesora Comercial (cosmética) - Sopo
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Bachiller académico, Técnico o Tecnólogo concluido
+    tipo: obligatorio
+  - texto: Ventas de productos de belleza / cosmética
+    tipo: obligatorio
+  - texto: Ventas en el sector retail
+    tipo: obligatorio
+  - texto: Servicio y atención al cliente en punto de venta
+    tipo: obligatorio
+  - texto: conocimiento técnico o gusto por productos de belleza
+    tipo: deseable
+  - texto: disponibilidad para laborar en horarios rotativos
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    3 meses de experiencia, Bachillerato completo hasta Especialización/ Maestría
+    $ 1.750.905
+    Sopó
+    🎯 Objetivo del Cargo
+
+    Brindar una experiencia de servicio y asesoría personalizada de alto impacto a los clientes en el punto de venta, impulsando la comercialización de productos de belleza y contribuyendo al cumplimiento de las metas comerciales de la tienda.
+
+    📋 Responsabilidades Principales
+    Atender y asesorar a los clientes de forma oportuna, cordial y personalizada en la elección de productos.
+    Apoyar la gestión comercial y el cierre de ventas en el sector retail.
+    Realizar la exhibición, organización y surtido de productos en el punto de venta según los estándares de la marca.
+    Mantener la fidelización de clientes a través de un servicio memorable y conocimiento del portafolio.
+    🔍 Requisitos del Perfil
+    Formación Académica: Bachiller académico, Técnico o Tecnólogo concluido.
+    Experiencia: Mínimo 3 meses formal y certificable en:
+    Ventas de productos de belleza / cosmética.
+    Ventas en el sector retail (tiendas de ropa, accesorios, calzado o consumo masivo).
+    Servicio y atención al cliente en punto de venta.
+    Conocimientos Deseables: Valoramos como un plus el conocimiento técnico o gusto por productos de belleza, cuidado facial o maquillaje.
+    Disponibilidad: Total disponibilidad para laborar en horarios rotativos de domingo a domingo con un día de descanso fijo entre semana.
+
+     Asignacion salarial: 1.750.905 + auxilio de trasnporte todas las prestaciones de ley + comisiones
+
+    Pagos quincenales
+
+     se parte de este equipo !!!!!!
+- id: mag-1121626
+  titulo: Asesora Comercial (cosmética) - Neiva
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Formación académica de Bachiller
+    tipo: obligatorio
+  - texto: Mínimo 3 meses de experiencia formal y certificable en ventas de productos de belleza
+    tipo: obligatorio
+  - texto: Experiencia en ventas en el sector retail
+    tipo: obligatorio
+  - texto: Experiencia en servicio y atención al cliente en punto de venta
+    tipo: obligatorio
+  - texto: Disponibilidad para laborar en horarios rotativos
+    tipo: obligatorio
+  - texto: Cuidado facial
+    tipo: obligatorio
+  - texto: Orientación al cliente
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    3 meses de experiencia, Bachillerato completo hasta Tecnólogo
+    $ 1.750.950 a $ 2.000.000
+    Neiva
+    Asesora Comercial (Cosmética)
+    Palabras clave:
+    Asesora Comercial
+    Asesora de Ventas
+    Asesora de Belleza
+    Consultora de Belleza
+    ventas de productos de belleza
+    cosmética
+    retail
+    atención al cliente
+    punto de venta
+    cierre de ventas
+    exhibición
+    portafolio comercial
+
+    Se requiere Asesora Comercial para fortalecer la venta de productos de belleza en punto de venta mediante asesoría personalizada y cierre de ventas. El cargo busca experiencia en cosmética y retail para orientar decisiones de compra, mantener la exhibición y gestionar el portafolio comercial.
+
+    Responsabilidades:
+    Atender y asesorar a los clientes de forma oportuna cordial y personalizada en la elección de productos.
+    Apoyar la gestión comercial y el cierre de ventas en el sector retail.
+    Realizar la exhibición organización y surtido de productos en el punto de venta según los estándares de la marca.
+    Mantener la fidelización de clientes a través de un servicio memorable y conocimiento del portafolio.
+    Requerimientos:
+    Formación académica de Bachiller.
+    Mínimo 3 meses de experiencia formal y certificable en ventas de productos de belleza y cosmética.
+    Experiencia en ventas en el sector retail.
+    Experiencia en servicio y atención al cliente en punto de venta.
+    Disponibilidad para laborar en horarios rotativos de domingo a domingo.
+    Nivel de educación:
+    Bachiller
+    Sectores laborales:
+    Ventas
+    Servicio al cliente y afines
+    Cargo:
+    Asistente
+    Otras habilidades:
+    Habilidades técnicas:
+    Cuidado facial
+    Exhibición comercial
+    Habilidades interpersonales:
+    Orientación al cliente
+    Trabajo en equipo
+- id: mag-1121594
+  titulo: AUXILIAR DE ENFERMERIA JARDINES SOCIALES
+  etiquetas:
+  - Comunicación asertiva
+  - atención al detalle
+  insuficiente: false
+  esperados:
+  - texto: Experiencia mínima de 1 año en el sector educativo
+    tipo: obligatorio
+  - texto: Certificación vigente en competencias laborales en enfermería
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Técnico hasta Tecnólogo
+    $ 1.672.600
+    Bogotá, D.C.
+
+    ¡Únete a nuestro equipo como Auxiliar de Enfermería!
+
+    Buscamos auxiliares de enfermería certificados en competencias laborales, apasionados por el cuidado y bienestar de los más pequeños.
+
+    Requisitos:
+
+    Experiencia mínima de 1 año en el sector educativo, preferiblemente en atención a primera infancia.
+    Certificación vigente en competencias laborales en enfermería.
+
+    Te ofrecemos:
+
+    Horario: Lunes a viernes.
+    Contrato: Fijo.
+    Salario: $1,672.600
+
+    ¡Forma parte de la Generación C! Únete a un equipo comprometido con hacer la diferencia en la atención y educación de la primera infancia.
+- id: mag-1121046
+  titulo: Auxiliar de enfermería (vacante para personas con discapacidad)
+  etiquetas:
+  - organización
+  - atención al detalle
+  - trabajo en equipo
+  insuficiente: false
+  esperados:
+  - texto: mínimo 1 año de experiencia
+    tipo: obligatorio
+  - texto: Técnico en auxiliar de enfermeria
+    tipo: obligatorio
+  - texto: trabajo en equipo, humanización y comunicación asertiva
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    Apto para personas con discapacidad
+    6 meses de experiencia, Técnico hasta Tecnólogo
+    Salario a convenir
+    Pereira - Manizales - Armenia
+
+    Auxiliar de Enfermería (Esta vacante pertenece al programa de inclusión laboral)
+
+    Grupo Zentria es una red prestadora de servicios de salud y farmacéuticos con una mirada integral hacia el bienestar para gestionar de forma eficiente y preventiva la calidad de vida de los colombianos. Conectamos todas las etapas de la vida del paciente para brindar un modelo de atención integral y cercano.
+
+    Como parte de nuestro programa de inclusión, diversidad y equidad, actualmente nos encontramos en búsqueda de técnico en auxiliar de enfermeria
+
+    Objetivo del Cargo: brindar atención a las necesidades básicas de los pacientes a través de un servicio integral, seguro y oportuno, con calidad humana y garantizando la satisfacción de los usuarios y su familia
+
+    Competencias:  trabajo en equipo, humanización y comunicación asertiva
+
+
+
+    Que Busca la Compañía
+
+    -       Tiempo de experiencia: mínimo 1 año de experiencia
+
+    -       Formación académica: Técnico en auxiliar de enfermeria
+
+    Que Ofrece la Compañía
+
+
+
+    -       Tipo de contrato: fijo directo con la empresa
+
+    - Horario: Rotativo o administrativo
+
+    - Ciudad: Pereira - Manizales - Armenia
+- id: mag-1121592
+  titulo: Auxiliar de enfermeria Bogota
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Experiencia de 6 meses en UCI
+    tipo: obligatorio
+  - texto: Resolución en salud
+    tipo: obligatorio
+  - texto: Rethus
+    tipo: obligatorio
+  - texto: Esquema de vacunación completo
+    tipo: obligatorio
+  - texto: Cursos actualizados
+    tipo: obligatorio
+  - texto: Disponibilidad para rotar
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    6 meses de experiencia, Técnico hasta Otros
+    $ 1.920.000
+    Bogotá, D.C.
+
+    Importante unidad renal está en búsqueda de AUXILIAR DE ENFERMERÍA para la ciudad de Bogota, contar con disponibilidad para rotar en las sedes
+
+    Requisitos • Experiencia de 6 meses en UCI, HOSPITALIZACIÓN, URGENCIAS • Resolución en salud
+
+    • Rethus
+
+    • Esquema de vacunación completo (3 dosis Hepatitis B- 2 dosis Covid)
+
+    • Cursos actualizados.
+
+    • Disponibilidad para rotar en cualquier turno y sede.
+
+    Horarios Lunes a sábado horarios rotativos 8 horas (6-2/2-10) Disponibilidad para rotar en cualquier turno.
+
+
+
+    Salario $ 1.920.350 + auxilio legal de transporte 250.000 + todas las prestaciones de ley + recargos y horas extras que realice
+
+    ¡Si cumples con los requisitos postúlate!
+- id: mag-1120969
+  titulo: Practicante de Diseño Gráfico 2027 - 1
+  etiquetas:
+  - Adobe Premiere Pro
+  - Adobe After Effects
+  - Adobe Photoshop
+  - Adobe Illustrator
+  - Fotografía
+  - Trabajo en equipo
+  - Atención al detalle
+  insuficiente: false
+  esperados:
+  - texto: Estudiante de nivel técnico o tecnológico en Diseño Gráfico
+    tipo: obligatorio
+  - texto: búsqueda de prácticas para iniciar en los primeros meses del 2027
+    tipo: obligatorio
+  - texto: habilitación para firmar contrato de aprendizaje
+    tipo: obligatorio
+  - texto: Manejo de herramientas de diseño y edición
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    Técnico hasta Tecnólogo
+    Salario a convenir
+    Medellín - Bello - Itagui
+
+    La Universidad de San Buenaventura, seccional Medellín, se encuentra en búsqueda de un nuevo talento que desee hacer parte de nuestra comunidad como Aprendiz en Diseño Gráfico y Producción Audiovisual.
+
+    Principales responsabilidades:
+
+    Crear piezas gráficas para medios impresos y digitales.
+
+    Participar en las fases de preproducción audiovisual mediante la elaboración de guiones y storyboards.
+
+    Apoyar en las actividades de producción, como la grabación de video, audio y toma de fotografía.
+
+    Realizar la postproducción completa de contenidos, incluyendo edición de video, montaje y graficación (animación).
+
+    Operar equipos de grabación y fotografía para la creación de piezas multimedia.
+
+    Requisitos:
+
+    Estudiante de nivel técnico o tecnológico en Diseño Gráfico, Producción Audiovisual, Diseño Multimedia o áreas afines.
+
+    Estar en búsqueda de prácticas para iniciar en los primeros meses del 2027.
+
+    Contar con disponibilidad y habilitación para firmar contrato de aprendizaje.
+
+    Manejo de herramientas de diseño y edición (Adobe Premiere Pro, After Effects, Photoshop, Illustrator).
+
+    Ciudad: Medellín - Bello
+
+    Tipo de contrato: Contrato de aprendizaje. Modalidad: Presencial
+
+    ¡Te invitamos a ser parte de nuestra comunidad Bonaventuriana!
+- id: mag-1115168
+  titulo: Aprendiz Diseño Grafico - Marinilla
+  etiquetas:
+  - Ilustrator
+  - Photoshop
+  - Sketchup
+  insuficiente: true
+  esperados: []
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    Técnico hasta Tecnólogo
+    $ 1.750.905
+    Marinilla - Rionegro - Retiro - El Santuario - La Ceja - Guarne - El Carmen de Viboral
+
+    Vincúlate con nuestro propósito de existir para ayudar a las personas a expresar su esencia a través de una moda consciente, sé parte de nuestro equipo de practicantes y complementa tu proceso académico con una práctica significativa.
+
+     1. Apoyar en la construcción de matrices, pedidos e instructivos de los procesos relacionados con el área de Visual merchandising.
+
+    2. Realiza el seguimiento de montajes, guías y entrega informes de cierre completo de tareas.
+    3. Recibir y ejecutar las solicitudes por parte de tiendas.
+    4. Llenar y hacer seguimiento del montaje de los videos que van en pantallas de tiendas.
+    5. Montar y coordinar matrices de instalación.
+    6. Entregar los diferentes informes requeridos por su superior inmediato, analizando y consolidando la información de su área, para reportar el avance de los programas y actividades que le correspondan.
+- id: mag-1116167
+  titulo: Diseñador Gráfico - GEF
+  etiquetas:
+  - Illustrator
+  - Photoshop
+  - IA
+  - After Effects
+  insuficiente: true
+  esperados: []
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    3 años de experiencia, Profesional
+    Salario a convenir
+    Medellín - Itagui - Envigado
+
+    Vincúlate con nuestro propósito de existir para ayudar a las personas a expresar su esencia a través de una moda consciente, sé parte de nuestro equipo de diseñadores, aquí tu objetivo será desarrollar piezas gráficas (on y off), con base en el direccionamiento de las diferentes áreas de la organización que lo requieran, con el fin de materializar las necesidades planteadas por ellos.
+
+    Funciones:
+
+    1. Elaborar piezas gráficas con base en el brief o la orden de trabajo suministrada  por el cliente interno, revisando antecedentes y ampliando la información necesaria, con el fin de dar respuesta oportuna al requerimiento.
+
+    2. Desarrollar conceptos para campañas especiales, mediante el trabajo conjunto del equipo,  con el fin de generar propuestas coherentes y alineadas con las áreas que los solicitaron, para pasar a aprobación.
+
+    3. Investigar tendencias de moda,  de diseño gráfico y digital, a través de las herramientas que brinda la compañía y otros medios, con el fin de mantenerse actualizados y realizar nuevas propuestas que sean de interés para la compañía.
+
+    4. Dirigir las necesidades del área hacia la consecución de metas desde el montaje de cronogramas de trabajo semanales para la marca
+
+    5. Realizar investigación de tendencias de moda, gráficas"
+- id: mag-1121576
+  titulo: Operarios de producción o empaque
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Bachiller académico completo
+    tipo: obligatorio
+  - texto: Mínimo 6 meses en procesos de producción, manufactura, empaque
+    tipo: obligatorio
+  - texto: Buenas Prácticas de Manufactura (BPM) y manipulación de alimentos
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    6 meses de experiencia, Bachillerato completo hasta Tecnólogo
+    $ 1.750.000
+    Bogotá, D.C.
+
+    ¡Estamos buscando Operarios(as) de Producción!
+
+    Si tienes experiencia en plantas de producción o manufactura, eres una persona responsable, detallista y buscas estabilidad, ¡queremos que formes parte de nuestro equipo.
+
+    Propósito del cargo:
+
+    Ejecutar los procesos de producción, manufactura y empaque de nuestros productos, asegurando el cumplimiento de los estándares de calidad y las Buenas Prácticas de Manufactura (BPM) en la planta.
+
+    ¿Cuáles serán tus principales funciones?
+
+    ·         Operar y realizar el manejo básico de la maquinaria y equipos asignados en la línea de producción.
+
+    ·         Ejecutar las actividades de empaque y sellado del producto final bajo los lineamientos requeridos.
+
+    ·         Garantizar el estricto cumplimiento de las normas de higiene, manipulación de alimentos y Buenas Prácticas de Manufactura (BPM).
+
+    ·         Mantener el orden, limpieza y desinfección de su área de trabajo asignada.
+
+
+
+    ¿Qué necesitas para postularte?
+
+    ·         Educación: Bachiller académico completo.
+
+    ·         Experiencia: Mínimo 6 meses en procesos de producción, manufactura, empaque o actividades operativas relacionadas (deseable si vienes de la industria de alimentos).
+
+    ·         Conocimientos: Manejo de Buenas Prácticas de Manufactura (BPM) y manipulación de alimentos.
+
+
+
+    ¿Qué te ofrecemos?
+
+    ·         Tipo de contrato: Fijo inferior a 1 año.
+
+    ·         Salario: Salario Mínimo Legal Mensual Vigente (SMLV) + prestaciones de ley + recargos correspondientes.
+
+    ·         Horario: Turnos rotativos (Mañana: 6:00 a.m. a 1:00 p.m. / Tarde: 1:00 p.m. a 8:00 p.m. / Noche: 8:00 p.m. a 6:00 a.m.).
+
+    ·         Lugar de trabajo: Parque Industrial Celta Park (Funza, Cundinamarca).
+
+
+
+    ¡Si cumples con los requisitos y te apasiona el trabajo en equipo y la calidad, postula tu hoja de vida ahora!
+- id: mag-1121278
+  titulo: Operario de Producción (Plásticos)
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Bachiller académico
+    tipo: obligatorio
+  - texto: Experiencia mínima de 1 año como Operario de Producción
+    tipo: obligatorio
+  - texto: Conocimientos en procesos de producción
+    tipo: obligatorio
+  - texto: operación de maquinaria industrial
+    tipo: obligatorio
+  - texto: manipulación de materiales y control visual de calidad
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Bachillerato completo
+    $ 1.750.905
+    Bogotá, D.C.
+    Operario de Producción (Plásticos)
+    Palabras clave:
+    Operario de Producción
+    operario de planta
+    auxiliar de producción
+    operario de manufactura
+    Production Operator
+
+    Se requiere Operario de Producción para procesos de manufactura de plásticos. El cargo tiene como propósito ejecutar actividades operativas en procesos de producción, cumpliendo procedimientos, estándares de calidad y normas de seguridad para asegurar la continuidad de la operación industrial, la productividad y el control del producto terminado desempeñado como operario de planta o auxiliar de producción.
+
+    Responsabilidades:
+    Ejecutar actividades operativas en procesos de producción de plásticos según los procedimientos establecidos.
+    Operar maquinaria industrial requerida para la manufactura.
+    Realizar la manipulación segura de materiales y materias primas.
+    Efectuar el control visual de calidad en el producto terminado.
+    Cumplir con las normas de seguridad y los estándares de calidad de la planta.
+    Requerimientos:
+    Nivel educativo requerido: Bachiller académico.
+    Experiencia mínima de 1 año como Operario de Producción o Production Operator.
+    Conocimientos en procesos de producción y operario de manufactura.
+    Competencias técnicas en operación de maquinaria industrial.
+    Experiencia en manipulación de materiales y control visual de calidad.
+    Nivel de educación:
+    Bachillerato completo
+    Sectores laborales:
+    Producción Operarios y Manufactura
+    Cargo:
+    Auxiliar
+    Otras habilidades:
+    Habilidades técnicas:
+    Operación de maquinaria
+    Control de calidad
+    Habilidades interpersonales:
+    Trabajo en equipo
+    Atención al detalle
+- id: mag-1121174
+  titulo: Operario De Producción En Planta De Alimentos - Llanos De Cuivá
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Experiencia mínima de 1 año como Operario de Producción
+    tipo: obligatorio
+  - texto: procesos de producción en plantas de alimentos
+    tipo: obligatorio
+  - texto: operar maquinaria de producción y realizar mantenimiento básico
+    tipo: obligatorio
+  - texto: trabajar en turnos rotativos
+    tipo: obligatorio
+  - texto: Compromiso con la calidad y seguridad
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    6 meses de experiencia, Bachillerato completo
+    $ 1.750.905
+    Santa Rosa de Osos - Yarumal
+    Operario de Producción en Planta de Alimentos - Llanos de Cuivá
+    Palabras clave:
+    Operario de Producción
+    Técnico de Producción
+    Operario de Planta
+    Asistente de Producción
+    Operario de Empaque
+    Operador de Proceso
+
+    ¿Tienes pasión por la producción alimentaria y deseas ser parte de un equipo que marca la diferencia? El rol de Operario de Producción es fundamental para el éxito de nuestro equipo, contribuyendo directamente a la calidad y eficiencia en el proceso de empaque y etiquetado de champiñones. Buscamos a un candidato comprometido que desee formar parte de una empresa líder en el sector alimentario, donde su trabajo será vital para asegurar la inocuidad y calidad del producto final. En nuestra planta, ubicada en los Llanos de Cuivá, tendrás la oportunidad de crecer profesionalmente en un ambiente que valora el trabajo en equipo, la innovación y el desarrollo continuo. Únete a nosotros y da un paso hacia un futuro prometedor.
+
+    Responsabilidades:
+    Operar equipos de producción de manera segura y eficiente.
+    Monitorear el proceso de empaque y etiquetado para cumplir con los estándares de calidad.
+    Realizar mantenimiento básico de maquinaria para asegurar su funcionamiento óptimo.
+    Cumplir con las normas de seguridad e higiene en la planta.
+    Colaborar con el equipo para mejorar procesos y resolver problemas de producción.
+    Requerimientos:
+    Experiencia mínima de 1 año como Operario de Producción o en roles similares.
+    Conocimiento de procesos de producción en plantas de alimentos.
+    Habilidad para operar maquinaria de producción y realizar mantenimiento básico.
+    Capacidad para trabajar en turnos rotativos.
+    Compromiso con la calidad y seguridad en el trabajo.
+    Nivel de educación:
+    Bachillerato completo
+    Sectores laborales:
+    Producción Operarios y Manufactura
+    Gastronomía bebidas/alimentos y restaurantes
+    Cargo:
+    Auxiliar
+    Otras habilidades:
+    Habilidades técnicas:
+    Manejo de maquinaria
+    Control de calidad
+    Mantenimiento básico
+    Habilidades interpersonales:
+    Trabajo en equipo
+    Resolución de problemas
+    Comunicación efectiva
+- id: mag-1108121
+  titulo: ASISTENTE ADMINISTRATIVO
+  etiquetas:
+  - Excel
+  - Facturación
+  - Atención al cliente
+  - Gestión documental
+  insuficiente: false
+  esperados:
+  - texto: Técnico/a o tecnólogo/a en Administración, Gestión Empresarial
+    tipo: obligatorio
+  - texto: Mínimo 1 año de experiencia en procesos administrativos de talleres automotrices
+    tipo: obligatorio
+  - texto: Manejo de paquete Office, especialmente Excel
+    tipo: obligatorio
+  - texto: Procesos administrativos y facturación
+    tipo: obligatorio
+  - texto: Gestión documental y archivo
+    tipo: obligatorio
+  - texto: Atención al cliente y proveedores
+    tipo: obligatorio
+  - texto: Seguimiento a órdenes de trabajo y procesos de taller
+    tipo: obligatorio
+  - texto: Deseable licencia de conducción vigente
+    tipo: deseable
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Técnico hasta Tecnólogo
+    $ 2.000.000
+    Bogotá, D.C.
+
+    Si tienes experiencia en procesos administrativos dentro de talleres automotrices, gestión documental, facturación, atención al cliente y apoyo operativo, esta oportunidad es para ti.
+
+    Perfil requerido
+    Formación académica
+
+    • Técnico/a o tecnólogo/a en Administración, Gestión Empresarial o carreras afines.
+
+    Experiencia
+
+    • Mínimo 1 año de experiencia en procesos administrativos de talleres automotrices, realizando gestión documental, facturación, manejo de archivo, seguimiento de órdenes de trabajo, atención a clientes y proveedores, así como apoyo en la movilización y control de vehículos dentro de la operación.
+
+    Conocimientos
+
+    • Manejo de paquete Office, especialmente Excel.
+    • Procesos administrativos y facturación.
+    • Gestión documental y archivo.
+    • Atención al cliente y proveedores.
+    • Seguimiento a órdenes de trabajo y procesos de taller.
+    • Deseable licencia de conducción vigente y experiencia en movilización de vehículos.
+
+    Funciones principales
+
+    • Apoyar la gestión administrativa y documental del taller.
+    • Realizar seguimiento a órdenes de trabajo, facturación y documentación de vehículos.
+    • Gestionar archivo físico y digital de la operación.
+    • Brindar atención a clientes, proveedores y personal interno.
+    • Apoyar el control y seguimiento de procesos operativos del taller.
+    • Movilizar vehículos dentro de las instalaciones o según requerimientos de la operación.
+    • Apoyar la entrega y recepción de vehículos cuando sea requerido.
+
+    Te ofrecemos
+
+    • Estabilidad laboral.
+    • Oportunidades de crecimiento y desarrollo profesional.
+
+    • Beneficios para ti y tu familia.
+- id: mag-1098812
+  titulo: Asistente Administrativo
+  etiquetas: []
+  insuficiente: false
+  esperados:
+  - texto: Técnico, tecnólogo o estudiante de carreras administrativas
+    tipo: obligatorio
+  - texto: Mínimo 1 año de trayectoria en gestión y roles administrativos
+    tipo: obligatorio
+  - texto: Dominio de herramientas ofimáticas (Excel avanzado
+    tipo: obligatorio
+  - texto: Conocimiento o manejo en trámites de movilidad
+    tipo: deseable
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Bachillerato completo hasta Especialización/ Maestría
+    $ 2.500.000 a $ 6.000.000
+    Bogotá, D.C.
+
+    En Grupo Vardí sabemos que las ventas no se cierran solas y la operación no avanza sin una mente organizada, analítica y orientada al detalle que mueva las piezas maestras tras bambalinas. Buscamos esa pieza clave que haga clic con nuestro equipo y mantenga nuestro motor comercial al 100%.
+
+    🎯 Tu rol en esta relación:
+
+    Serás el engranaje central que le da soporte a los procesos administrativos y operativos del concesionario: gestión impecable de documentación, trámites, indicadores e información estratégica para que la experiencia del cliente y la operación nunca se detengan.
+
+    Lo que te enamorará de trabajar en Grupo Vardí:
+
+    Estabilidad y proyección real con contrato directo con la compañía + Salario Basico + Prestaciones de ley.
+
+    Respaldamos tu bienestar con asistencia médica IKE + Póliza de vida Allianz+ seguro exequial los olivos
+
+    El orden y el logro tienen recompensa, Prima extralegal por cumplimiento de resultados del Grupo empresarial. ¡Tu gestión suma a tu bolsillo!
+
+    Convenios con instituciones académicas
+
+    Lo que necesitamos para hacer clic:
+
+    Formación: Técnico, tecnólogo o estudiante de carreras administrativas o afines.
+
+    Experiencia: Mínimo 1 año de trayectoria en gestión y roles administrativos.
+
+    Habilidades clave: Dominio de herramientas ofimáticas (Excel avanzado es tu mejor aliado).
+
+    Plus que suma: Conocimiento o manejo en trámites de movilidad (¡punto extra!).
+
+    ¿Listo para ser el motor que impulse la operación?
+- id: mag-1120768
+  titulo: Auxiliar administrativo/a para Envigado 360215-137317
+  etiquetas:
+  - Atención al usuario
+  - Asesorar clientes
+  insuficiente: false
+  esperados:
+  - texto: técnica o tecnología en áreas administrativas
+    tipo: obligatorio
+  - texto: Atención al usuario con orientación a la calidad
+    tipo: obligatorio
+  - texto: Ética y valores
+    tipo: obligatorio
+  - texto: Trabajo en equipo
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    1 año de experiencia, Técnico hasta Tecnólogo
+    $ 1.810.000
+    Envigado
+
+    Importante empresa solicita para su equipo de trabajo personal con experiencia mínima de 1 año para desempeñar el cargo de Auxiliar administrativo/a.
+
+    Formación académica: técnica o tecnología en áreas administrativas.
+
+    Funciones específicas:
+
+    - Conocer los productos y servicios de la organización.
+
+    - Asesorar a los clientes de manera objetiva, identificando y atendiendo sus necesidades.
+
+    - Mantener contacto continuo con los clientes y ofrecer un excelente servicio posventa.
+
+    - Identificar, diligenciar y reportar al jefe inmediato las oportunidades de mejoramiento expresadas por los clientes.
+
+    - Recibir y gestionar las llamadas relacionadas con solicitudes de información sobre cirugías y servicios de otras unidades de negocio, dando respuesta oportuna según los procedimientos establecidos.
+
+    Conocimientos:
+
+    - Atención al usuario con orientación a la calidad.
+
+    - Ética y valores.
+
+    - Compromiso con la organización.
+
+    - Trabajo en equipo.
+
+    Salario: $1.810.000 + prestaciones de ley.
+
+    Horarios: lunes a viernes de 8:00 a. m. a 5:00 p. m. y dos sábados al mes de 8:00 a. m. a 11:00 a. m., con una hora de almuerzo.
+
+    Tipo de contrato: indefinido.
+
+    Lugar de trabajo: Envigado.
+
+    Proceso de Selección
+
+    Tu próxima oportunidad laboral puede estar a pocos pasos. Para postularte:
+
+    Haz clic en el botón "Postularme".
+    Inicia sesión o crea tu cuenta en Magneto, registra tu hoja de vida y responde las preguntas del proceso.
+    Revisa tu correo electrónico para conocer el estado de tu postulación.
+    Si avanzas, completa las pruebas y/o entrevistas solicitadas.
+
+    El equipo del Servicio de Empleo Comfama evaluará tu perfil, si se ajusta a la vacante y pasas los filtros, lo enviará a la empresa y ellos te contactarán para continuar el proceso. Recuerda que no debes pagar para participar de procesos de selección. Así dirás #MeProtejodelfraude
+
+    Sobre Nosotros
+
+    El Servicio de Empleo Comfama es la plataforma de intermediación que conecta el talento de las personas y las necesidades de las empresas. Como agencia transnacional, presta el servicio para empresas ubicadas en Antioquia, y en el extranjero que requieren talento colombiano. Somos prestador autorizado Resolución 0017 del 14 de enero de 2026 del Servicio Público de Empleo.
+- id: mag-1120292
+  titulo: Practicante Financiero
+  etiquetas:
+  - Análisis financiero
+  - Atención al detalle
+  - Manejo de Excel
+  - Phyton
+  insuficiente: false
+  esperados:
+  - texto: estudiante de Ingeniería Administrativa, Administración de Empresas con enfoque financiero
+    tipo: obligatorio
+  - texto: aval de la institución educativa para realizar práctica
+    tipo: obligatorio
+  - texto: Habilidades analíticas y capacidad para trabajar con información numérica
+    tipo: obligatorio
+  - texto: Organización, atención al detalle y orientación al cumplimiento
+    tipo: obligatorio
+  - texto: Manejo básico o intermedio de herramientas ofimáticas, especialmente Excel
+    tipo: obligatorio
+  - texto: Interés por aprender y crecer en el área financiera
+    tipo: obligatorio
+  - texto: Disponibilidad para realizar la práctica de lunes a viernes
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    Profesional
+    $ 1.750.905
+    Medellín
+
+    En Nutrium, creemos en el talento joven como motor de aprendizaje, innovación y crecimiento. Por eso, buscamos a una persona en etapa de práctica, con interés por aprender y desarrollarse en el área financiero. Queremos que este rol aporte al seguimiento de información clave para la compañía, fortalezca sus habilidades analíticas y crezca junto a un equipo que acompaña, reta y construye.
+
+    📍 Lugar de trabajo: Medellín
+    🏢 Modalidad: Presencial
+
+    🎯 Objetivo del cargo
+    Apoyar al área financiera en la consolidación, análisis y generación de informes relacionados con costos, márgenes, gastos y rentabilidad, contribuyendo a la toma de decisiones y al seguimiento financiero de las operaciones de Nutrium.
+
+    🔍 Responsabilidades principales
+
+    Descargar, consolidar y generar informes de costos de producción de las diferentes plantas de Nutrium.
+    Apoyar la apertura de costos de las referencias negociadas y realizar ajustes que contribuyan al seguimiento de la rentabilidad de los contratos.
+    Elaborar informes de margen bruto por SKU para la compañía.
+    Acompañar la elaboración y análisis de informes de gastos.
+    Apoyar la gestión de información financiera, asegurando orden, precisión y oportunidad en los reportes.
+    Participar en actividades del área financiera, fortaleciendo sus conocimientos prácticos y su criterio analítico.
+
+    💡 Competencias y habilidades deseadas
+
+    Ser estudiante de Ingeniería Administrativa, Administración de Empresas con enfoque financiero, Ingeniería Financiera o programas afines.
+    Contar con aval de la institución educativa para realizar práctica bajo contrato de aprendizaje.
+    Interés por aprender y crecer en el área financiera.
+    Habilidades analíticas y capacidad para trabajar con información numérica.
+    Organización, atención al detalle y orientación al cumplimiento.
+    Manejo básico o intermedio de herramientas ofimáticas, especialmente Excel.
+    Disponibilidad para realizar la práctica de lunes a viernes en horario de oficina.
+
+    📄 Tipo de contrato
+    Contrato fijo especial, con acompañamiento del equipo y oportunidad de fortalecer tus conocimientos en un entorno empresarial dinámico.
+
+    🌱 Beneficios y bienestar
+    Únete a nuestro equipo y disfruta de un entorno de trabajo colaborativo con beneficios como servicio de alimentación, gimnasio, espacios de coworking, horarios flexibles y jornada corta los viernes. ¡Da el siguiente paso en tu carrera profesional con nosotros!
+
+    🌿 Si te motiva hacer parte de una organización que promueve el crecimiento, te invitamos a postularte y ser parte de Nutrium.
+- id: mag-1121240
+  limite_conocido: dos requisitos en una sola oración; la regla de §13.2 cuenta unidades, así que la ve insuficiente
+  titulo: Practicante de Seguridad y Gestión de Operaciones 2027-1
+  etiquetas:
+  - Trabajo en equipo
+  - Atención al detalle
+  - Proactividad
+  insuficiente: false
+  esperados:
+  - texto: Estudiantes de ingeniería industrial, Administración de empresas, Negocios Internacionales
+    tipo: obligatorio
+  - texto: habilitados para realizar su etapa práctica
+    tipo: obligatorio
+  texto: |-
+    Requisitos para aplicar a la vacante:
+
+    Bachillerato completo
+    Salario a convenir
+    Bogotá, D.C.
+
+    ¡Tu primer gran reto profesional comienza aquí!
+
+    En Alkosto-Ktronix queremos que esta etapa sea mucho más que una práctica: queremos que tengas la oportunidad de aprender, aportar tus ideas y conocer desde adentro cómo funciona una de las compañías de retail más importantes de Colombia.
+
+    Practicante de Seguridad y Gestión de Operaciones
+
+    Tu reto:
+    Apoyar la gestión comercial, operativa y administrativa de las áreas de Concesiones y Seguridad, participando en el seguimiento de aliados, actividades comerciales, procesos, indicadores y solicitudes internas. Tendrás la oportunidad de aportar al cumplimiento de procesos y a la mejora de la operación.
+
+     ¿Qué aprenderás?
+    Apoyar la gestión de concesiones y aliados, haciendo seguimiento a activaciones, beneficios, solicitudes operativas y actividades comerciales a nivel nacional.
+
+    Apoyar el seguimiento y actualización de procesos y documentación, así como visitas, auditorías y cumplimiento de políticas en los puntos de venta.
+
+    Gestionar y analizar información de Seguridad, utilizando Salesforce, bases de datos e indicadores, además de generar informes y hacer seguimiento a solicitudes.
+
+    Apoyar la gestión de casos y planes de acción, participando en comités, seguimiento de incidencias y acciones de mejora.
+
+    ¿Qué buscamos?
+     Estudiantes de ingeniería industrial, Administración de empresas, Negocios Internacionales, habilitados para realizar su etapa práctica y que no hayan tenido contrato de aprendizaje.
+
+    ¿Qué encontrarás en Alkosto-Ktronix?
+
+    Contrato de aprendizaje.
+
+    Auxilio económico de acuerdo con las condiciones de la compañía.
+
+    Acompañamiento durante tu etapa práctica.
+
+    Oportunidad de aprender en una compañía 100% colombiana.
+
+    Experiencia real en proyectos y procesos.
+
+     Bogotá lunes a viernes
+
+    Eres la pieza clave de nuestro equipo.
