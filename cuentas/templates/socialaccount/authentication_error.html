@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Ingresar | Scoutly{% endblock %}
+{% block body %}
+<main class="auth-page">
+  <section class="auth-card">
+    <a href="{% url 'login' %}" class="brand-mark auth-brand"><img src="{% static 'img/logo.svg' %}" alt="" />Scoutly</a>
+    <h1 class="auth-title">No pudimos conectar con tu red social</h1>
+    <p class="auth-subtitle">Algo falló al iniciar sesión con el proveedor. Vuelve a intentarlo o ingresa con tu correo.</p>
+    <p class="auth-pie"><a href="{% url 'login' %}" class="auth-btn-secundario">Volver a iniciar sesión</a></p>
+  </section>
+</main>
+{% endblock %}

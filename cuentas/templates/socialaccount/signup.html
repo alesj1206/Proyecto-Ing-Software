@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Crear cuenta | Scoutly{% endblock %}
+
+{% block body %}
+<main class="auth-page">
+  <section class="auth-card auth-card-ancha">
+    <a href="{% url 'login' %}" class="brand-mark auth-brand">
+      <img src="{% static 'img/logo.svg' %}" alt="" />
+      Scoutly
+    </a>
+    <p class="auth-eyebrow">Ya casi terminas</p>
+    <h1 class="auth-title">Confirma tus datos</h1>
+    <p class="auth-subtitle">Vas a crear tu cuenta de Scoutly con {{ account.get_provider.name|default:"tu red social" }}.</p>
+
+    <form method="post" action="{% url 'socialaccount_signup' %}" class="auth-form" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-error-box">{{ form.non_field_errors.0 }}</div>{% endif %}
+      <label class="auth-label" for="{{ form.email.id_for_label }}">Correo electrónico</label>
+      <div class="auth-input">
+        {% include "cuentas/_icono_correo.html" %}
+        {{ form.email }}
+      </div>
+      {% if form.email.errors %}<p class="form-error">{{ form.email.errors.0 }}</p>{% endif %}
+
+      {% include "cuentas/_autorizacion.html" with form=form %}
+
+      <div class="auth-acciones">
+        <button type="submit" class="btn auth-btn-navy">Crear cuenta
+          <svg class="auth-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
+{% endblock %}

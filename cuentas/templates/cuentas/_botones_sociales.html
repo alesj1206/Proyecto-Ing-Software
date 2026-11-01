@@ -1,10 +1,11 @@
 {% comment %}Botones de inicio de sesión social. `proveedores`: lista de ProveedorSocial; vacía → no se dibuja nada.
 allauth 65 inicia el login por POST, así que cada botón es un formulario con CSRF.{% endcomment %}
+{% load socialaccount %}
 {% if proveedores %}
 <p class="auth-label">{{ titulo|default:"Redes sociales" }}</p>
 <div class="auth-social">
   {% for p in proveedores %}
-  <form method="post" action="{{ p.url }}">
+  <form method="post" action="{% provider_login_url p.id %}">
     {% csrf_token %}
     <button type="submit" class="auth-social-btn" aria-label="Continuar con {{ p.nombre }}">
       {% include "cuentas/_icono_social.html" with id=p.id %}

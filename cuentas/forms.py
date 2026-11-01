@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth import authenticate
+from allauth.socialaccount.forms import SignupForm as SignupSocialBase
 from django.contrib.auth.password_validation import validate_password
+from django.db import transaction
 
 from .models import Perfil, Usuario, normalizar_correo
 
@@ -138,3 +140,18 @@ class RegistroClaveForm(forms.Form):
             except forms.ValidationError as error:
                 self.add_error("password1", error)
         return datos
+
+
+class RegistroSocialForm(SignupSocialBase):
+    """Alta con red social: el correo lo trae el proveedor, pero las casillas son igual de obligatorias."""
+
+    autoriza_datos = AutorizacionForm.base_fields["autoriza_datos"]
+    acepta_terminos = AutorizacionForm.base_fields["acepta_terminos"]
+
+    @transaction.atomic
+    def save(self, request):
+        from .services import registrar_autorizacion
+
+        usuario = super().save(request)
+        registrar_autorizacion(usuario)
+        return usuario

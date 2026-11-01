@@ -74,6 +74,13 @@ INSTALLED_APPS = [
     'matching',
     'postulaciones',
     'notificaciones',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.microsoft',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.openid_connect',
 ]
 
 AUTH_USER_MODEL = 'cuentas.Usuario'
@@ -84,6 +91,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -165,6 +173,30 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = 'raiz'  # raiz decide entre onboarding y dashboard
+
+# Inicio de sesión social (django-allauth). Solo los proveedores con credenciales en el entorno
+# quedan activos y muestran su botón (cuentas/sociales.py, docs/cuentas-sociales.md).
+from cuentas.sociales import settings_proveedores  # noqa: E402
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+SOCIALACCOUNT_PROVIDERS = settings_proveedores()
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*']
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # el registro por correo es propio (cuentas/views_auth.py)
+ACCOUNT_SIGNUP_REDIRECT_URL = 'onboarding'
+# Todo alta social pasa por el formulario con las casillas de autorización (Ley 1581).
+SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_FORMS = {'signup': 'cuentas.forms.RegistroSocialForm'}
+# Solo con correos que el proveedor marca como verificados; allauth además borra la contraseña de
+# la cuenta local si su correo no estaba verificado (evita la toma de cuentas pre-registradas).
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_LOGIN_ON_GET = False
 
 # HU-06: token compartido que el workflow de n8n manda en el header
 # X-Scoutly-Token al disparar POST /api/recalcular-matches. En desarrollo
