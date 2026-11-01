@@ -181,6 +181,9 @@
       <ul class="decision-motivos">
         {% for motivo in decision.motivos %}<li>{{ motivo }}</li>{% endfor %}
       </ul>
+      {% if decision.accion == "AJUSTAR_CV" %}
+      <a href="{% url 'taller' vacante.id %}" class="btn btn-brand" style="margin-bottom:1rem;">Abrir el taller de CV</a>
+      {% endif %}
       {% for req in requisitos.cubiertos %}
       <div class="requirement-item">
         <span class="requirement-dot matched">✓</span>

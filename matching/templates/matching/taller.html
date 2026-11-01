@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Taller de CV · {{ vacante.titulo }} | Scoutly{% endblock %}
+{% block content %}
+<div class="container" style="max-width:48rem;padding-top:2rem;padding-bottom:3rem;">
+  <a href="{% url 'vacante_detalle' vacante.id %}" class="btn-link">← Volver a la vacante</a>
+  <p class="label-eyebrow" style="margin-top:1.5rem;">Taller de CV</p>
+  <h1 style="font-size:1.75rem;margin-top:0.5rem;color:var(--navy);">{{ vacante.titulo }}</h1>
+  <p style="margin-top:0.5rem;color:var(--muted-foreground);">{{ vacante.empresa }}</p>
+
+  <div class="form-error-box toast-info" style="margin-top:1.5rem;">
+    Solo acepta lo que sea verdad: estas sugerencias reformulan tu propia experiencia para que el reclutador vea en
+    segundos que cumples con esta vacante. Tu hoja de vida es tuya y debe ser verdadera.
+  </div>
+
+  {% for s in sugerencias %}
+  <div class="card" style="margin-top:1rem;">
+    {% if s.tipo == "requisito" %}
+      <p class="decision-insignia decision-ajustar_cv" style="margin-top:0;">Haz explícito: {{ s.requisito }}</p>
+      <p class="decision-evidencia" style="margin-top:0.6rem;">tu evidencia: «{{ s.evidencia }}»</p>
+    {% else %}
+      <p class="decision-insignia" style="margin-top:0;">Resumen para esta postulación</p>
+    {% endif %}
+    <p style="margin-top:0.6rem;font-size:0.95rem;color:var(--navy);">{{ s.propuesta }}</p>
+    {% if s.estado == "pendiente" %}
+    <div style="display:flex;gap:0.6rem;margin-top:0.9rem;">
+      <form method="post" action="{% url 'taller_responder' vacante.id s.id %}">{% csrf_token %}
+        <input type="hidden" name="acepta" value="1" /><button type="submit" class="btn btn-brand">Aceptar</button></form>
+      <form method="post" action="{% url 'taller_responder' vacante.id s.id %}">{% csrf_token %}
+        <input type="hidden" name="acepta" value="0" /><button type="submit" class="btn btn-outline">Rechazar</button></form>
+    </div>
+    {% else %}
+    <p class="decision-cubres">{{ s.get_estado_display }}</p>
+    {% endif %}
+  </div>
+  {% empty %}
+  <p style="margin-top:1.5rem;color:var(--muted-foreground);">No hay sugerencias: tu hoja de vida ya dice lo que esta vacante pide, o lo que falta no aparece en tu experiencia (míralo en tu plan de aprendizaje).</p>
+  {% endfor %}
+
+  {% if texto %}
+  <div class="card" style="margin-top:1.5rem;">
+    <h3 style="font-size:0.95rem;color:var(--navy);">Texto para tu postulación</h3>
+    <p class="decision-evidencia">Cópialo en tu hoja de vida antes de postularte a esta vacante.</p>
+    <textarea readonly rows="5" style="width:100%;margin-top:0.75rem;padding:0.75rem;border:1px solid var(--input);border-radius:var(--radius);font-family:var(--font-sans);">{{ texto }}</textarea>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

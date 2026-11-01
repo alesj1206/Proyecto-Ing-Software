@@ -56,3 +56,31 @@ class SolicitudDecision(models.Model):
     perfil = models.OneToOneField(Perfil, on_delete=models.CASCADE, related_name="solicitud_decision")
     creada_en = models.DateTimeField(default=timezone.now)  # se refresca en cada solicitud
     intentos = models.PositiveSmallIntegerField(default=0)  # fallos del batch con este perfil
+
+
+class SugerenciaCV(models.Model):
+    """Una propuesta del Taller de CV para una vacante (spec §13.3): sale de la evidencia que el CV ya tiene y el
+    candidato la acepta o la rechaza. No modifica el CV guardado."""
+
+    class Tipo(models.TextChoices):
+        REQUISITO = "requisito", "Requisito"
+        RESUMEN = "resumen", "Resumen"
+
+    class Estado(models.TextChoices):
+        PENDIENTE = "pendiente", "Pendiente"
+        ACEPTADA = "aceptada", "Aceptada"
+        RECHAZADA = "rechazada", "Rechazada"
+
+    perfil = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name="sugerencias_cv")
+    vacante = models.ForeignKey(Vacante, on_delete=models.CASCADE, related_name="sugerencias_cv")
+    tipo = models.CharField(max_length=10, choices=Tipo.choices)
+    requisito = models.TextField(blank=True)
+    evidencia = models.TextField(blank=True)
+    propuesta = models.TextField()
+    estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PENDIENTE)
+    creada_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["perfil", "vacante", "tipo", "requisito"],
+                                               name="una_sugerencia_por_requisito")]
+        ordering = ["tipo", "id"]

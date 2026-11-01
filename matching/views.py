@@ -3,13 +3,16 @@
 from datetime import date
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from cuentas.selectors import perfil_con_cv
 from postulaciones.models import Postulacion
 from vacantes.models import Vacante
 
-from . import selectors
+from . import selectors, taller as taller_cv
+from .models import Decision, SugerenciaCV
 from .politica import Accion
 
 
@@ -57,3 +60,23 @@ def detalle_view(request, vacante_id):
     contexto = {"vacante": vacante, "match": None, "criterios": [], "modificador": None, "decision": None,
                 "postulacion": Postulacion.objects.filter(perfil=perfil, vacante=vacante).first() if perfil else None}
     return render(request, "matching/detalle.html", contexto | (decision or {}))
+
+
+@login_required
+def taller_view(request, vacante_id):
+    perfil = perfil_con_cv(request.user)
+    vacante = get_object_or_404(Vacante, id=vacante_id)
+    if perfil is None or not Decision.objects.filter(perfil=perfil, vacante=vacante).exists():
+        raise Http404("No hay una decisión para esta vacante")
+    return render(request, "matching/taller.html", {
+        "vacante": vacante, "sugerencias": taller_cv.taller(perfil, vacante),
+        "texto": taller_cv.texto_adaptado(perfil, vacante)})
+
+
+@login_required
+@require_POST
+def taller_responder_view(request, vacante_id, sugerencia_id):
+    sugerencia = get_object_or_404(SugerenciaCV, id=sugerencia_id, vacante_id=vacante_id,
+                                   perfil=perfil_con_cv(request.user))
+    taller_cv.responder(sugerencia, acepta=request.POST.get("acepta") == "1")
+    return redirect("taller", vacante_id=vacante_id)
