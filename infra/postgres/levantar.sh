@@ -8,9 +8,12 @@ set -a; source .env; set +a
 if podman container exists scoutly-postgres; then
   podman start scoutly-postgres >/dev/null
 else
-  podman run -d --name scoutly-postgres --env-file .env \
+  # --shm-size: la construcción paralela de HNSW usa /dev/shm; los 64 MB por defecto no alcanzan.
+  podman run -d --name scoutly-postgres --env-file .env --shm-size=3g \
     -p "${POSTGRES_PORT}:5432" -v scoutly_pgdata:/var/lib/postgresql/data \
-    docker.io/pgvector/pgvector:pg17 >/dev/null
+    docker.io/pgvector/pgvector:pg17 \
+    -c shared_buffers=4GB -c maintenance_work_mem=2GB -c max_parallel_maintenance_workers=6 \
+    -c jit=off >/dev/null
 fi
 
 for _ in $(seq 1 30); do
