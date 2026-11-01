@@ -1,10 +1,12 @@
+from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from .forms import CVUploadForm, ExpectativasForm
 from .models import Perfil
 from .selectors import perfil_con_cv
-from .services import guardar_perfil_desde_cv
+from .services import eliminar_cuenta, guardar_perfil_desde_cv
 
 
 def _cargar_cv(request):
@@ -44,3 +46,17 @@ def expectativas_view(request):
         form.save()  # la Fase 2 recalcula aquí las decisiones del perfil
         return redirect("expectativas")
     return render(request, "cuentas/expectativas.html", {"form": form, "perfil": perfil})
+
+
+@login_required
+def eliminar_cuenta_view(request):
+    error = None
+    if request.method == "POST":
+        if request.POST.get("confirmo"):
+            usuario = request.user
+            logout(request)
+            eliminar_cuenta(usuario)
+            messages.success(request, "Eliminamos tu cuenta y todos tus datos.")
+            return redirect("login")
+        error = "Marca la casilla para confirmar que quieres eliminar tu cuenta."
+    return render(request, "cuentas/eliminar_cuenta.html", {"error": error})

@@ -10,6 +10,9 @@
       Scoutly
     </a>
 
+    {% for message in messages %}
+      <div class="form-error-box {% if message.tags == 'success' %}toast-success{% else %}toast-info{% endif %}">{{ message }}</div>
+    {% endfor %}
     <h1 class="auth-title">Inicia sesión en tu cuenta</h1>
     <p class="auth-subtitle">Puedes hacerlo fácilmente con tus redes sociales o tu correo electrónico.</p>
 

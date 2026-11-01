@@ -78,5 +78,14 @@
       <p class="form-error">{{ form.cv.errors.0 }}</p>
     {% endif %}
   </div>
+
+  {# v3 (§13.5, Ley 1581): único bloque agregado a este template de v2. #}
+  <div class="card" style="margin-top:2rem;">
+    <p style="margin:0;font-weight:600;color:var(--navy);">Eliminar mi cuenta</p>
+    <p style="margin-top:0.35rem;font-size:0.8125rem;color:var(--muted-foreground);">
+      Borra tu cuenta, tu hoja de vida y todo lo que Scoutly guardó sobre ti. No se puede deshacer.
+    </p>
+    <a href="{% url 'eliminar_cuenta' %}" class="btn btn-outline" style="margin-top:1rem;">Eliminar mi cuenta</a>
+  </div>
 </div>
 {% endblock %}

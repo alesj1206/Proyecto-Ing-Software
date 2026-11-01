@@ -47,3 +47,8 @@ def guardar_perfil_desde_cv(usuario: Usuario, archivo) -> Perfil:
         for i, u in enumerate(cv.unidades)
     )
     return perfil
+
+
+def eliminar_cuenta(usuario: Usuario) -> None:
+    """Supresión total (Ley 1581): todo lo del usuario cuelga de él con on_delete=CASCADE."""
+    usuario.delete()

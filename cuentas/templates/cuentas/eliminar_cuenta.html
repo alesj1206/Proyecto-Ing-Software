@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Eliminar mi cuenta | Scoutly{% endblock %}
+{% block content %}
+<div class="container" style="max-width:40rem;padding-top:2rem;padding-bottom:3rem;">
+  <p class="label-eyebrow">Tus datos</p>
+  <h1 style="font-size:1.75rem;margin-top:0.5rem;color:var(--navy);">Eliminar mi cuenta</h1>
+  <div class="card" style="margin-top:1.5rem;">
+    <p style="margin:0;line-height:1.6;">Se borrarán tu cuenta, tu hoja de vida, tus expectativas, tus postulaciones
+      y tus notificaciones. Esta acción no se puede deshacer.</p>
+    {% if error %}<div class="form-error-box" style="margin-top:1rem;">{{ error }}</div>{% endif %}
+    <form method="post" style="margin-top:1.25rem;">
+      {% csrf_token %}
+      <label class="auth-check" style="margin-top:0;">
+        <input type="checkbox" name="confirmo" />
+        <span>Entiendo que se borra todo y quiero eliminar mi cuenta.</span>
+      </label>
+      <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+        <button type="submit" class="btn btn-brand" style="background:#c0392b;">Eliminar definitivamente</button>
+        <a href="{% url 'perfil' %}" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -10,5 +10,6 @@ urlpatterns = [
     path("logout", views_auth.logout_view, name="logout"),
     path("onboarding", views.onboarding_view, name="onboarding"),
     path("perfil", views.perfil_view, name="perfil"),
+    path("cuenta/eliminar", views.eliminar_cuenta_view, name="eliminar_cuenta"),
     path("expectativas", views.expectativas_view, name="expectativas"),
 ]
