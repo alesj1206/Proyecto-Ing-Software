@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Política de tratamiento de datos | Scoutly{% endblock %}
+{% block content %}
+<div class="container" style="max-width:48rem;padding-top:2rem;padding-bottom:3rem;">
+  <p class="label-eyebrow">Versión {{ version }}</p>
+  <h1 style="font-size:1.75rem;margin-top:0.5rem;color:var(--navy);">Política de tratamiento de datos personales</h1>
+  <div class="card" style="margin-top:1.5rem;padding:1.75rem;line-height:1.7;">
+    <p>Scoutly es un proyecto académico construido para el reto de Magneto Empleos. Esta política explica qué
+      hacemos con tus datos, conforme a la Ley 1581 de 2012 y sus decretos reglamentarios.</p>
+
+    <h2 style="font-size:1.1rem;margin-top:1.25rem;">Finalidad</h2>
+    <p>{{ finalidad }}</p>
+
+    <h2 style="font-size:1.1rem;margin-top:1.25rem;">Qué datos tratamos</h2>
+    <p>Tu correo, tu hoja de vida (experiencia, educación y habilidades) y las expectativas que declares
+      (salario, modalidad, ubicación y disponibilidad). Antes de analizar tu hoja de vida quitamos tu correo,
+      teléfono, número de documento y dirección.</p>
+
+    <h2 style="font-size:1.1rem;margin-top:1.25rem;">Cómo usamos la inteligencia artificial</h2>
+    <p>La comparación entre tu perfil y cada vacante se hace con modelos que corren en nuestros propios
+      equipos. La decisión sobre cada vacante es automatizada: siempre te mostramos el motivo y puedes
+      revisar cualquier vacante por tu cuenta. Para redactar algunas explicaciones usamos el servicio Groq,
+      ubicado en Estados Unidos: a Groq solo le enviamos campos de criterio (por ejemplo, la modalidad que
+      buscas y la de la vacante), nunca el CV ni tus datos de contacto.</p>
+
+    <h2 style="font-size:1.1rem;margin-top:1.25rem;">Tus derechos</h2>
+    <p>Puedes conocer, actualizar y corregir tus datos desde tu perfil, revocar esta autorización y pedir que
+      los borremos con el botón «Eliminar mi cuenta», que borra todo de inmediato.</p>
+  </div>
+</div>
+{% endblock %}
