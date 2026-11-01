@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Crear cuenta | Scoutly{% endblock %}
+
+{% block body %}
+<main class="auth-page">
+  <section class="auth-card auth-card-ancha">
+    <a href="{% url 'login' %}" class="brand-mark auth-brand">
+      <img src="{% static 'img/logo.svg' %}" alt="" />
+      Scoutly
+    </a>
+
+    {% if clave_form %}
+      <p class="auth-eyebrow">Último paso</p>
+      <h1 class="auth-title">Crea tu contraseña</h1>
+      <p class="auth-subtitle">Para la cuenta <strong>{{ email }}</strong>.</p>
+      <form method="post" action="{% url 'registro' %}" class="auth-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="paso" value="clave" />
+        <div class="auth-input">
+          {% include "cuentas/_icono_clave.html" %}
+          {{ clave_form.password1 }}
+        </div>
+        {% for error in clave_form.password1.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+        <div class="auth-input">
+          {% include "cuentas/_icono_clave.html" %}
+          {{ clave_form.password2 }}
+        </div>
+        {% if clave_form.password2.errors %}<p class="form-error">{{ clave_form.password2.errors.0 }}</p>{% endif %}
+        <p class="auth-ayuda">Al menos 8 caracteres. Evita contraseñas comunes, solo números o parecidas a tu correo.</p>
+        <div class="auth-acciones">
+          <button type="submit" class="btn auth-btn-navy">Crear cuenta
+            <svg class="auth-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+        </div>
+      </form>
+    {% else %}
+      <p class="auth-eyebrow">Aquí empieza tu próxima entrevista</p>
+      <h1 class="auth-title">¿Cómo deseas crear tu cuenta?</h1>
+
+      {% include "cuentas/_botones_sociales.html" with titulo="Con tus redes sociales:" %}
+
+      <form method="post" action="{% url 'registro' %}" class="auth-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="paso" value="datos" />
+        <p class="auth-label auth-label-suave">Con tu correo electrónico:</p>
+        <div class="auth-input">
+          {% include "cuentas/_icono_correo.html" %}
+          {{ datos_form.email }}
+        </div>
+        {% if datos_form.email.errors %}<p class="form-error">{{ datos_form.email.errors.0 }}</p>{% endif %}
+        <div class="auth-input">
+          {% include "cuentas/_icono_correo.html" %}
+          {{ datos_form.email_confirmacion }}
+        </div>
+        {% if datos_form.email_confirmacion.errors %}<p class="form-error">{{ datos_form.email_confirmacion.errors.0 }}</p>{% endif %}
+
+        {% include "cuentas/_autorizacion.html" with form=datos_form %}
+
+        <div class="auth-acciones">
+          <button type="submit" class="btn auth-btn-navy">Siguiente
+            <svg class="auth-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+        </div>
+      </form>
+    {% endif %}
+
+    <p class="auth-pie">
+      ¿Ya tienes una cuenta?
+      <a href="{% url 'login' %}" class="auth-btn-secundario">
+        <svg class="auth-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7l5 5-5 5M15 12H3M14 4h5v16h-5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        Iniciar sesión
+      </a>
+    </p>
+  </section>
+</main>
+{% endblock %}

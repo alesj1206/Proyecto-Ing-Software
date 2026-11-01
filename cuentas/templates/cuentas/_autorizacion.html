@@ -1,0 +1,18 @@
+{% comment %}Recuadro de autorización (Ley 1581). `form` trae los campos autoriza_datos y acepta_terminos.{% endcomment %}
+<div class="auth-consent">
+  <p class="auth-consent-aviso">
+    <svg class="auth-consent-icono" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--navy)"/><path fill="#fff" d="M11 10.5h2V17h-2zM12 6.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5z"/></svg>
+    Antes de entregarnos tus datos personales y autorizar su tratamiento, te recomendamos leer toda la información con calma.
+  </p>
+  <label class="auth-check">
+    <input type="checkbox" name="autoriza_datos" {% if form.autoriza_datos.value %}checked{% endif %} />
+    <span>He leído y autorizo el tratamiento de mis datos para los fines informados. Acepto la
+      <a href="{% url 'privacidad' %}" target="_blank" rel="noopener">política de tratamiento de datos personales</a>.</span>
+  </label>
+  {% if form.autoriza_datos.errors %}<p class="form-error">{{ form.autoriza_datos.errors.0 }}</p>{% endif %}
+  <label class="auth-check">
+    <input type="checkbox" name="acepta_terminos" {% if form.acepta_terminos.value %}checked{% endif %} />
+    <span>He leído y acepto los <a href="{% url 'terminos' %}" target="_blank" rel="noopener">términos y condiciones de uso</a> de la plataforma.</span>
+  </label>
+  {% if form.acepta_terminos.errors %}<p class="form-error">{{ form.acepta_terminos.errors.0 }}</p>{% endif %}
+</div>

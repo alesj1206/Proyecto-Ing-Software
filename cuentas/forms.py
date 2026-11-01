@@ -1,6 +1,8 @@
 from django import forms
+from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 
-from .models import Perfil
+from .models import Perfil, Usuario, normalizar_correo
 
 MAX_BYTES_CV = 5 * 1024 * 1024
 
@@ -44,3 +46,95 @@ class ExpectativasForm(forms.ModelForm):
             "exp_ubicacion": forms.TextInput(attrs={"placeholder": "Ej: Medellín, remoto en Colombia"}),
             "anios_experiencia": forms.NumberInput(attrs={"placeholder": "Ej: 3"}),
         }
+
+
+# --- Login y registro (estructura de Magneto: correo primero) --------------------------------------
+
+class CorreoForm(forms.Form):
+    email = forms.EmailField(
+        label="Correo electrónico",
+        widget=forms.EmailInput(attrs={"placeholder": "Escribe tu correo electrónico", "autocomplete": "email"}),
+    )
+
+    def clean_email(self):
+        return normalizar_correo(self.cleaned_data["email"])
+
+
+class ClaveLoginForm(forms.Form):
+    """Paso 2 del login. El mensaje de error es el mismo exista o no el correo."""
+
+    ERROR_GENERICO = "Correo electrónico o contraseña incorrectos."
+    ERROR_CUENTA_SOCIAL = "Esta cuenta no tiene contraseña. Ingresa con el botón de tu red social."
+
+    password = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={"placeholder": "Escribe tu contraseña", "autocomplete": "current-password"}),
+    )
+
+    def __init__(self, *args, email: str, request=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.email, self.request, self.usuario = email, request, None
+
+    def clean(self):
+        datos = super().clean()
+        password = datos.get("password")
+        if password:
+            self.usuario = authenticate(self.request, username=self.email, password=password)
+            if self.usuario is None:
+                existente = Usuario.objects.filter(email=self.email).first()
+                social = existente is not None and not existente.has_usable_password()
+                raise forms.ValidationError(self.ERROR_CUENTA_SOCIAL if social else self.ERROR_GENERICO)
+        return datos
+
+
+class AutorizacionForm(forms.Form):
+    """Las dos casillas obligatorias (Ley 1581). Se reutiliza en el alta con redes sociales."""
+
+    autoriza_datos = forms.BooleanField(
+        error_messages={"required": "Debes autorizar el tratamiento de tus datos para crear la cuenta."})
+    acepta_terminos = forms.BooleanField(
+        error_messages={"required": "Debes aceptar los términos y condiciones de uso."})
+
+
+class RegistroDatosForm(AutorizacionForm):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": "Correo electrónico",
+                                                            "autocomplete": "email"}))
+    email_confirmacion = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": "Confirmación correo electrónico",
+                                                                         "autocomplete": "off"}))
+    field_order = ["email", "email_confirmacion", "autoriza_datos", "acepta_terminos"]
+
+    def clean_email(self):
+        email = normalizar_correo(self.cleaned_data["email"])
+        if Usuario.objects.filter(email=email).exists():
+            raise forms.ValidationError("Ya existe una cuenta con ese correo. Inicia sesión.")
+        return email
+
+    def clean(self):
+        datos = super().clean()
+        email, confirmacion = datos.get("email"), datos.get("email_confirmacion")
+        if email and confirmacion and email != normalizar_correo(confirmacion):
+            self.add_error("email_confirmacion", "Los correos no coinciden.")
+        return datos
+
+
+class RegistroClaveForm(forms.Form):
+    password1 = forms.CharField(widget=forms.PasswordInput(attrs={"placeholder": "Contraseña",
+                                                                  "autocomplete": "new-password"}))
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs={"placeholder": "Confirma tu contraseña",
+                                                                  "autocomplete": "new-password"}))
+
+    def __init__(self, *args, email: str, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.email = email
+
+    def clean(self):
+        datos = super().clean()
+        p1, p2 = datos.get("password1"), datos.get("password2")
+        if p1 and p2 and p1 != p2:
+            self.add_error("password2", "Las contraseñas no coinciden.")
+        elif p1:
+            try:  # AUTH_PASSWORD_VALIDATORS: largo, comunes, numéricas y parecida al correo
+                validate_password(p1, user=Usuario(email=self.email))
+            except forms.ValidationError as error:
+                self.add_error("password1", error)
+        return datos

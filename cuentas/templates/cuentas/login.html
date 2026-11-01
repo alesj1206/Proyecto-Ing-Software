@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Ingresar | Scoutly{% endblock %}
+
+{% block body %}
+<main class="auth-page">
+  <section class="auth-card">
+    <a href="{% url 'login' %}" class="brand-mark auth-brand">
+      <img src="{% static 'img/logo.svg' %}" alt="" />
+      Scoutly
+    </a>
+
+    <h1 class="auth-title">Inicia sesión en tu cuenta</h1>
+    <p class="auth-subtitle">Puedes hacerlo fácilmente con tus redes sociales o tu correo electrónico.</p>
+
+    {% include "cuentas/_botones_sociales.html" %}
+
+    {% if clave_form %}
+      <form method="post" action="{% url 'login' %}" class="auth-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="paso" value="clave" />
+        <p class="auth-label">Correo electrónico</p>
+        <div class="auth-email-fijo">
+          <span>{{ email }}</span>
+          <a href="{% url 'login' %}?cambiar=1" class="btn-link">Cambiar</a>
+        </div>
+        {% if clave_form.non_field_errors %}
+          <div class="form-error-box">{{ clave_form.non_field_errors.0 }}</div>
+        {% endif %}
+        <label class="auth-label" for="{{ clave_form.password.id_for_label }}">Contraseña</label>
+        <div class="auth-input">
+          {% include "cuentas/_icono_clave.html" %}
+          {{ clave_form.password }}
+        </div>
+        <button type="submit" class="btn auth-btn-primario">Ingresar
+          <svg class="auth-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'login' %}" class="auth-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="paso" value="correo" />
+        <label class="auth-label" for="{{ correo_form.email.id_for_label }}">Correo electrónico</label>
+        <div class="auth-input">
+          {% include "cuentas/_icono_correo.html" %}
+          {{ correo_form.email }}
+        </div>
+        {% if correo_form.email.errors %}<p class="form-error">{{ correo_form.email.errors.0 }}</p>{% endif %}
+        <button type="submit" class="btn auth-btn-primario">Continuar
+          <svg class="auth-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+      </form>
+    {% endif %}
+
+    <p class="auth-pie">
+      ¿Aún no tienes una cuenta?
+      <a href="{% url 'registro' %}" class="auth-btn-secundario">Crear cuenta</a>
+    </p>
+  </section>
+</main>
+{% endblock %}
