@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Mi hoja de vida | Scoutly{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="padding-top:3rem;padding-bottom:3.5rem;">
+  <p class="label-eyebrow">Mi hoja de vida</p>
+  <h1 style="margin-top:0.75rem;font-size:2rem;color:var(--navy);">
+    {% if perfil %}{{ perfil.nombre|default:"Perfil sin nombre detectado" }}{% else %}Aún no has cargado tu CV{% endif %}
+  </h1>
+
+  {% if perfil %}
+  <p style="margin-top:0.5rem;font-size:0.8125rem;color:var(--muted-foreground);">
+    Extraído de <strong>{{ perfil.cv_nombre_archivo }}</strong> — actualizado el {{ perfil.actualizado_en|date:"d/m/Y H:i" }}
+  </p>
+
+  <div class="card" style="margin-top:1.75rem;">
+    <div style="display:grid;gap:1.5rem;grid-template-columns:repeat(2,1fr);">
+      <div>
+        <p class="label-eyebrow">Contacto</p>
+        {% if perfil.contacto %}
+          <p style="margin-top:0.4rem;font-size:0.9rem;color:var(--navy);">{{ perfil.contacto }}</p>
+        {% else %}
+          <span class="badge-match" style="background:var(--surface-strong);color:var(--muted-foreground);margin-top:0.4rem;">Pendiente</span>
+        {% endif %}
+      </div>
+
+      <div>
+        <p class="label-eyebrow">Habilidades detectadas</p>
+        <div style="margin-top:0.4rem;">
+          {% for skill in perfil.habilidades %}
+            <span class="skill-chip">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.75rem;border-top:1px solid var(--border);padding-top:1.5rem;">
+      <p class="label-eyebrow">Experiencia</p>
+      {% if perfil.experiencia %}
+        <ul style="margin-top:0.6rem;padding-left:1.1rem;color:var(--muted-foreground);line-height:1.7;font-size:0.9rem;">
+          {% for linea in perfil.experiencia %}<li>{{ linea }}</li>{% endfor %}
+        </ul>
+      {% else %}
+        <span class="badge-match" style="background:var(--surface-strong);color:var(--muted-foreground);margin-top:0.4rem;">Pendiente</span>
+      {% endif %}
+    </div>
+
+    <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.5rem;">
+      <p class="label-eyebrow">Educación</p>
+      {% if perfil.educacion %}
+        <ul style="margin-top:0.6rem;padding-left:1.1rem;color:var(--muted-foreground);line-height:1.7;font-size:0.9rem;">
+          {% for linea in perfil.educacion %}<li>{{ linea }}</li>{% endfor %}
+        </ul>
+      {% else %}
+        <span class="badge-match" style="background:var(--surface-strong);color:var(--muted-foreground);margin-top:0.4rem;">Pendiente</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem;">
+    <a href="{% url 'dashboard' %}" class="btn btn-brand btn-lg">Ver mis matches</a>
+  </div>
+  {% endif %}
+
+  <div class="card" style="margin-top:2rem;">
+    <p style="margin:0;font-weight:600;color:var(--navy);">
+      {% if perfil %}Reemplazar hoja de vida{% else %}Cargar mi hoja de vida{% endif %}
+    </p>
+    <p style="margin-top:0.35rem;font-size:0.8125rem;color:var(--muted-foreground);">
+      Sube un PDF para actualizar los datos de tu perfil.
+    </p>
+    <form method="post" enctype="multipart/form-data" style="margin-top:1.25rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem;">
+      {% csrf_token %}
+      {{ form.cv }}
+      <button type="submit" class="btn btn-brand">Analizar CV</button>
+    </form>
+    {% if form.cv.errors %}
+      <p class="form-error">{{ form.cv.errors.0 }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

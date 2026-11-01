@@ -1,7 +1,10 @@
 from django.db import transaction
 
+from .cv.lector import extraer_texto
+from .cv.minimizacion import minimizar
+from .cv.secciones import analizar_cv
 from .legal import FINALIDAD, VERSION_POLITICA, VERSION_TERMINOS
-from .models import Autorizacion, Usuario
+from .models import Autorizacion, EvidenciaPerfil, Perfil, Usuario
 
 
 def registrar_autorizacion(usuario: Usuario) -> Autorizacion:
@@ -20,3 +23,27 @@ def crear_usuario_con_autorizacion(email: str, password: str | None) -> Usuario:
     usuario = Usuario.objects.create_user(email=email, password=password)
     registrar_autorizacion(usuario)
     return usuario
+
+
+@transaction.atomic
+def guardar_perfil_desde_cv(usuario: Usuario, archivo) -> Perfil:
+    """Analiza el CV y reemplaza la evidencia del perfil. La evidencia se guarda sin datos personales."""
+    cv = analizar_cv(extraer_texto(archivo), archivo.name)
+    perfil, _ = Perfil.objects.update_or_create(
+        usuario=usuario,
+        defaults={
+            "nombre": cv.nombre,
+            "contacto": cv.contacto,
+            "experiencia": cv.experiencia,
+            "educacion": cv.educacion or None,
+            "habilidades": cv.habilidades,
+            "campos_pendientes": cv.campos_pendientes,
+            "cv_nombre_archivo": archivo.name,
+        },
+    )
+    perfil.evidencias.all().delete()
+    EvidenciaPerfil.objects.bulk_create(
+        EvidenciaPerfil(perfil=perfil, texto=minimizar(u.texto), seccion=u.seccion, posicion=i)
+        for i, u in enumerate(cv.unidades)
+    )
+    return perfil
