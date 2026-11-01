@@ -161,16 +161,31 @@ vacante, con caché y texto de respaldo (como hoy). Groq nunca participa en la d
   encarga el decisor, que las muestra como DESCARTAR con su motivo. El dashboard indica cuántas
   vacantes se excluyeron por modalidad ("N vacantes presenciales ocultas"), así que nada desaparece en
   silencio.
-- **Conjunto decidido.** La búsqueda aproximada trae el **top-100** por candidato. A las 100 se les calcula
-  cobertura, reranker y decisión, y cada una queda guardada como `Decision`. La brecha agregada ("Docker
-  aparece en 9 de tus mejores vacantes") se cuenta sobre ese mismo top-100.
-- **Escritura diaria.** El batch diario escribe las decisiones de **todos** los candidatos con CV. Lo
-  incremental aplica a los **embeddings** (vacantes nuevas o modificadas, perfiles cambiados), no a las
-  decisiones: re-decidir 100 vacantes es barato una vez que los vectores existen. Así `/historial`
-  conserva su semántica de "foto por día".
-- **Notificación.** Se notifica cada vacante que hoy es POSTULAR y ayer no lo era (o no estaba en el
-  top-100), con un tope de 3 por día y candidato para no saturar. `ResultadoDecision` se asocia a la
-  decisión más reciente del par (perfil, vacante) en el momento de la transición del tablero.
+- **Conjunto decidido: umbral, no tope (decidido por el usuario).** No hay un número máximo de vacantes por
+  candidato, porque un tope fijo esconde vacantes buenas a perfiles amplios. Entra **toda vacante cuya
+  similitud de documento con el perfil supere `τ_relevancia`**, sean 30 o 3.000. La búsqueda usa el índice
+  HNSW con escaneo iterativo de pgvector (`hnsw.iterative_scan`) para seguir trayendo resultados mientras
+  superen el umbral, más un tope técnico de seguridad alto (por ejemplo 5.000) que solo protege contra
+  perfiles degenerados y queda registrado en el log si se alcanza. A todas las vacantes que entran se les
+  calcula cobertura, restricciones y decisión (las tres operaciones son baratas).
+- **El reranker solo ordena, no decide.** Se aplica por páginas dentro de cada acción: al calcular, las
+  primeras páginas de POSTULAR y AJUSTAR_CV; el resto se ordena bajo demanda cuando el candidato pagina,
+  y queda en caché. Antes de reordenarse, las vacantes se ordenan por similitud de documento.
+- **Brecha agregada** ("Docker aparece en 37 de tus vacantes relevantes") se cuenta sobre **todas** las
+  vacantes decididas.
+- **Persistencia.** `Decision` guarda la **decisión vigente** por par (perfil, vacante): se actualiza en
+  lugar de duplicarse cada día y conserva `fecha_decision` y `accion_anterior`. `/historial` lee
+  `FotoDiaria`, un resumen por candidato y día (conteos por acción y las ~10 vacantes principales de cada
+  acción con su cobertura), así que la base no crece con miles de filas diarias por persona. Lo
+  incremental aplica a los **embeddings** (vacantes nuevas o modificadas, perfiles cambiados). Las
+  decisiones se recalculan en el batch diario para todos los candidatos con CV.
+- **Notificación (preferencia del candidato, decidido por el usuario).** Un cambio a POSTULAR es *nuevo*
+  cuando la vacante hoy es POSTULAR y antes no lo era (o no estaba entre las relevantes). Las
+  notificaciones nunca limitan lo que se ve: todo sigue en el dashboard. Por correo, el candidato elige en
+  `/expectativas` entre: **resumen diario** (un solo correo con todas las novedades, por defecto),
+  **individual con máximo N al día** (N configurable, por defecto 3) o **desactivado**. La campana dentro de
+  la app muestra todas. `ResultadoDecision` se asocia a la `Decision` vigente del par en el momento de la
+  transición del tablero, con una copia de los insumos de ese momento.
 
 ## 6. Escala: por qué es viable con 120.000 vacantes
 
@@ -180,9 +195,9 @@ La clave es que **el trabajo pesado depende de cada vacante y no de cada par (ca
 |---|---|---|
 | Extraer requisitos y embeber una vacante | 1 vez por vacante nueva o modificada | 120k × ~9 unidades ≈ 1,1M embeddings para la carga inicial. Con un modelo pequeño en ONNX son decenas de minutos en CPU y bastante menos en GPU. El delta diario (unos miles de vacantes) toma minutos. |
 | Almacenamiento | — | Cerca de 1,1M vectores de 384 dimensiones. Con `halfvec` son menos de 1 GB en Postgres. |
-| Preselección por candidato | Diaria, o cuando cambia el perfil | Primero el prefiltro SQL mínimo (sección 5.7), luego búsqueda aproximada (índice HNSW de pgvector) sobre los vectores de documento → top-100. Toma milisegundos. |
-| Cobertura | Por candidato, sobre el top-100 | 100 × ~9 requisitos × ~30 evidencias son unos 27k productos punto en numpy. Despreciable. |
-| Reranker | Por candidato, sobre el top-100 | 100 pares de cross-encoder. Segundos en CPU y se paraleliza entre candidatos. |
+| Preselección por candidato | Diaria, o cuando cambia el perfil | Primero el prefiltro SQL mínimo (sección 5.7), luego búsqueda aproximada HNSW con escaneo iterativo hasta `τ_relevancia`. De milisegundos a menos de un segundo. |
+| Cobertura | Por candidato, sobre todas las relevantes | Con 3.000 vacantes × ~9 requisitos × ~30 evidencias son unos 810k productos punto, vectorizados en numpy. Menos de un segundo. |
+| Reranker | Por candidato, solo las páginas visibles | ~40 pares en el batch (primeras páginas) y luego bajo demanda al paginar. Segundos en CPU. |
 | Decisión | Por candidato | Reglas en Python. Despreciable. |
 | Groq | Solo cuando el candidato abre un detalle | Igual que hoy. |
 
@@ -193,7 +208,9 @@ cambiaron. Las decisiones se recalculan todos los días (sección 5.7).
 proyectado a 120k vacantes:
 - Carga inicial de 120k vacantes: ≤ 8 h en CPU y ≤ 2 h con GPU. Es un proceso que se corre una sola vez.
 - Delta diario de 3.000 vacantes nuevas: ≤ 15 min.
-- Decisión por candidato (top-100 completo): ≤ 5 s en CPU.
+- Decisión por candidato (todas las relevantes, con un perfil amplio de unas 3.000, más el reranking de las
+  primeras páginas): ≤ 5 s en CPU.
+- Página siguiente ordenada bajo demanda: ≤ 1,5 s.
 
 Si un modelo no cumple estos umbrales, se usa la variante más pequeña (e5-small antes que e5-base, y el
 reranker más liviano). Si ni la variante más pequeña cumple, se vuelve a este documento.
@@ -236,9 +253,14 @@ tiempos. Ese número es el que se presenta.
 - `Vacante`: los campos actuales + `vector_doc (halfvec)` + `hash_contenido` para la re-ingesta incremental.
 - `Requisito`: vacante, texto, `tipo` (obligatorio/deseable), `vector (halfvec)`.
 - `Perfil`: los campos actuales + `vector_doc`. `EvidenciaPerfil`: perfil, texto, sección, `vector`.
-- `Decision` (reemplaza a `MatchDiario`): perfil, vacante, fecha, acción, confianza, relevancia,
-  cobertura (json: requisito → estado + evidencia), restricciones (json), `version_politica`. Es única por
-  (perfil, vacante, fecha) y alimenta el dashboard y `/historial`.
+- `Decision` (reemplaza a `MatchDiario`): la **decisión vigente**. Tiene perfil, vacante, acción,
+  `accion_anterior`, confianza, similitud, relevancia del reranker (puede ser nula hasta que se ordena),
+  cobertura (json: requisito → estado + evidencia), restricciones (json), `fecha_decision` y
+  `version_politica`. Es única por (perfil, vacante) y alimenta el dashboard y el detalle.
+- `FotoDiaria`: perfil, fecha, conteos por acción y las ~10 vacantes principales de cada acción (json).
+  Es única por (perfil, fecha) y alimenta `/historial`.
+- `Perfil` también guarda la preferencia de notificación (resumen diario / individual con máximo N /
+  desactivado) y N.
 - `ResultadoDecision`: decisión, resultado (entrevista/descartado) y fecha. Lo escribe postulaciones.
 - `Postulacion`, `Notificacion` y `ExplicacionCriterio`: equivalentes a los actuales.
 - **No se migran datos de v2**: la base es nueva y las vacantes se vuelven a ingerir. Las cuentas de demo se
