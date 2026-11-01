@@ -15,3 +15,12 @@ def test_variedad():
 def test_evidencia_es_distinta_de_requisito():
     assert unidades_evidencia(30, 5) != unidades_requisito(30, 5)
     assert all(5 <= len(u.split()) <= 25 for u in unidades_evidencia(200, 6))
+
+
+def test_resumenes_cortos_con_titulo_y_requisitos():
+    from spike.fase0.textos import resumenes_vacante
+
+    rs = resumenes_vacante(200, 7)
+    assert rs == resumenes_vacante(200, 7)
+    assert all(150 <= len(r) <= 700 for r in rs)
+    assert all(";" in r for r in rs)

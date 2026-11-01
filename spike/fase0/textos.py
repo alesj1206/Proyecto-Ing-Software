@@ -94,3 +94,19 @@ def documentos_vacante(n: int, semilla: int = 0) -> list[str]:
             partes.append("Ofrecemos " + ", ".join(rnd.sample(BENEFICIOS, 3)) + ".")
         docs.append(" ".join(partes)[:2500])
     return docs
+
+
+def resumenes_vacante(n: int, semilla: int = 0) -> list[str]:
+    """Lo que de verdad recibe el reranker: título + requisitos, no la descripción completa."""
+    rnd = random.Random(semilla + 7_000_001)
+    reales = _fixture()
+    resumenes = []
+    for _ in range(n):
+        titulo = rnd.choice(reales)[0]
+        requisitos = [_rellenar(rnd.choice(PLANTILLAS_REQUISITO), rnd) for _ in range(rnd.randint(3, 7))]
+        resumen = f"{titulo}. " + "; ".join(requisitos)
+        while len(resumen) > 700:
+            requisitos.pop()
+            resumen = f"{titulo}. " + "; ".join(requisitos)
+        resumenes.append(resumen)
+    return resumenes

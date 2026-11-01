@@ -37,6 +37,7 @@ MODELOS_EMBEDDING = [
 ]
 MODELOS_RERANKER = [
     "BAAI/bge-reranker-v2-m3-int8",
+    "BAAI/bge-reranker-v2-m3",  # fp32: solo tiene sentido en GPU (en CPU es más lento que el int8)
     "jinaai/jina-reranker-v2-base-multilingual",
 ]
 
@@ -63,6 +64,8 @@ def _providers(proveedor: str) -> list[str]:
         return ["CPUExecutionProvider"]
     import onnxruntime
 
+    # Las librerías CUDA/cuDNN vienen como wheels de nvidia: hay que precargarlas antes de crear la sesión.
+    getattr(onnxruntime, "preload_dlls", lambda: None)()
     # Sin esto, onnxruntime cae a CPU en silencio y el benchmark reportaría CPU como si fuera GPU.
     if "CUDAExecutionProvider" not in onnxruntime.get_available_providers():
         raise RuntimeError("CUDAExecutionProvider no disponible en este onnxruntime")
