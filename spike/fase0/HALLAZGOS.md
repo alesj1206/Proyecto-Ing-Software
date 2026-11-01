@@ -31,9 +31,12 @@ Todo lo demás cumple en CPU con mucho margen:
 
 La elección es **provisional**: el set de calidad es demasiado chico para separar los modelos.
 - **Embeddings.** Hay 40 casos, y cada caso vale 2,5 puntos (intervalo de confianza del 95% de unos ±10 puntos).
-  MiniLM (36/40) y potion (35/40) están a un solo caso, así que no se distinguen. El reporte se queda con
-  **`potion-multilingual-128M`**: es estático, 170× más rápido en CPU y tiene licencia MIT. MiniLM es la alternativa
-  si el set de evaluación de la Fase 4 muestra que potion pierde en los casos de experiencia implícita.
+  MiniLM (36/40) y potion (35/40) están a un solo caso, así que no se distinguen **en orden entre pares**. El
+  reporte automático se queda con potion por velocidad, pero **esa elección queda anulada**: el prototipo sobre
+  vacantes reales mostró que la cobertura usa un **umbral absoluto**, y ahí potion separa mucho peor. Con τ = 0,40,
+  MiniLM deja sobre el umbral al 85% de los positivos y al 10% de los negativos; potion, al 55% y al 8%. **Se
+  recomienda `paraphrase-multilingual-MiniLM-L12-v2`** (Apache-2.0, 0,85 h de carga en CPU), con umbrales
+  calibrados τ_alto = 0,50 y τ_bajo = 0,40. Ver `docs/exploracion/prototipo-decisor-lecciones.md`.
 - **Reranker.** En la tarea real (perfil resumido frente a resumen de vacante), **los tres sacaron 20/20**, así que
   este set no sirve para elegir. En pares cortos, bge sacó 0,95 y jina 0,90. El reporte elige
   **`jina-reranker-v2-base-multilingual`** por velocidad (178 pares/s en GPU), pero su licencia es **CC-BY-NC**:
