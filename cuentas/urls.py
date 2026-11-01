@@ -12,5 +12,5 @@ urlpatterns = [
     path("logout", pendiente, name="logout"),
     path("onboarding", views.onboarding_view, name="onboarding"),
     path("perfil", views.perfil_view, name="perfil"),
-    path("expectativas", pendiente, name="expectativas"),
+    path("expectativas", views.expectativas_view, name="expectativas"),
 ]

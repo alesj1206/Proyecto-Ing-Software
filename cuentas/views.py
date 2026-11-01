@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from .forms import CVUploadForm
+from .forms import CVUploadForm, ExpectativasForm
+from .models import Perfil
 from .selectors import perfil_con_cv
 from .services import guardar_perfil_desde_cv
 
@@ -33,3 +34,13 @@ def perfil_view(request):
         if guardado:
             return redirect("perfil")
     return render(request, "cuentas/perfil.html", {"perfil": perfil_con_cv(request.user), "form": form})
+
+
+@login_required
+def expectativas_view(request):
+    perfil, _ = Perfil.objects.get_or_create(usuario=request.user)
+    form = ExpectativasForm(request.POST or None, instance=perfil)
+    if request.method == "POST" and form.is_valid():
+        form.save()  # la Fase 2 recalcula aquí las decisiones del perfil
+        return redirect("expectativas")
+    return render(request, "cuentas/expectativas.html", {"form": form, "perfil": perfil})
