@@ -11,6 +11,6 @@ def token_invalido(request) -> JsonResponse | None:
     if not settings.DEBUG and configurado == settings.N8N_SCORING_TOKEN_DEV_DEFAULT:
         return JsonResponse({"error": "N8N_SCORING_TOKEN no configurado"}, status=503)
     recibido = request.headers.get("X-Scoutly-Token", "")
-    if not configurado or not hmac.compare_digest(recibido, configurado):
+    if not configurado or not hmac.compare_digest(recibido.encode(), configurado.encode()):
         return JsonResponse({"error": "token inválido"}, status=401)
     return None

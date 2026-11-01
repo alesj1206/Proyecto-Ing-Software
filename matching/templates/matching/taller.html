@@ -29,7 +29,7 @@
         <input type="hidden" name="acepta" value="0" /><button type="submit" class="btn btn-outline">Rechazar</button></form>
     </div>
     {% else %}
-    <p class="decision-cubres">{{ s.get_estado_display }}</p>
+    <p class="decision-cubres">{{ s.get_estado_display }}{% if not s.vigente %} · ya no está respaldada por tu CV actual: no la uses{% endif %}</p>
     {% endif %}
   </div>
   {% empty %}

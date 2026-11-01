@@ -30,21 +30,48 @@ def para_n8n(vista):
     return envoltura
 
 
+MAX_TERMINOS, MAX_LARGO_TERMINO, MAX_POR_TERMINO = 10, 60, 20
+
+
+class EntradaInvalida(ValueError):
+    pass
+
+
 def _datos(request) -> dict:
     try:
-        return json.loads(request.body or b"{}")
-    except ValueError:
-        return {}
+        datos = json.loads(request.body or b"{}")
+    except ValueError as error:
+        raise EntradaInvalida("JSON inválido") from error
+    if not isinstance(datos, dict):
+        raise EntradaInvalida("se esperaba un objeto JSON")
+    return datos
+
+
+def _validar(datos: dict) -> tuple[list[str], int]:
+    """Acota lo que n8n puede pedir: el scraping corre con Chromium y no debe durar horas."""
+    terminos = datos.get("terminos") or TERMINOS_POR_DEFECTO
+    if not (isinstance(terminos, list) and 0 < len(terminos) <= MAX_TERMINOS
+            and all(isinstance(t, str) and 0 < len(t) <= MAX_LARGO_TERMINO for t in terminos)):
+        raise EntradaInvalida(f"terminos: lista de 1 a {MAX_TERMINOS} textos de hasta {MAX_LARGO_TERMINO} caracteres")
+    try:
+        por_termino = int(datos.get("por_termino") or POR_TERMINO_POR_DEFECTO)
+    except (TypeError, ValueError) as error:
+        raise EntradaInvalida("por_termino debe ser un número") from error
+    return terminos, min(max(por_termino, 1), MAX_POR_TERMINO)
 
 
 def fuente_para(datos: dict) -> FuenteMagnetoDetalle:
-    return FuenteMagnetoDetalle(datos.get("terminos") or TERMINOS_POR_DEFECTO,
-                                int(datos.get("por_termino") or POR_TERMINO_POR_DEFECTO))
+    return FuenteMagnetoDetalle(*_validar(datos))
 
 
 @para_n8n
 def importar_vacantes(request):
-    if not ingerir_en_segundo_plano(fuente_para(_datos(request))):
+    try:
+        datos = _datos(request)
+        _validar(datos)
+    except EntradaInvalida as error:
+        return JsonResponse({"error": str(error)}, status=400)
+    if not ingerir_en_segundo_plano(fuente_para(datos)):
         return JsonResponse({"error": "ya hay una ingesta en curso"}, status=409)
     return JsonResponse({"estado": "ingesta iniciada"}, status=202)
 

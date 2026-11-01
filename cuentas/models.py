@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from pgvector.django import HalfVectorField
 
@@ -86,7 +87,7 @@ class Perfil(models.Model):
         DESACTIVADO = "desactivado", "Solo en la campana, sin correos"
 
     notif_modo = models.CharField(max_length=12, choices=ModoNotificacion.choices, default=ModoNotificacion.RESUMEN)
-    notif_max = models.PositiveSmallIntegerField(default=3)
+    notif_max = models.PositiveSmallIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(10)])
 
     # Vectores (Fase 2): promedio normalizado de la evidencia y su matriz (float16), al día si hash_embebido coincide.
     vector = HalfVectorField(dimensions=settings.SCOUTLY_DIMENSION, null=True, blank=True)
@@ -131,3 +132,15 @@ class ConexionMagneto(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="conexion_magneto")
     token_cifrado = models.TextField()
     expira_en = models.DateTimeField()
+
+
+class RegistroPendiente(models.Model):
+    """Un registro por correo que espera la confirmación. La cuenta NO existe hasta abrir el enlace, así que nadie
+    puede apropiarse de un correo ajeno ni bloquearlo: un registro nuevo con el mismo correo reemplaza a este."""
+
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)  # ya en hash (make_password)
+    version_politica = models.CharField(max_length=20)
+    version_terminos = models.CharField(max_length=20)
+    token_hash = models.CharField(max_length=64, unique=True)  # sha256 del token del enlace; el token no se guarda
+    creado_en = models.DateTimeField(auto_now=True)

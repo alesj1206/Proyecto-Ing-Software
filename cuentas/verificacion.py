@@ -1,17 +1,28 @@
-"""Verificación del correo al registrarse: la cuenta queda inactiva hasta abrir un enlace firmado (3 días). Evita que
-alguien registre un correo ajeno (pendiente de la revisión de la Fase 1). Las cuentas sociales ya llegan verificadas."""
+"""Verificación del correo al registrarse (revisión final de la Fase 3). El registro deja un RegistroPendiente con un
+token aleatorio (solo se guarda su hash) y la cuenta se crea al abrir el enlace, dentro de 3 días. Así:
+- nadie se apropia de un correo ajeno: el enlace llega al dueño del correo, y si el dueño se registra, reemplaza lo
+  pendiente con su propia contraseña;
+- no hay cuentas inactivas que reactivar;
+- los reenvíos tienen límite."""
 
+import hashlib
+import secrets
 from datetime import timedelta
 
 from django.conf import settings
-from django.core import signing
+from django.contrib.auth.hashers import make_password
+from django.core.cache import cache
 from django.core.mail import send_mail
+from django.db import transaction
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import Usuario
+from .legal import VERSION_POLITICA, VERSION_TERMINOS
+from .models import RegistroPendiente, Usuario, normalizar_correo
+from .services import crear_usuario_con_autorizacion
 
-SAL = "scoutly.verificacion"
 VIGENCIA = timedelta(days=3)
+ESPERA_REENVIO_S = 300  # un reenvío cada 5 minutos por correo
 
 
 class EnlaceInvalido(Exception):
@@ -26,30 +37,52 @@ class EnlaceUsado(Exception):
     pass
 
 
-def generar_token(usuario: Usuario) -> str:
-    return signing.dumps({"u": usuario.pk, "e": usuario.email}, salt=SAL)
+def _hash(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
 
 
-def enviar_verificacion(usuario: Usuario, request) -> None:
-    enlace = request.build_absolute_uri(reverse("verificar", args=[generar_token(usuario)]))
+def _enviar(pendiente: RegistroPendiente, request) -> None:
+    token = secrets.token_urlsafe(32)
+    pendiente.token_hash = _hash(token)
+    pendiente.save()
+    enlace = request.build_absolute_uri(reverse("verificar", args=[token]))
     send_mail("Confirma tu correo en Scoutly",
-              f"Hola. Abre este enlace para activar tu cuenta de Scoutly (vence en 3 días):\n\n{enlace}\n\n"
-              "Si no creaste una cuenta, ignora este correo.",
-              settings.DEFAULT_FROM_EMAIL, [usuario.email])
+              f"Hola. Abre este enlace para crear tu cuenta de Scoutly (vence en 3 días):\n\n{enlace}\n\n"
+              "Si no te registraste, ignora este correo: no se creará ninguna cuenta.",
+              settings.DEFAULT_FROM_EMAIL, [pendiente.email])
 
 
+def registrar_pendiente(email: str, password: str, request) -> None:
+    """Crea o REEMPLAZA el registro pendiente de ese correo y envía el enlace."""
+    email = normalizar_correo(email)
+    pendiente = RegistroPendiente.objects.filter(email=email).first() or RegistroPendiente(email=email)
+    pendiente.password = make_password(password)
+    pendiente.version_politica, pendiente.version_terminos = VERSION_POLITICA, VERSION_TERMINOS
+    _enviar(pendiente, request)
+
+
+def reenviar(email: str, request) -> None:
+    """Reenvía el enlace si hay un registro pendiente, como mucho uno cada 5 minutos. No revela nada."""
+    email = normalizar_correo(email)
+    if not cache.add(f"reenvio-verificacion:{email}", 1, ESPERA_REENVIO_S):
+        return
+    if pendiente := RegistroPendiente.objects.filter(email=email).first():
+        _enviar(pendiente, request)
+
+
+@transaction.atomic
 def verificar(token: str) -> Usuario:
-    try:
-        datos = signing.loads(token, salt=SAL, max_age=VIGENCIA)
-    except signing.SignatureExpired as error:
-        raise EnlaceVencido from error
-    except signing.BadSignature as error:
-        raise EnlaceInvalido from error
-    usuario = Usuario.objects.filter(pk=datos.get("u"), email=datos.get("e")).first()
-    if usuario is None:
+    pendiente = RegistroPendiente.objects.select_for_update().filter(token_hash=_hash(token)).first()
+    if pendiente is None:
         raise EnlaceInvalido
-    if usuario.is_active:
+    if pendiente.creado_en < timezone.now() - VIGENCIA:
+        pendiente.delete()
+        raise EnlaceVencido
+    if Usuario.objects.filter(email=pendiente.email).exists():
+        pendiente.delete()
         raise EnlaceUsado
-    usuario.is_active = True
-    usuario.save(update_fields=["is_active"])
+    usuario = crear_usuario_con_autorizacion(pendiente.email, None)
+    usuario.password = pendiente.password  # el hash que eligió quien se registró
+    usuario.save(update_fields=["password"])
+    pendiente.delete()
     return usuario

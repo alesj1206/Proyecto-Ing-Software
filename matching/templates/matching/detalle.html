@@ -182,7 +182,7 @@
         {% for motivo in decision.motivos %}<li>{{ motivo }}</li>{% endfor %}
       </ul>
       <div id="explicacion" data-url="{% url 'explicacion' vacante.id %}">
-        <button type="button" class="btn btn-outline" onclick="fetch(this.parentElement.dataset.url).then(r => r.text()).then(h => { this.parentElement.innerHTML = h; })">Explícamelo</button>
+        <button type="button" class="btn btn-outline" onclick="const caja = this.parentElement; fetch(caja.dataset.url).then(r => (!r.ok || r.redirected) ? Promise.reject() : r.text()).then(h => { caja.innerHTML = h; }, () => { caja.textContent = 'No pudimos cargar la explicación. Recarga la página e inténtalo de nuevo.'; })">Explícamelo</button>
       </div>
       {% if decision.accion == "AJUSTAR_CV" %}
       <a href="{% url 'taller' vacante.id %}" class="btn btn-brand" style="margin-bottom:1rem;">Abrir el taller de CV</a>

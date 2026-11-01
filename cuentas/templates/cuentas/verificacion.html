@@ -7,7 +7,7 @@
     <a href="{% url 'login' %}" class="brand-mark auth-brand"><img src="{% static 'img/logo.svg' %}" alt="" />Scoutly</a>
     <h1 class="auth-title">{% if problema %}{{ problema }}{% else %}Revisa tu correo{% endif %}</h1>
     {% if aviso %}<p class="auth-subtitle">{{ aviso }}</p>{% endif %}
-    {% if problema %}<p class="auth-subtitle">Escribe tu correo y te enviamos un enlace nuevo.</p>{% endif %}
+    {% if problema %}<p class="auth-subtitle">Escribe tu correo y te enviamos un enlace nuevo, o vuelve a registrarte.</p>{% endif %}
     <form method="post" action="{% url 'reenviar_verificacion' %}" class="auth-form">
       {% csrf_token %}
       <div class="auth-input">

@@ -40,7 +40,7 @@ def test_evidencia_que_ya_no_esta_en_el_cv_no_se_sugiere(decision):
 
 
 def test_resumen_solo_con_requisitos_cubiertos(decision):
-    [r] = [s for s in generar_sugerencias(decision, []) if s.tipo == "resumen"]
+    [r] = [s for s in generar_sugerencias(decision, ["Usé SQL en reportes", "Reportes en Excel"]) if s.tipo == "resumen"]
     assert r.propuesta == "Resumen sugerido: experiencia en SQL y Excel." and "Docker" not in r.propuesta
 
 
@@ -82,3 +82,17 @@ def test_el_detalle_ofrece_el_taller_solo_en_ajustar_cv(client_con_cv, decision)
 
 def test_sin_decision_el_taller_es_404(client_con_cv, vacante_v1):
     assert client_con_cv.get(reverse("taller", args=["v1"])).status_code == 404
+
+
+# --- revisión final de la Fase 3 -----------------------------------------------------------------------
+
+def test_el_resumen_no_cita_cubiertos_cuya_evidencia_ya_no_esta(decision, usuario, vacante_v1):
+    sugerencias = generar_sugerencias(decision, ["Hice tableros en Excel."])  # el CV ya no tiene SQL ni Excel
+    assert not [s for s in sugerencias if s.tipo == "resumen"]
+
+
+def test_el_texto_para_copiar_no_lleva_evidencia_que_ya_no_esta(decision, usuario, vacante_v1):
+    s = next(s for s in taller(usuario.perfil, vacante_v1) if s.tipo == "requisito")
+    responder(s, acepta=True)
+    usuario.perfil.evidencias.filter(texto="Hice tableros en Excel.").delete()
+    assert texto_adaptado(usuario.perfil, vacante_v1) == ""

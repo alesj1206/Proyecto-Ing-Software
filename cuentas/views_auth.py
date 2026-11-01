@@ -12,7 +12,7 @@ from .legal import VERSION_POLITICA, VERSION_TERMINOS
 from .selectors import perfil_con_cv
 from .models import Usuario
 from .services import crear_usuario_con_autorizacion
-from .verificacion import EnlaceInvalido, EnlaceUsado, EnlaceVencido, enviar_verificacion, verificar
+from .verificacion import EnlaceInvalido, EnlaceUsado, EnlaceVencido, registrar_pendiente, reenviar, verificar
 from .sociales import proveedores_activos
 
 MAX_INTENTOS_LOGIN = 5
@@ -113,14 +113,8 @@ def registro_view(request):
     if not clave_form.is_valid():
         return _render_registro(request, clave_form=clave_form)
     request.session.pop(SESION_REGISTRO, None)
-    try:
-        usuario = crear_usuario_con_autorizacion(paso1["email"], clave_form.cleaned_data["password1"], activo=False)
-    except IntegrityError:  # alguien registró el mismo correo entre el paso 1 y el 2
-        datos_form = RegistroDatosForm(initial={"email": paso1["email"]})
-        datos_form.errors["email"] = datos_form.error_class(["Ya existe una cuenta con ese correo. Inicia sesión."])
-        return _render_registro(request, datos_form=datos_form)
-    enviar_verificacion(usuario, request)
-    return render(request, "cuentas/registro.html", {"enviado": usuario.email, "proveedores": []})
+    registrar_pendiente(paso1["email"], clave_form.cleaned_data["password1"], request)
+    return render(request, "cuentas/registro.html", {"enviado": paso1["email"], "proveedores": []})
 
 
 def verificar_view(request, token):
@@ -140,12 +134,10 @@ def verificar_view(request, token):
 @require_POST
 def reenviar_verificacion_view(request):
     """La misma respuesta exista o no la cuenta: no revela qué correos están registrados."""
-    email = request.POST.get("email", "").strip().lower()
-    pendiente = Usuario.objects.filter(email=email, is_active=False).first()
-    if pendiente:
-        enviar_verificacion(pendiente, request)
+    reenviar(request.POST.get("email", ""), request)
     return render(request, "cuentas/verificacion.html", {
-        "aviso": "Si ese correo tiene una cuenta pendiente de confirmar, te enviamos un enlace nuevo."})
+        "aviso": "Si ese correo tiene un registro pendiente de confirmar, te enviamos un enlace nuevo "
+                 "(como mucho uno cada 5 minutos)."})
 
 
 @require_POST

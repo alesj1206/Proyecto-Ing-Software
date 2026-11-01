@@ -83,14 +83,15 @@ def test_registro_paso2_sin_paso1_vuelve_al_inicio(client, db):
     assert not Usuario.objects.exists()
 
 
-def test_registro_completo_crea_usuario_autorizado_pendiente_de_verificar(client, db):
-    """Fase 3: la cuenta queda inactiva hasta abrir el enlace del correo (cuentas/tests/test_verificacion.py)."""
+def test_registro_completo_queda_pendiente_hasta_el_enlace(client, db):
+    """Fase 3 (revisión final): la cuenta y su autorización se crean al abrir el enlace del correo."""
+    from cuentas.models import RegistroPendiente
+
     client.post(reverse("registro"), DATOS_REGISTRO)
     r = client.post(reverse("registro"), {"paso": "clave", "password1": CLAVE_DE_PRUEBA,
                                           "password2": CLAVE_DE_PRUEBA})
-    usuario = Usuario.objects.get(email="n@e.com")
-    assert r.status_code == 200 and not usuario.is_active and usuario.autorizacion_set.exists()
-    assert "registro_paso1" not in client.session
+    assert r.status_code == 200 and not Usuario.objects.exists()
+    assert RegistroPendiente.objects.filter(email="n@e.com").exists() and "registro_paso1" not in client.session
 
 
 def test_registro_con_correo_existente(client, usuario):

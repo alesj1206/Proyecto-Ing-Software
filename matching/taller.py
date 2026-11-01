@@ -24,7 +24,8 @@ def generar_sugerencias(decision: Decision, evidencias_actuales: list[str]) -> l
                 perfil=decision.perfil, vacante=decision.vacante, tipo=SugerenciaCV.Tipo.REQUISITO,
                 requisito=r["texto"], evidencia=r["evidencia"],
                 propuesta=f"{r['evidencia'].rstrip('. ')} ({r['texto']})."))
-    cubiertos = [r["texto"] for r in decision.cobertura if r["estado"] == "cubierto" and r["tipo"] == "obligatorio"]
+    cubiertos = [r["texto"] for r in decision.cobertura
+                 if r["estado"] == "cubierto" and r["tipo"] == "obligatorio" and r["evidencia"] in actuales]
     if len(cubiertos) >= 2:
         sugerencias.append(SugerenciaCV(
             perfil=decision.perfil, vacante=decision.vacante, tipo=SugerenciaCV.Tipo.RESUMEN, requisito="",
@@ -52,7 +53,11 @@ def taller(perfil: Perfil, vacante: Vacante) -> list[SugerenciaCV]:
     for vieja in SugerenciaCV.objects.filter(perfil=perfil, vacante=vacante, estado=SugerenciaCV.Estado.PENDIENTE):
         if (vieja.tipo, vieja.requisito) not in claves:
             vieja.delete()
-    return list(SugerenciaCV.objects.filter(perfil=perfil, vacante=vacante))
+    propuestas_vigentes = {s.propuesta for s in vigentes}
+    sugerencias = list(SugerenciaCV.objects.filter(perfil=perfil, vacante=vacante))
+    for s in sugerencias:  # una respondida cuya evidencia ya no está en el CV se marca (se guarda como historial)
+        s.vigente = s.propuesta in propuestas_vigentes
+    return sugerencias
 
 
 def responder(sugerencia: SugerenciaCV, acepta: bool) -> None:
@@ -61,5 +66,11 @@ def responder(sugerencia: SugerenciaCV, acepta: bool) -> None:
 
 
 def texto_adaptado(perfil: Perfil, vacante: Vacante) -> str:
+    """Las aceptadas que siguen respaldadas por el CV actual: nunca se copia algo cuya evidencia ya no está."""
+    decision = Decision.objects.filter(perfil=perfil, vacante=vacante).first()
+    if decision is None:
+        return ""
+    vigentes = {s.propuesta for s in generar_sugerencias(decision, list(perfil.evidencias.values_list("texto",
+                                                                                                    flat=True)))}
     aceptadas = SugerenciaCV.objects.filter(perfil=perfil, vacante=vacante, estado=SugerenciaCV.Estado.ACEPTADA)
-    return "\n".join(s.propuesta for s in aceptadas)
+    return "\n".join(s.propuesta for s in aceptadas if s.propuesta in vigentes)

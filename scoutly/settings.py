@@ -28,6 +28,11 @@ if not os.environ.get("SCOUTLY_SIN_DOTENV"):  # los tests de settings fijan su p
     load_dotenv(BASE_DIR / ".env")
 
 
+def _activado(valor: str) -> bool:
+    """Banderas del entorno: solo "1", "true", "yes" o "si" encienden (un "false" no debe encender nada)."""
+    return valor.strip().lower() in ("1", "true", "yes", "si", "sí")
+
+
 # Seguridad: nada sensible vive en el repo. DEBUG está apagado salvo que el .env
 # local lo encienda (DJANGO_DEBUG=true); con el túnel abierto debe quedar apagado,
 # porque una página de error con DEBUG muestra a internet los datos del CV.
@@ -182,7 +187,7 @@ SCOUTLY_RERANKER = os.environ.get('SCOUTLY_RERANKER', '')
 SCOUTLY_DIMENSION = 384  # MiniLM-L12; la columna halfvec de vacantes y perfiles
 
 # B1 (spec §13.3): MCP oficial de candidatos de Magneto. APAGADO hasta que el equipo revise los términos de uso.
-SCOUTLY_MAGNETO_MCP = os.environ.get('SCOUTLY_MAGNETO_MCP', '')
+SCOUTLY_MAGNETO_MCP = _activado(os.environ.get('SCOUTLY_MAGNETO_MCP', ''))  # "0"/"false" = apagado
 SCOUTLY_MAGNETO_MCP_URL = os.environ.get('SCOUTLY_MAGNETO_MCP_URL', 'https://api.magneto365.com/mcp/candidates')
 SCOUTLY_MAGNETO_OAUTH_AUTORIZAR = os.environ.get('SCOUTLY_MAGNETO_OAUTH_AUTORIZAR', '')
 SCOUTLY_MAGNETO_OAUTH_TOKEN = os.environ.get('SCOUTLY_MAGNETO_OAUTH_TOKEN', '')

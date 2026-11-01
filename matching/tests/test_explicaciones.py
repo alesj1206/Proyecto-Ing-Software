@@ -59,7 +59,7 @@ def test_sin_redactor_usa_el_respaldo(decision):
 def test_groq_lento_respeta_el_timeout(decision):
     with mock.patch("matching.ia.groq.requests.post", side_effect=requests.Timeout) as post:
         assert RedactorGroq("clave").redactar(insumos_publicos(decision)) is None
-    assert post.call_args.kwargs["timeout"] == 8
+    assert sum(post.call_args.kwargs["timeout"]) == 8
 
 
 def test_la_explicacion_requiere_sesion_y_decision_propia(client, decision, django_user_model):

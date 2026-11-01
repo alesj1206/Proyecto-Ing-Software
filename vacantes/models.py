@@ -94,3 +94,4 @@ class EstadoIngesta(models.Model):
     en_curso = models.BooleanField(default=False)
     iniciada_en = models.DateTimeField(null=True, blank=True)
     ultimo_resumen = models.CharField(max_length=255, blank=True)
+    corrida = models.CharField(max_length=32, blank=True)  # dueño del candado: solo él lo suelta

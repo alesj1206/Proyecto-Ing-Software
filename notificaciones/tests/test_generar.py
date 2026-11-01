@@ -32,7 +32,7 @@ def perfil(client_con_cv, usuario):
 def test_solo_notifica_postular_nuevo_de_hoy(perfil):
     _decision(perfil, 1)
     _decision(perfil, 2, anterior="POSTULAR")
-    _decision(perfil, 3, anterior="AJUSTAR_CV", cuando=timezone.now() - timedelta(days=1))
+    _decision(perfil, 3, anterior="AJUSTAR_CV", cuando=timezone.now() - timedelta(days=3))  # fuera de la ventana
     _decision(perfil, 4, accion="AJUSTAR_CV")
     generar_notificaciones()
     assert list(Notificacion.objects.values_list("vacante_id", flat=True)) == ["v1"]

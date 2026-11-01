@@ -31,10 +31,10 @@ def test_flujo_diario_como_n8n(client, usuario, settings, monkeypatch):
 
     assert _post(client, "api_importar_vacantes").status_code == 202
     assert _post(client, "api_decidir").json() == {"encolados": 1}
-    call_command("decidir", "--pendientes")  # lo que hace `decidir --escuchar` en producción
+    call_command("decidir", "--pendientes")  # lo que hace `decidir --escuchar`: decide y notifica
     assert Decision.objects.get(perfil=perfil, vacante_id="vpost").accion == "POSTULAR"
 
-    assert _post(client, "api_generar_notificaciones").json() == {"creadas": 1, "correos": 1}
+    assert _post(client, "api_generar_notificaciones").json() == {"creadas": 0, "correos": 0}  # ya notificó el batch
     assert Notificacion.objects.filter(perfil=perfil).count() == 1 and len(mail.outbox) == 1
 
     postular(perfil, Vacante.objects.get(id="vpost"))

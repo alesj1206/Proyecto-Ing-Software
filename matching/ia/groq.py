@@ -8,7 +8,7 @@ import requests
 from django.conf import settings
 
 URL = "https://api.groq.com/openai/v1/chat/completions"
-TIMEOUT_S = 8  # una explicación no debe colgar la página
+TIMEOUT_S = (3, 5)  # conectar + leer: en total una explicación no cuelga la página más de 8 s
 INSTRUCCIONES = (
     "Eres el asistente de Scoutly, una plataforma colombiana de empleo. Recibes la acción que el sistema recomienda "
     "para una vacante y los datos que la producen. Explica en 2 o 3 oraciones, en español claro y sin markdown, por qué "
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class RedactorGroq:
-    def __init__(self, api_key: str, modelo: str | None = None, timeout: int = TIMEOUT_S):
+    def __init__(self, api_key: str, modelo: str | None = None, timeout: tuple[int, int] = TIMEOUT_S):
         self.api_key, self.modelo, self.timeout = api_key, modelo or settings.SCOUTLY_GROQ_MODELO, timeout
 
     def redactar(self, insumos: dict) -> str | None:
@@ -29,7 +29,7 @@ class RedactorGroq:
                     {"role": "system", "content": INSTRUCCIONES},
                     {"role": "user", "content": json.dumps(insumos, ensure_ascii=False)}]})
             respuesta.raise_for_status()
-            return respuesta.json()["choices"][0]["message"]["content"].strip() or None
-        except (requests.RequestException, KeyError, IndexError, ValueError) as error:
+            return (respuesta.json()["choices"][0]["message"]["content"] or "").strip() or None
+        except (requests.RequestException, KeyError, IndexError, ValueError, TypeError, AttributeError) as error:
             log.warning("Groq no respondió: %s", error)
             return None

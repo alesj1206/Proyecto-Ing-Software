@@ -30,9 +30,6 @@
         {% if clave_form.non_field_errors %}
           <div class="form-error-box">{{ clave_form.non_field_errors.0 }}</div>
         {% endif %}
-        {% if clave_form.sin_verificar %}
-          <button type="submit" formaction="{% url 'reenviar_verificacion' %}" name="email" value="{{ email }}" class="btn-link" style="margin-bottom:1rem;">Reenviar el enlace de confirmación</button>
-        {% endif %}
         <label class="auth-label" for="{{ clave_form.password.id_for_label }}">Contraseña</label>
         <div class="auth-input">
           {% include "cuentas/_icono_clave.html" %}

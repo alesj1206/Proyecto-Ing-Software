@@ -55,6 +55,7 @@ class Command(BaseCommand):
         embebidas = embeber_vacantes(self.embedder)
         if embebidas:
             self.stdout.write(f"vacantes embebidas: {embebidas}")
+        decididos = 0
         for perfil in perfiles:
             try:
                 r = decidir_para_perfil(perfil, self.embedder, self.ordenador)
@@ -62,7 +63,13 @@ class Command(BaseCommand):
                 log.exception("No se pudo decidir para el perfil %s", perfil.pk)
                 self._contar_fallo(perfil)
                 continue
+            decididos += 1
             self.stdout.write(f"perfil {perfil.pk}: {r.relevantes} relevantes {r.por_accion} en {r.segundos:.2f} s")
+        if decididos:  # n8n no espera al batch: las notificaciones salen en cuanto hay decisiones nuevas
+            from notificaciones.services import generar_notificaciones
+
+            r = generar_notificaciones()
+            self.stdout.write(f"notificaciones: {r.creadas} nuevas, {r.correos} correos")
 
     def _contar_fallo(self, perfil):
         solicitud = SolicitudDecision.objects.filter(perfil=perfil).first()
