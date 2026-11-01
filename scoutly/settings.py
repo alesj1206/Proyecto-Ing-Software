@@ -69,11 +69,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
+    'cuentas',
     'vacantes',
+    'matching',
+    'postulaciones',
+    'notificaciones',
 ]
 
-AUTH_USER_MODEL = 'accounts.Usuario'
+AUTH_USER_MODEL = 'cuentas.Usuario'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -97,7 +100,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'vacantes.context_processors.notificaciones_sin_leer',
             ],
         },
     },
@@ -109,10 +111,15 @@ WSGI_APPLICATION = 'scoutly.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# Postgres 17 + pgvector en Podman (infra/postgres/levantar.sh). Credenciales en .env.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DJANGO_DB_NAME', 'scoutly_v3'),
+        'USER': os.environ.get('DJANGO_DB_USER', 'scoutly'),
+        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', ''),
+        'HOST': os.environ.get('DJANGO_DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DJANGO_DB_PORT', '5433'),
     }
 }
 
@@ -134,7 +141,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-co'
 
 # Candidatos y vacantes son colombianos; "hoy" para Matches de hoy (HU-06)
 # debe ser el día en Bogotá, no en UTC.

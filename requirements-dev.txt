@@ -1,0 +1,4 @@
+-r requirements.txt
+pytest>=9
+pytest-django>=4.11
+fpdf2>=2.8

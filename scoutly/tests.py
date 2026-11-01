@@ -59,3 +59,17 @@ class ConfiguracionSeguraTests(SimpleTestCase):
     def test_cookies_normales_en_desarrollo(self):
         _, s = cargar_settings(DJANGO_DEBUG="true")
         self.assertFalse(s["cookie_segura"])
+
+
+RUTAS_V2 = ["raiz", "login", "registro", "logout", "onboarding", "perfil", "expectativas", "dashboard",
+            "historial", "tablero", "notificaciones"]
+
+
+def test_todas_las_rutas_de_v2_existen():
+    from django.urls import reverse
+
+    for nombre in RUTAS_V2:
+        reverse(nombre)
+    reverse("vacante_detalle", args=["x"])
+    reverse("postularme", args=["x"])
+    reverse("cambiar_estado_postulacion", args=[1])

@@ -17,7 +17,15 @@ else
 fi
 
 for _ in $(seq 1 30); do
-  podman exec scoutly-postgres pg_isready -U "$POSTGRES_USER" -q && { echo "scoutly-postgres listo en :${POSTGRES_PORT}"; exit 0; }
+  if podman exec scoutly-postgres pg_isready -U "$POSTGRES_USER" -q; then
+    # Base de la app v3 (la del spike, $POSTGRES_DB, queda aparte). Idempotente.
+    BD_APP="${DJANGO_DB_NAME:-scoutly_v3}"
+    existe=$(podman exec scoutly-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc \
+      "SELECT 1 FROM pg_database WHERE datname = '${BD_APP}'")
+    [ "$existe" = "1" ] || podman exec scoutly-postgres createdb -U "$POSTGRES_USER" "$BD_APP"
+    echo "scoutly-postgres listo en :${POSTGRES_PORT} (base de la app: ${BD_APP})"
+    exit 0
+  fi
   sleep 1
 done
 echo "Postgres no respondió en 30 s"; exit 1

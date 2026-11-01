@@ -2,4 +2,6 @@ from django.apps import AppConfig
 
 
 class VacantesConfig(AppConfig):
-    name = 'vacantes'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "vacantes"
+    verbose_name = "Catálogo e ingesta de vacantes"
