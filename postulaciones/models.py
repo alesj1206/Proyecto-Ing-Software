@@ -25,3 +25,24 @@ class Postulacion(models.Model):
 
     def __str__(self):
         return f"{self.perfil} → {self.vacante} ({self.get_estado_display()})"
+
+
+class ResultadoDecision(models.Model):
+    """Lo que pasó con una postulación (entrevista o descartado) junto a la decisión que la produjo (spec §5.5): son
+    los datos con que se calibrará el decisor más adelante."""
+
+    class Resultado(models.TextChoices):
+        ENTREVISTA = "entrevista", "Entrevista"
+        DESCARTADO = "descartado", "Descartado"
+
+    postulacion = models.ForeignKey(Postulacion, on_delete=models.CASCADE, related_name="resultados")
+    resultado = models.CharField(max_length=12, choices=Resultado.choices)
+    accion = models.CharField(max_length=16, blank=True)  # "" si la vacante no tenía decisión
+    solidez = models.CharField(max_length=5, blank=True)
+    cobertura_pct = models.PositiveSmallIntegerField(null=True, blank=True)
+    version_politica = models.CharField(max_length=20, blank=True)
+    insumos = models.JSONField(default=dict, blank=True)  # copia de cobertura y restricciones en ese momento
+    registrado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["postulacion", "resultado"], name="un_resultado_por_estado")]
