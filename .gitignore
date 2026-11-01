@@ -13,3 +13,7 @@ db.sqlite3
 *.pem
 .env*
 !.env.example
+.superpowers/
+!infra/postgres/.env.ejemplo
+spike/fase0/resultados/*.json
+spike/fase0/.venv-gpu/
