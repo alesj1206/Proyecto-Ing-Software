@@ -39,7 +39,8 @@ class Command(BaseCommand):
 
     def _imprimir(self, informe):
         self.stdout.write(f"pares: {informe.total}  exactitud: {informe.exactitud:.0%}  "
-                          f"línea base: {informe.exactitud_linea_base:.0%}")
+                          f"línea base: {informe.exactitud_linea_base:.0%}  "
+                          f"clase mayoritaria: {informe.exactitud_mayoritaria:.0%}")
         self.stdout.write(f"distribución: {dict(informe.distribucion)}")
         for error in informe.errores:
             self.stdout.write(f"  ✗ {error}")

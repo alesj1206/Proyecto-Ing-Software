@@ -69,7 +69,7 @@ def parsear_detalle(cuerpo: str, url: str) -> VacanteCruda | None:
     texto = _recortar(cuerpo, inicio)
     resumen = [l.strip() for l in texto.split("\n")[1:] if l.strip()][:4]
     ubicacion = next((resumen[i + 1] for i, l in enumerate(resumen[:-1])
-                      if l.startswith("$") or l.lower().startswith("salario a convenir")), "Colombia")
+                      if l.startswith("$") or l.lower().startswith("salario a convenir")), "")
     return VacanteCruda(
         id=f"mag-{url.rstrip('/').rsplit('-', 1)[-1]}",
         titulo=titulo,

@@ -26,10 +26,11 @@ def dashboard_view(request):
         "modalidad_activa": modalidad_activa,
     }
     if perfil:
-        grupos = selectors.decisiones_por_accion(perfil)
+        grupos, conteos = selectors.decisiones_por_accion(perfil), selectors.conteo_por_accion(perfil)
         contexto |= {
             "pendiente": selectors.pendiente_de_decision(perfil),
-            "por_accion": [(a, Accion(a).label, ds) for a, ds in grupos.items() if ds],
+            "por_accion": [(a, Accion(a).label, ds, conteos.get(a, 0), conteos.get(a, 0) - len(ds))
+                           for a, ds in grupos.items() if ds],
             "aprendizaje": selectors.plan_de_aprendizaje(perfil),
             "ocultas_por_modalidad": selectors.ocultas_por_modalidad(perfil),
             "modalidad_oculta": selectors.MODALIDAD_OPUESTA.get(perfil.exp_modalidad, ""),

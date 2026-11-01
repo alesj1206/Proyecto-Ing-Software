@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from cuentas.models import Perfil
 from vacantes.models import Vacante
@@ -12,7 +13,8 @@ class Decision(models.Model):
     perfil = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name="decisiones")
     vacante = models.ForeignKey(Vacante, on_delete=models.CASCADE, related_name="decisiones")
     accion = models.CharField(max_length=16, choices=Accion.choices)
-    accion_anterior = models.CharField(max_length=16, choices=Accion.choices, blank=True)
+    accion_anterior = models.CharField(max_length=16, blank=True)  # la acción previa, o "NUEVA" si recién es relevante
+    cambio_en = models.DateTimeField(null=True, blank=True)  # cuándo cambió la acción por última vez (o apareció)
     con_nota = models.CharField(max_length=255, blank=True)
     solidez = models.CharField(max_length=5)  # alta | media | baja
     motivo_solidez = models.CharField(max_length=255)
@@ -41,6 +43,7 @@ class FotoDiaria(models.Model):
     fecha = models.DateField()
     conteos = models.JSONField(default=dict)  # {accion: n}
     top = models.JSONField(default=dict)  # {accion: [{vacante_id, cobertura_pct, orden}]} (hasta 10 por acción)
+    ocultas_por_modalidad = models.PositiveIntegerField(default=0)  # lo lee el dashboard sin buscar de nuevo
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["perfil", "fecha"], name="una_foto_por_dia")]
@@ -51,4 +54,5 @@ class SolicitudDecision(models.Model):
     """Un perfil que cambió (CV o expectativas) y espera que el batch lo decida. La web no carga modelos (§13.4)."""
 
     perfil = models.OneToOneField(Perfil, on_delete=models.CASCADE, related_name="solicitud_decision")
-    creada_en = models.DateTimeField(auto_now_add=True)
+    creada_en = models.DateTimeField(default=timezone.now)  # se refresca en cada solicitud
+    intentos = models.PositiveSmallIntegerField(default=0)  # fallos del batch con este perfil

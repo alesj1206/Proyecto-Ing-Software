@@ -21,7 +21,7 @@ def _vector(similitud: float) -> list[float]:
 
 def _vacante(id_, similitud, modalidad="Presencial", inferida=False, activa=True, con_vector=True):
     return Vacante.objects.create(id=id_, titulo=id_, empresa="ACME", ubicacion="Medellín", modalidad=modalidad,
-                                  fecha_publicacion=date(2026, 10, 30), fuente="prueba", hash_contenido="x",
+                                  fecha_publicacion=date(2026, 10, 30), fuente="prueba", hash_contenido="x", hash_embebido="x",
                                   modalidad_inferida=inferida, activa=activa,
                                   vector=_vector(similitud) if con_vector else None)
 

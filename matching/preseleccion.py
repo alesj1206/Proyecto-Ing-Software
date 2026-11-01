@@ -4,7 +4,7 @@ aproximado (recall 100%). El tope técnico solo protege contra perfiles degenera
 import logging
 from dataclasses import dataclass, field
 
-from django.db.models import Q
+from django.db.models import F, Q
 from pgvector.django import CosineDistance
 
 from cuentas.models import Perfil
@@ -25,7 +25,8 @@ class Preseleccion:
 def preseleccionar(perfil: Perfil, tau: float, tope: int = TOPE_TECNICO) -> Preseleccion:
     if perfil.vector is None:
         return Preseleccion()
-    candidatas = (Vacante.objects.filter(activa=True, vector__isnull=False)
+    # Solo vacantes con vectores al día: una re-ingesta posterior al embebido dejaría una matriz desalineada.
+    candidatas = (Vacante.objects.filter(activa=True, vector__isnull=False, hash_embebido=F("hash_contenido"))
                   .annotate(distancia=CosineDistance("vector", perfil.vector))
                   .filter(distancia__lte=1 - tau))
     ocultas = 0

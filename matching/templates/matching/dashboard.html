@@ -31,7 +31,7 @@
   </div>
   {% endif %}
   {% if ocultas_por_modalidad %}
-  <p class="decision-ocultas">{{ ocultas_por_modalidad }} vacante{{ ocultas_por_modalidad|pluralize }} {{ modalidad_oculta|lower }}{{ ocultas_por_modalidad|pluralize }} oculta{{ ocultas_por_modalidad|pluralize }} porque buscas otra modalidad.</p>
+  <p class="decision-ocultas">{{ ocultas_por_modalidad }} vacante{{ ocultas_por_modalidad|pluralize }} {{ modalidad_oculta|lower }}{% if modalidad_oculta == "Presencial" %}{{ ocultas_por_modalidad|pluralize:"es" }}{% else %}{{ ocultas_por_modalidad|pluralize }}{% endif %} oculta{{ ocultas_por_modalidad|pluralize }} porque buscas otra modalidad.</p>
   {% endif %}
   {% if top_matches %}
   <div class="matches-grid">
@@ -69,7 +69,10 @@
     {% endfor %}
   </div>
   {% else %}
-  {% if not pendiente %}
+  {% if pendiente %}
+  {% elif por_accion %}
+  <p style="margin-top:1rem;color:var(--muted-foreground);">Hoy no hay vacantes para postular ya: revisa tus vacantes por acción y tu plan de aprendizaje.</p>
+  {% else %}
   <p style="margin-top:1rem;color:var(--muted-foreground);">No encontramos vacantes relevantes para tu perfil todavía: revisa que tu hoja de vida tenga tu experiencia y habilidades.</p>
   {% endif %}
   {% endif %}
@@ -77,9 +80,9 @@
   {% if por_accion %}
   <h2 style="font-size:1.25rem;color:var(--navy);margin-top:3rem;">Tus vacantes por acción</h2>
   <div class="decision-acciones">
-    {% for accion, etiqueta, decisiones in por_accion %}
+    {% for accion, etiqueta, decisiones, total, restantes in por_accion %}
     <details class="card decision-grupo"{% if forloop.first %} open{% endif %}>
-      <summary><span class="decision-insignia decision-{{ accion|lower }}">{{ etiqueta }} ({{ decisiones|length }})</span></summary>
+      <summary><span class="decision-insignia decision-{{ accion|lower }}">{{ etiqueta }} ({{ total }})</span></summary>
       <ul class="job-list">
         {% for d in decisiones %}
         <li>
@@ -93,6 +96,7 @@
         </li>
         {% endfor %}
       </ul>
+      {% if restantes %}<p class="decision-ocultas">y {{ restantes }} más</p>{% endif %}
     </details>
     {% endfor %}
   </div>

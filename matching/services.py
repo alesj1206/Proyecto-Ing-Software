@@ -22,6 +22,7 @@ from .solidez import calcular_solidez
 from .vectores import de_bytes, embeber_perfil
 
 TOP_POR_ACCION_EN_FOTO = 10
+NUEVA = "NUEVA"  # accion_anterior de una vacante que recién entra al conjunto relevante (spec §5.7)
 
 
 @dataclass
@@ -33,14 +34,17 @@ class ResumenDecision:
 
 
 def solicitar_decision(perfil: Perfil) -> None:
-    """Lo llama la web cuando cambian el CV o las expectativas: el batch (`decidir --escuchar`) lo atiende."""
-    SolicitudDecision.objects.get_or_create(perfil=perfil)
+    """Lo llama la web cuando cambian el CV o las expectativas: el batch (`decidir --escuchar`) lo atiende. Refresca la
+    fecha para que una solicitud hecha mientras el batch decide no se borre al terminar."""
+    SolicitudDecision.objects.update_or_create(perfil=perfil, defaults={"creada_en": timezone.now(), "intentos": 0})
 
 
-def _decision(perfil, vacante, similitud, evidencias, matriz_evid, politica) -> Decision:
+def _decision(perfil, vacante, similitud, evidencias, matriz_evid, politica) -> Decision | None:
     requisitos = sorted(vacante.requisito_set.all(), key=lambda r: r.posicion)
-    cobertura = cubrir(requisitos, de_bytes(vacante.matriz_requisitos), evidencias, matriz_evid,
-                       politica.tau_alto, politica.tau_bajo)
+    matriz_req = de_bytes(vacante.matriz_requisitos)
+    if len(matriz_req) != len(requisitos) or len(matriz_evid) != len(evidencias):
+        return None  # vectores desalineados con el texto: se decide en la próxima corrida, ya re-embebida
+    cobertura = cubrir(requisitos, matriz_req, evidencias, matriz_evid, politica.tau_alto, politica.tau_bajo)
     restricciones = [r.evaluar(perfil, vacante, politica) for r in RESTRICCIONES]
     contexto = ContextoDecision(cobertura, restricciones, requisitos, politica)
     veredicto = decidir(contexto)
@@ -61,11 +65,13 @@ def decidir_par(perfil: Perfil, vacante: Vacante, similitud: float, politica: Po
     return _decision(perfil, vacante, similitud, evidencias, de_bytes(perfil.matriz_evidencia), politica)
 
 
-def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date) -> None:
-    anteriores = dict(Decision.objects.filter(perfil=perfil).values_list("vacante_id", "accion"))
+def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date, ocultas: int, inicio) -> None:
+    anteriores = {v: (a, c) for v, a, c in Decision.objects.filter(perfil=perfil)
+                  .values_list("vacante_id", "accion", "cambio_en")}
     for d in decisiones:
-        anterior = anteriores.get(d.vacante_id, "")
-        d.accion_anterior = anterior if anterior != d.accion else ""
+        accion_previa, cambio_previo = anteriores.get(d.vacante_id, (NUEVA, None))
+        d.accion_anterior = accion_previa
+        d.cambio_en = cambio_previo if accion_previa == d.accion and cambio_previo else inicio
     Decision.objects.filter(perfil=perfil).exclude(vacante_id__in=[d.vacante_id for d in decisiones]).delete()
     campos = [f.name for f in Decision._meta.concrete_fields if f.name not in ("id", "perfil", "vacante")]
     Decision.objects.bulk_create(decisiones, update_conflicts=True, unique_fields=["perfil", "vacante"],
@@ -76,22 +82,23 @@ def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date) -> None:
         top[accion] = [{"vacante_id": d.vacante_id, "cobertura_pct": d.cobertura_pct, "orden": d.orden}
                        for d in de_accion[:TOP_POR_ACCION_EN_FOTO]]
     FotoDiaria.objects.update_or_create(perfil=perfil, fecha=hoy, defaults={
-        "conteos": dict(Counter(d.accion for d in decisiones)), "top": top})
-    SolicitudDecision.objects.filter(perfil=perfil).delete()
+        "conteos": dict(Counter(str(d.accion) for d in decisiones)), "top": top, "ocultas_por_modalidad": ocultas})
+    SolicitudDecision.objects.filter(perfil=perfil, creada_en__lte=inicio).delete()  # las nuevas se quedan
 
 
 def decidir_para_perfil(perfil: Perfil, embedder: Embedder, ordenador: Ordenador | None = None,
                         politica: Politica = POLITICA, hoy: date | None = None) -> ResumenDecision:
-    inicio = time.perf_counter()
-    embeber_perfil(perfil, embedder)
+    inicio, reloj = timezone.now(), time.perf_counter()
+    evidencias = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))  # se leen una vez
+    embeber_perfil(perfil, embedder, evidencias)
     preseleccion = preseleccionar(perfil, politica.tau_relevancia)
     similitudes = dict(preseleccion.relevantes)
     vacantes = Vacante.objects.filter(id__in=similitudes).prefetch_related("requisito_set")
-    evidencias = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))
     matriz_evid = de_bytes(perfil.matriz_evidencia)
-    decisiones = [_decision(perfil, v, similitudes[v.id], evidencias, matriz_evid, politica) for v in vacantes]
+    decisiones = [d for v in vacantes if (d := _decision(perfil, v, similitudes[v.id], evidencias, matriz_evid,
+                                                         politica))]
     (ordenador or OrdenSimilitudCobertura()).ordenar(perfil, decisiones)
     with transaction.atomic():
-        _guardar(perfil, decisiones, hoy or timezone.localdate())
+        _guardar(perfil, decisiones, hoy or timezone.localdate(), preseleccion.ocultas_por_modalidad, inicio)
     return ResumenDecision(len(decisiones), dict(Counter(d.accion for d in decisiones)),
-                           preseleccion.ocultas_por_modalidad, time.perf_counter() - inicio)
+                           preseleccion.ocultas_por_modalidad, time.perf_counter() - reloj)

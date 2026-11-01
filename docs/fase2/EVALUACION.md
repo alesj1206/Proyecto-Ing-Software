@@ -16,6 +16,7 @@ Insumos:
 |---|---|---|
 | Exactitud del decisor | 54% | **73%** |
 | Exactitud de la línea base (similitud pura) | 19% | 19% |
+| Exactitud de "siempre la clase mayoritaria" (DESCARTAR) | 42% | 42% |
 | Acción más frecuente | DESCARTAR 42% | DESCARTAR 42% |
 
 Distribución final: POSTULAR 7, AJUSTAR_CV 3, CERRAR_BRECHA 3, DESCARTAR 11, SIN_DATOS 2.
@@ -54,6 +55,15 @@ en la Fase 4.
 | habilidad_nombrada_distinto × mag-1115173 | AJUSTAR_CV | CERRAR_BRECHA | "Hojas de cálculo" no llega a "Excel avanzado" (el caso difícil a propósito) |
 | experiencia_implicita × mag-1108121 | AJUSTAR_CV | POSTULAR | El CV implícito alcanza a cubrir más de lo que una persona daría por cubierto |
 | sin_experiencia × mag-1120958 | SIN_DATOS | DESCARTAR | La vacante no es relevante para su perfil (similitud 0,25), así que no se muestra. Probablemente la etiqueta era la equivocada |
+
+**Advertencia sobre la mitad de prueba (revisión final):**
+- Está desbalanceada: 14 de 21 pares son DESCARTAR, así que responder siempre DESCARTAR ya acierta el 67%.
+- 11 de sus 19 vacantes también aparecen en la mitad de ajuste.
+- Antes de correrla en la Fase 4 hay que rebalancearla por acción con vacantes nuevas, cambiando solo etiquetas y
+  sin correr nada, y reportar la línea base de clase mayoritaria junto a la de similitud.
+
+Después de la revisión final, la exactitud sigue en 73%: las competencias blandas se detectan por palabra completa y
+"0 obligatorios comparables" pasa a SIN_DATOS.
 
 **Para la Fase 4:**
 - correr la mitad de prueba;

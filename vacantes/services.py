@@ -47,7 +47,7 @@ def _guardar(cruda: VacanteCruda, fuente: str, firma: str) -> bool:
         defaults={
             "titulo": cruda.titulo,
             "empresa": cruda.empresa,
-            "ubicacion": cruda.ubicacion or restricciones.ubicacion or "Colombia",
+            "ubicacion": cruda.ubicacion or restricciones.ubicacion or "",  # vacío = la vacante no lo dice
             "modalidad": cruda.modalidad or restricciones.modalidad or MODALIDAD_POR_DEFECTO,
             "salario_min": salario_min,
             "salario_max": salario_max,

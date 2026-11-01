@@ -13,12 +13,17 @@ from vacantes.models import Vacante
 
 from .models import Decision, FotoDiaria, SolicitudDecision
 from .politica import Accion
+from .preseleccion import OPUESTA as MODALIDAD_OPUESTA
 
 ACCIONES_DEL_PLAN = (Accion.POSTULAR, Accion.AJUSTAR_CV)
 ORDEN_ACCIONES = (Accion.POSTULAR, Accion.AJUSTAR_CV, Accion.CERRAR_BRECHA, Accion.SIN_DATOS, Accion.DESCARTAR)
 ACCIONES_DEL_RANKING = (Accion.POSTULAR, Accion.AJUSTAR_CV, Accion.CERRAR_BRECHA)
 HORAS_POSTULAR_HOY = 72
 TOP_HISTORIAL = 10
+MAX_POR_GRUPO = 20  # el dashboard muestra a lo sumo 20 por acción ("y N más"): §6 habla de ~3.000 relevantes
+CANDIDATAS_PLAN = 200  # el Plan de hoy reordena por frescura solo las mejores por `orden`
+# El dashboard no necesita el texto completo ni los vectores de cada vacante (decenas de MB con 3.000 decisiones).
+CAMPOS_PESADOS = ("vacante__texto_completo", "vacante__descripcion", "vacante__vector", "vacante__matriz_requisitos")
 SUFIJOS_EMPRESA = re.compile(r"\b(?:s a s|sas|s a|sa|ltda|s en c)\b")
 CRITERIOS = (("experiencia", "Experiencia"), ("salario", "Salario"), ("modalidad", "Modalidad"),
              ("ubicacion", "Ubicación"))
@@ -87,7 +92,8 @@ def _frescura(publicada: date, hoy: date) -> float:
 def plan_de_hoy(perfil, n: int = 5, ahora: date | None = None) -> list[ItemPlan]:
     """3–5 vacantes para postularse hoy: como máximo una por empresa, por ajuste × frescura (spec §13.2)."""
     hoy = ahora or timezone.localdate()
-    candidatas = Decision.objects.filter(perfil=perfil, accion__in=ACCIONES_DEL_PLAN).select_related("vacante")
+    candidatas = (Decision.objects.filter(perfil=perfil, accion__in=ACCIONES_DEL_PLAN).select_related("vacante")
+                  .defer(*CAMPOS_PESADOS).order_by("-orden")[:CANDIDATAS_PLAN])
     ordenadas = sorted(candidatas, key=lambda d: -d.orden * _frescura(d.vacante.fecha_publicacion, hoy))
     plan, empresas = [], set()
     for d in ordenadas:
@@ -100,12 +106,19 @@ def plan_de_hoy(perfil, n: int = 5, ahora: date | None = None) -> list[ItemPlan]
     return plan
 
 
-def decisiones_por_accion(perfil) -> dict[str, list[Decision]]:
-    decisiones = Decision.objects.filter(perfil=perfil).select_related("vacante").order_by("-orden")
-    grupos = {accion.value: [] for accion in ORDEN_ACCIONES}
-    for d in decisiones:
-        grupos[d.accion].append(d)
+def decisiones_por_accion(perfil, limite: int = MAX_POR_GRUPO) -> dict[str, list[Decision]]:
+    """Las mejores `limite` de cada acción (para el dashboard); `conteo_por_accion` da los totales."""
+    grupos = {}
+    for accion in ORDEN_ACCIONES:
+        grupos[accion.value] = list(Decision.objects.filter(perfil=perfil, accion=accion).select_related("vacante")
+                                    .defer(*CAMPOS_PESADOS).order_by("-orden")[:limite])
     return grupos
+
+
+def conteo_por_accion(perfil) -> dict[str, int]:
+    from django.db.models import Count
+
+    return dict(Decision.objects.filter(perfil=perfil).values_list("accion").annotate(n=Count("id")))
 
 
 def plan_de_aprendizaje(perfil, n: int = 5) -> list[tuple[str, int]]:
@@ -173,15 +186,9 @@ def historial(perfil, fecha: date | None = None) -> dict:
             "fecha_anterior": anterior.fecha if anterior else None, "ranking": ranking}
 
 
-MODALIDAD_OPUESTA = {"Remoto": "Presencial", "Presencial": "Remoto"}
-
-
 def ocultas_por_modalidad(perfil) -> int:
-    """Cuántas vacantes relevantes se ocultaron por modalidad opuesta (§5.7: nada desaparece en silencio)."""
-    from .politica import POLITICA
-    from .preseleccion import preseleccionar
-
-    return preseleccionar(perfil, POLITICA.tau_relevancia).ocultas_por_modalidad
+    """Cuántas vacantes relevantes se ocultaron por modalidad opuesta (§5.7). Lo calcula el batch; la web solo lo lee."""
+    return FotoDiaria.objects.filter(perfil=perfil).values_list("ocultas_por_modalidad", flat=True).first() or 0
 
 
 def pendiente_de_decision(perfil) -> bool:

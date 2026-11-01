@@ -53,6 +53,14 @@ class Informe:
         return self.aciertos / self.total if self.total else 0.0
 
     @property
+    def exactitud_mayoritaria(self) -> float:
+        """Lo que acertaría responder siempre la acción esperada más frecuente (la línea base más simple)."""
+        esperadas = Counter()
+        for (esperada, _), n in self.confusion.items():
+            esperadas[esperada] += n
+        return max(esperadas.values()) / self.total if self.total else 0.0
+
+    @property
     def exactitud_linea_base(self) -> float:
         return self.aciertos_linea_base / self.total if self.total else 0.0
 

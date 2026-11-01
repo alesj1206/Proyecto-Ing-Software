@@ -3,6 +3,8 @@ por similitud (§13.2): que algo "se parezca" no prueba un título, y AJUSTAR_CV
 
 from dataclasses import dataclass, field
 
+import re
+
 import numpy as np
 
 from vacantes.extraccion import normalizar
@@ -26,9 +28,15 @@ PALABRAS_BLANDAS = ("trabajo en equipo", "disponibilidad", "aprendizaje", "actit
                     "vacunacion", "habilidades de comunicacion", "capacidad de aprendizaje", "empatia")
 
 
+# Requisitos técnicos que contienen una palabra "blanda" (revisión final de la Fase 2).
+EXCEPCIONES_TECNICAS = ("aprendizaje automatico", "aprendizaje de maquina", "aprendizaje profundo", "titulos valores",
+                        "liderazgo tecnico")
+_BLANDAS = re.compile(r"\b(?:" + "|".join(re.escape(p) for p in PALABRAS_BLANDAS) + r")")
+
+
 def es_blando(texto: str) -> bool:
     normal = normalizar(texto)
-    return any(p in normal for p in PALABRAS_BLANDAS)
+    return not any(e in normal for e in EXCEPCIONES_TECNICAS) and bool(_BLANDAS.search(normal))
 
 
 def es_solo_anios(texto: str) -> bool:

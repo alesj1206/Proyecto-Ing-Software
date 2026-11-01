@@ -56,9 +56,10 @@ def embeber_vacantes(embedder: Embedder, lote: int = 256) -> int:
     return total
 
 
-def embeber_perfil(perfil: Perfil, embedder: Embedder) -> bool:
-    """Embebe la evidencia del perfil si cambió. Devuelve si hizo algo."""
-    textos = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))
+def embeber_perfil(perfil: Perfil, embedder: Embedder, textos: list[str] | None = None) -> bool:
+    """Embebe la evidencia del perfil si cambió. Devuelve si hizo algo. `textos` evita leerla dos veces."""
+    if textos is None:
+        textos = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))
     firma = hashlib.sha256("\n".join(textos).encode("utf-8")).hexdigest()
     if perfil.hash_embebido == firma:
         return False

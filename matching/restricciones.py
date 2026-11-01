@@ -73,6 +73,8 @@ class RestriccionUbicacion:
             return ResultadoRestriccion(self.criterio, "cumple", "Es remota")
         if not perfil.exp_ubicacion:
             return ResultadoRestriccion(self.criterio, "sin_datos", "No declaraste dónde quieres trabajar")
+        if normalizar(vacante.ubicacion) in ("", "colombia"):  # "Colombia" era el relleno de la Fase 1
+            return ResultadoRestriccion(self.criterio, "sin_datos", "La vacante no dice dónde queda")
         lugar = normalizar(vacante.ubicacion)
         ciudades = [normalizar(c) for c in perfil.exp_ubicacion.split(",") if normalizar(c)]
         if any(c in lugar for c in ciudades):

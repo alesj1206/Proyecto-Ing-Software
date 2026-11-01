@@ -1,3 +1,4 @@
+import logging
 import time
 
 from django.core.management.base import BaseCommand
@@ -10,6 +11,8 @@ from matching.services import decidir_para_perfil
 from matching.vectores import embeber_vacantes
 
 PAUSA_ESCUCHA_S = 5
+MAX_INTENTOS = 3  # tras 3 fallos el perfil sale de la cola (queda en el log) para no bloquear a nadie
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -33,7 +36,10 @@ class Command(BaseCommand):
             self.stdout.write("Escuchando la cola de decisiones (Ctrl+C para salir)…")
             try:
                 while True:
-                    self._atender_cola()
+                    try:
+                        self._atender_cola()
+                    except Exception:  # un error de base de datos pasajero no debe apagar al que escucha
+                        log.exception("Falló una vuelta de la cola de decisiones")
                     time.sleep(PAUSA_ESCUCHA_S)
             except KeyboardInterrupt:
                 self.stdout.write("Listo.")
@@ -50,5 +56,20 @@ class Command(BaseCommand):
         if embebidas:
             self.stdout.write(f"vacantes embebidas: {embebidas}")
         for perfil in perfiles:
-            r = decidir_para_perfil(perfil, self.embedder, self.ordenador)
+            try:
+                r = decidir_para_perfil(perfil, self.embedder, self.ordenador)
+            except Exception:  # un perfil que falla no detiene a los demás (revisión de seguridad, Fase 2)
+                log.exception("No se pudo decidir para el perfil %s", perfil.pk)
+                self._contar_fallo(perfil)
+                continue
             self.stdout.write(f"perfil {perfil.pk}: {r.relevantes} relevantes {r.por_accion} en {r.segundos:.2f} s")
+
+    def _contar_fallo(self, perfil):
+        solicitud = SolicitudDecision.objects.filter(perfil=perfil).first()
+        if solicitud is None:
+            return
+        solicitud.intentos += 1
+        if solicitud.intentos >= MAX_INTENTOS:
+            solicitud.delete()
+        else:
+            solicitud.save(update_fields=["intentos"])

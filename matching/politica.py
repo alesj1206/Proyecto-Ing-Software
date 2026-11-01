@@ -64,6 +64,9 @@ class SinDatos:
     def aplicar(self, contexto):
         if requisitos_insuficientes(contexto.requisitos):
             return Veredicto(Accion.SIN_DATOS, motivos=["La vacante no trae requisitos legibles: revísala tú"])
+        if not contexto.cobertura.obligatorios_total:  # solo formación, años o blandas: "cubres 0/0" no es POSTULAR
+            return Veredicto(Accion.SIN_DATOS, motivos=["La vacante no trae requisitos que podamos comparar con tu "
+                                                        "hoja de vida: revísala tú"])
         return None
 
 
