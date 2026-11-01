@@ -12,6 +12,7 @@ import re
 import unicodedata
 
 from pypdf import PdfReader
+from pypdf.errors import PyPdfError
 
 from .skills import HABILIDADES_CONOCIDAS
 
@@ -21,6 +22,7 @@ ENCABEZADOS_EXPERIENCIA = {"experiencia", "experiencia laboral", "experiencia pr
 ENCABEZADOS_EDUCACION = {"educacion", "formacion academica", "formacion", "estudios"}
 
 MAX_LINEAS_SECCION = 4
+MAX_PAGINAS_CV = 10
 
 EXPERIENCIA_POR_AREA = {
     frozenset({"react", "javascript", "typescript", "html", "css"}): [
@@ -126,9 +128,10 @@ def extraer_datos_cv(archivo):
     """archivo: un UploadedFile de Django (form.cleaned_data['cv'])."""
     try:
         lector = PdfReader(archivo)
-        texto_crudo = "\n".join(pagina.extract_text() or "" for pagina in lector.pages)
-    except Exception:
-        texto_crudo = ""
+        paginas = lector.pages[:MAX_PAGINAS_CV]  # un PDF de miles de páginas no debe tumbar el servidor
+        texto_crudo = "\n".join(pagina.extract_text() or "" for pagina in paginas)
+    except PyPdfError:
+        texto_crudo = ""  # PDF dañado: se sigue con el respaldo por nombre de archivo
 
     lineas = _limpiar_lineas(texto_crudo)
     texto_normalizado = _normalizar(" ".join(lineas))

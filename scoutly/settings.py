@@ -24,21 +24,40 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # existe (p. ej. en otra máquina sin configurar), load_dotenv() no hace
 # nada — os.environ.get(..., default) de abajo sigue cayendo a los valores
 # por defecto (backend de consola, etc.), no rompe nada.
-load_dotenv(BASE_DIR / ".env")
+if not os.environ.get("SCOUTLY_SIN_DOTENV"):  # los tests de settings fijan su propio entorno
+    load_dotenv(BASE_DIR / ".env")
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
+# Seguridad: nada sensible vive en el repo. DEBUG está apagado salvo que el .env
+# local lo encienda (DJANGO_DEBUG=true); con el túnel abierto debe quedar apagado,
+# porque una página de error con DEBUG muestra a internet los datos del CV.
+DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1(1!@u*m7fmsfkn8d)mp0a2qa22n77%+3-n1$j0z_kiqai55&)'
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
+if not SECRET_KEY:
+    if not DEBUG:
+        from django.core.exceptions import ImproperlyConfigured
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+        raise ImproperlyConfigured(
+            "Falta DJANGO_SECRET_KEY en el entorno o en .env (ver .env.example)."
+        )
+    # Solo en desarrollo: una clave aleatoria por proceso (las sesiones se pierden al reiniciar).
+    from django.core.management.utils import get_random_secret_key
 
-ALLOWED_HOSTS = ['*']
+    SECRET_KEY = get_random_secret_key()
+
+ALLOWED_HOSTS = os.environ.get(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1,host.containers.internal,.trycloudflare.com,.loca.lt",
+).split(",")
 
 CSRF_TRUSTED_ORIGINS = ['https://*.loca.lt', 'https://*.trycloudflare.com']
+
+# Sin DEBUG la app se usa por el túnel (HTTPS): cookies solo por HTTPS, y se confía
+# en el encabezado del proxy (cloudflared) para saber que la petición original era HTTPS.
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # Application definition
@@ -102,10 +121,13 @@ DATABASES = {
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {'min_length': 6},
+        'OPTIONS': {'min_length': 8},
     },
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 

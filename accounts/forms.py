@@ -1,18 +1,30 @@
 from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 
 from .models import Usuario
 
 
 class RegistroForm(forms.Form):
     email = forms.EmailField(label="Correo electrónico")
-    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput, min_length=6)
+    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
 
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()
         if Usuario.objects.filter(email=email).exists():
             raise forms.ValidationError("Ese correo ya está en uso.")
         return email
+
+    def clean(self):
+        """Aplica AUTH_PASSWORD_VALIDATORS (largo, comunes, numéricas, parecida al correo)."""
+        cleaned_data = super().clean()
+        password, email = cleaned_data.get("password"), cleaned_data.get("email")
+        if password:
+            try:
+                validate_password(password, user=Usuario(email=email or ""))
+            except forms.ValidationError as error:
+                self.add_error("password", error)
+        return cleaned_data
 
     def guardar(self):
         return Usuario.objects.create_user(

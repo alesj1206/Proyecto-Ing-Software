@@ -1,5 +1,6 @@
-django
-pypdf
-requests
-playwright
-python-dotenv
+# Pisos de versión por seguridad: Django 6.1.1 corrige PYSEC-2026-3717; pypdf 6.21.4 corrige 26 CVE.
+django>=6.1.1,<6.2
+pypdf>=6.21.4,<7
+requests>=2.34,<3
+playwright>=1.63,<2
+python-dotenv>=1.2,<2

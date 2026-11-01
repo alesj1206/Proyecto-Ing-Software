@@ -270,11 +270,15 @@ utilitaria oscura por encima de la navegación. Tokens actualizados en
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
+cp .env.example .env   # y pon una DJANGO_SECRET_KEY propia (instrucciones dentro)
 .venv/bin/python manage.py migrate
 .venv/bin/python manage.py seed_vacantes
-.venv/bin/python manage.py runserver 3000
+.venv/bin/python manage.py runserver --insecure 3000
 ```
 
 Abre [http://localhost:3000](http://localhost:3000).
+
+DEBUG está apagado por defecto, así que el CSS se sirve con `--insecure`. Para depurar en local
+pon `DJANGO_DEBUG=true` en `.env`, pero nunca con el túnel abierto. Tests: `.venv/bin/python manage.py test`.
 
 No hay despliegue configurado todavía; eso queda para una etapa posterior.

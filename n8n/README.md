@@ -105,7 +105,7 @@ dentro del contenedor `n8n` en esta máquina) — para que el request llegue,
 Django tiene que escuchar en todas las interfaces, no solo loopback:
 
 ```bash
-.venv/bin/python manage.py runserver 0.0.0.0:8000
+.venv/bin/python manage.py runserver --insecure 0.0.0.0:8000
 ```
 
 (Con `127.0.0.1:8000` el contenedor no puede alcanzarlo — probado.)
