@@ -2,6 +2,8 @@
 
 Fecha: 2026-11-01 · Rama: `sprint-3` · Punto de retorno: tag `pre-sprint3-rebuild`
 
+> **Enmendado el 2026-11-02 tras la Fase 0 (§13).** Donde §13 contradiga una sección anterior, manda §13.
+
 ## 1. Intención y por qué
 
 Scoutly (reto Magneto, Idea 4: *vacantes → ranking diario → notificación*, orquestado por n8n) existe para que
@@ -349,3 +351,90 @@ El workflow mantiene sus 3 nodos HTTP en el mismo orden: `importar-vacantes` →
 La estructura interna de los módulos, los nombres de clases y funciones, la fórmula exacta de la confianza
 (dentro de 5.4), los valores iniciales de los umbrales (se ajustan en la Fase 4), cómo se generan los
 datos sintéticos del benchmark y el detalle de los fakes de test.
+
+## 13. Enmiendas aprobadas tras la Fase 0 (2026-11-02)
+
+Origen: `spike/fase0/HALLAZGOS.md` (P1–P8), `docs/exploracion/prototipo-decisor-lecciones.md` y
+`docs/exploracion/2026-11-02-propuestas-entrevistas.md`. El usuario aprobó: reranker opcional, alcance
+**A + C (texto) + B1**, y corregir la seguridad de v2 antes de empezar (hecho en el commit `bcc2550`). Lo marcado
+*(criterio del builder)* lo decidió el builder y se puede revertir.
+
+### 13.1 Escala y modelos (reemplaza §5.7 "Conjunto decidido", §6, §7.3 y §8 donde choquen)
+- **Embeddings:** `paraphrase-multilingual-MiniLM-L12-v2` (384 d, Apache-2.0). Umbrales iniciales
+  τ_alto = 0,50, τ_bajo = 0,40 y τ_relevancia = 0,40, **provisionales** hasta el set de evaluación.
+- **Búsqueda exacta dentro de Postgres, sin índice HNSW** *(criterio del builder, P2)*: 17 ms p95 con recall
+  100% sobre 120k vectores. Una sola fuente de verdad, sin matrices en memoria. HNSW solo vuelve con más de ~1M.
+- **Vector de la vacante = promedio de los vectores de sus requisitos y del título**. El del perfil es el promedio
+  de sus unidades de evidencia (P4: MiniLM trunca a ~128 tokens).
+- **Requisitos:** además de las filas `Requisito` (texto, tipo y `posicion`), cada vacante guarda su matriz de
+  vectores como un `bytea` float16, escrita en la **misma transacción** (P3). `Decision.cobertura` guarda el
+  **texto** del requisito, no su id.
+- **Reranker opcional (P1-b):** está apagado por defecto. Sin él, el orden dentro de cada acción es
+  similitud × cobertura. Si se enciende (`SCOUTLY_RERANKER=bge`, con GPU), usa `bge-reranker-v2-m3`
+  (Apache-2.0) *(criterio del builder: se prefiere por licencia sobre jina, que es CC-BY-NC)*. El umbral de
+  §6 "página ≤ 1,5 s" aplica solo con el reranker encendido.
+- La puerta de viabilidad de la Fase 0 queda **aprobada** con estas decisiones.
+
+### 13.2 El decisor (reemplaza §5.1 y §5.4 donde choquen)
+| Acción | Cuándo (en orden de la cadena) |
+|---|---|
+| **DESCARTAR** | Viola una restricción dura (con su motivo), o le faltan ≥ 3 obligatorios. |
+| **SIN_DATOS** | La vacante tiene menos de 2 requisitos legibles. Se muestra como "revísala tú" y **nunca** entra al Plan de hoy. |
+| **POSTULAR** | Cubre todos los obligatorios. **POSTULAR con nota** si la cobertura es ≥ 0,7 y falta **uno solo** de nivel herramienta o etiqueta de Magneto (las etiquetas son señales, no obligatorios). |
+| **AJUSTAR_CV** | No le falta ningún obligatorio, pero ≥ 1 es parcial y tiene evidencia que lo respalda. |
+| **CERRAR_BRECHA** | Le faltan 1 o 2 obligatorios. |
+
+- **"Confianza" pasa a llamarse "solidez"** (alta, media o baja), siempre con su motivo y **sin números**,
+  porque no es una probabilidad. Los factores de §5.4 se mantienen.
+- **La formación no se mide por similitud.** Es un dato estructurado (nivel y área), porque lo "parcial" no prueba
+  un título y AJUSTAR_CV nunca debe sugerir inflar el CV.
+- **Filtro de ruido en la extracción:** salario, presentación de la empresa y frases de marketing no son requisitos.
+- **El argumento de AJUSTAR_CV** es el volumen de postulantes y la lectura de ~7 s, **no** "los ATS filtran por
+  palabra clave" (§5.1 queda corregido en ese punto).
+- **Plan de hoy:** 3–5 vacantes POSTULAR/AJUSTAR_CV, como máximo una por empresa, ordenadas por ajuste × frescura.
+  Las de menos de 72 h llevan la marca "Postular hoy". Frescura y diversidad son **orden y presentación**, no
+  reglas de la cadena. El catálogo completo sigue visible.
+- **Plan de aprendizaje:** las brechas de CERRAR_BRECHA, agregadas y ordenadas por frecuencia (es la "brecha
+  agregada" de §5.7). Es una tarjeta del dashboard.
+- **Métrica:** el decisor debe **superar a la línea base** (orden por similitud pura) en el set de evaluación.
+  Los anti-objetivos de §2 se mantienen.
+- La regla de experiencia (< 50% de los años pedidos) se marca como **a calibrar**: con 0 años deja fuera a
+  juniors en vacantes que piden 1.
+
+### 13.3 Alcance del sprint (reemplaza §2 "No-objetivos" y §9 donde choquen)
+- **A, el decisor explicable:** completo. No se recorta.
+- **C, el Taller de CV en versión texto:** por cada requisito parcial, una sugerencia concreta de reescritura
+  **anclada en una evidencia del CV** ("tu evidencia: …"). Se generan **localmente con plantillas**: no se envían
+  viñetas del CV a ningún servicio externo. El candidato acepta o rechaza cada sugerencia, y sin evidencia no se
+  sugiere nada (eso va al plan de aprendizaje). El PDF adaptado queda fuera.
+- **B1, `candidate.job_detail` del MCP oficial de Magneto:** solo lectura, para traer el texto completo y el
+  cuestionario de prefiltro. Va detrás del mismo puerto que el scraping de la página de detalle (Strategy de
+  fuentes). **Arranca solo cuando el equipo revise los términos de uso de Magneto**; mientras tanto, la fuente
+  por defecto es el scraping del detalle.
+- **Fuera del sprint:** `job_apply` (postulación real), `job_applications` y el PDF del Taller.
+- **Orden de corte si falta tiempo:** notificaciones por correo → tarjeta "tu mercado" → B1 (se queda el
+  scraping). **No se cortan** A, la línea base ni el set de evaluación.
+- **Evidencia (Fase 4):** además del set de evaluación, una **evaluación ciega con 2–3 reclutadores**
+  (CV original contra el adaptado, y el Plan de hoy contra el top por similitud), usando solo CVs ficticios. Si
+  no se consiguen reclutadores, se reporta solo el set de evaluación.
+
+### 13.4 Arquitectura (reemplaza §7.1 y §7.2 donde choquen)
+- **5 apps:** `cuentas` (usuario, perfil, CV y expectativas), `vacantes` (catálogo, requisitos, ingesta y
+  fuentes), `matching` (decisor, puertos de IA en `matching/puertos.py`, adaptadores y fakes), `postulaciones`
+  y `notificaciones`. Los endpoints para n8n viven en un **módulo** `api`, no en una app.
+- Patrones: **Strategy** (restricciones y fuentes), **Chain of Responsibility** (política), **Adapter + Ports**
+  (embeddings, reranker, Groq, Magneto) y **Facade** (`decidir_para_perfil`). Se quita el "Pipeline con interfaz
+  común".
+- **Solo el batch carga los modelos**; la web lee las `Decision` ya calculadas. `POST /api/decidir` responde 202 y
+  encola el trabajo, para que n8n no espere.
+
+### 13.5 Privacidad y seguridad (sección nueva)
+- **Autorización según la Ley 1581** al registrarse: se guardan la versión del texto, la fecha y la finalidad. El
+  texto menciona el uso de IA y que Groq (en EE. UU.) solo recibe campos de criterio, nunca el CV.
+- **Minimización:** antes de embeber se quitan nombre, correo, teléfono, documento, dirección, edad, género y
+  estado civil.
+- Un botón **"eliminar mi cuenta"** que borra todo en cascada.
+- **Revisión humana:** la decisión es automatizada y se dice así. DESCARTAR siempre muestra el motivo y la
+  vacante sigue accesible.
+- Se mantienen los arreglos de v2 (secretos y DEBUG desde el entorno, límites a la subida de PDF y validadores de
+  contraseña).
