@@ -27,7 +27,7 @@ def _ingresar(pagina, base: str, usuario: str, clave: str, v2: bool) -> None:
     pagina.wait_for_load_state("networkidle")
 
 
-def capturar(base: str, salida: Path, usuario: str, clave: str, cv: Path, vacante: str, v2: bool) -> None:
+def capturar(base: str, salida: Path, usuario: str, clave: str, cv: Path | None, vacante: str, v2: bool) -> None:
     from playwright.sync_api import sync_playwright
 
     salida.mkdir(parents=True, exist_ok=True)
@@ -45,9 +45,10 @@ def capturar(base: str, salida: Path, usuario: str, clave: str, cv: Path, vacant
         foto("registro", "registro")
         _ingresar(pagina, base, usuario, clave, v2)
         foto("onboarding", "onboarding")
-        pagina.set_input_files("input[type=file]", str(cv))
-        pagina.click("form[enctype='multipart/form-data'] button[type=submit]")
-        pagina.wait_for_load_state("networkidle")
+        if cv:  # sin --cv se usa el CV que el usuario ya tiene (p. ej. para capturar sus decisiones)
+            pagina.set_input_files("input[type=file]", str(cv))
+            pagina.click("form[enctype='multipart/form-data'] button[type=submit]")
+            pagina.wait_for_load_state("networkidle")
         for ruta in PAGINAS_CON_SESION[1:]:
             foto(ruta, ruta)
         foto("detalle", f"vacantes/{vacante}")

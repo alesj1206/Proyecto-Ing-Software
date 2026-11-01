@@ -173,5 +173,16 @@ def historial(perfil, fecha: date | None = None) -> dict:
             "fecha_anterior": anterior.fecha if anterior else None, "ranking": ranking}
 
 
+MODALIDAD_OPUESTA = {"Remoto": "Presencial", "Presencial": "Remoto"}
+
+
+def ocultas_por_modalidad(perfil) -> int:
+    """Cuántas vacantes relevantes se ocultaron por modalidad opuesta (§5.7: nada desaparece en silencio)."""
+    from .politica import POLITICA
+    from .preseleccion import preseleccionar
+
+    return preseleccionar(perfil, POLITICA.tau_relevancia).ocultas_por_modalidad
+
+
 def pendiente_de_decision(perfil) -> bool:
     return SolicitudDecision.objects.filter(perfil=perfil).exists()

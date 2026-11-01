@@ -20,7 +20,9 @@ PAUSA_ENTRE_PAGINAS_S = 1.5  # no saturar el sitio
 LINEA_EMPRESA = re.compile(r"^(?P<empresa>.+?) \| .+, \d+ cupos?$")
 FECHA = re.compile(r"Fecha de publicación (\d{4}-\d{2}-\d{2})")
 INICIO_TEXTO = "Requisitos para aplicar a la vacante:"
-FINES_TEXTO = ("\nHabilidades\n", "\nPalabras clave:", "\nVer empresa:", "¡Ten cuidado con el fraude!")
+# "Palabras clave:" NO es un fin: a veces Magneto lo pone justo después del título, antes de la descripción (la
+# extracción lo trata como una sección más que no aporta requisitos).
+FINES_TEXTO = ("\nHabilidades\n", "\nVer empresa:", "¡Ten cuidado con el fraude!")
 
 log = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
-"""Páginas del decisor. En la Fase 1 renderizan con el catálogo y sin decisiones: los templates de v2 muestran su
-estado vacío. La Fase 2 llena top_matches, el historial y el match del detalle."""
+"""Páginas del decisor: solo leen las decisiones ya calculadas por el batch (`manage.py decidir`)."""
+
+from datetime import date
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
@@ -9,19 +10,31 @@ from postulaciones.models import Postulacion
 from vacantes.models import Vacante
 
 from . import selectors
+from .politica import Accion
 
 
 @login_required
 def dashboard_view(request):
+    perfil = perfil_con_cv(request.user)
     modalidad_activa = request.GET.get("modalidad", "")
-    return render(request, "matching/dashboard.html", {
-        "perfil": perfil_con_cv(request.user),
-        "top_matches": [],
+    contexto = {
+        "perfil": perfil,
+        "top_matches": selectors.plan_de_hoy(perfil) if perfil else [],
         "vacantes": selectors.catalogo(modalidad_activa),
         "total_vacantes": selectors.total_vacantes(),
         "modalidades": Vacante.Modalidad.choices,
         "modalidad_activa": modalidad_activa,
-    })
+    }
+    if perfil:
+        grupos = selectors.decisiones_por_accion(perfil)
+        contexto |= {
+            "pendiente": selectors.pendiente_de_decision(perfil),
+            "por_accion": [(a, Accion(a).label, ds) for a, ds in grupos.items() if ds],
+            "aprendizaje": selectors.plan_de_aprendizaje(perfil),
+            "ocultas_por_modalidad": selectors.ocultas_por_modalidad(perfil),
+            "modalidad_oculta": selectors.MODALIDAD_OPUESTA.get(perfil.exp_modalidad, ""),
+        }
+    return render(request, "matching/dashboard.html", contexto)
 
 
 @login_required
@@ -29,15 +42,17 @@ def historial_view(request):
     perfil = perfil_con_cv(request.user)
     if not perfil:
         return render(request, "matching/historial.html", {"perfil": None})
-    return render(request, "matching/historial.html", {
-        "perfil": perfil, "fechas_disponibles": [], "fecha_sel": None, "fecha_anterior": None, "ranking": [],
-    })
+    try:
+        fecha = date.fromisoformat(request.GET.get("fecha", ""))
+    except ValueError:
+        fecha = None
+    return render(request, "matching/historial.html", selectors.historial(perfil, fecha))
 
 
 def detalle_view(request, vacante_id):
     vacante = get_object_or_404(Vacante.objects.prefetch_related("requisito_set"), id=vacante_id)
     perfil = perfil_con_cv(request.user) if request.user.is_authenticated else None
-    postulacion = Postulacion.objects.filter(perfil=perfil, vacante=vacante).first() if perfil else None
-    return render(request, "matching/detalle.html", {
-        "vacante": vacante, "match": None, "criterios": [], "postulacion": postulacion, "modificador": None,
-    })
+    decision = selectors.detalle(perfil, vacante) if perfil else None
+    contexto = {"vacante": vacante, "match": None, "criterios": [], "modificador": None, "decision": None,
+                "postulacion": Postulacion.objects.filter(perfil=perfil, vacante=vacante).first() if perfil else None}
+    return render(request, "matching/detalle.html", contexto | (decision or {}))

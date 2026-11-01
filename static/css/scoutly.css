@@ -1135,3 +1135,44 @@ select:focus {
   .auth-card { padding: 1.5rem 1.25rem 1.75rem; }
   .auth-title { font-size: 1.35rem; }
 }
+
+/* ---------------------------------------------------------------------------------------------
+   Decisor v3 (Fase 2): insignia de acción · solidez, Plan de hoy y requisitos con evidencia.
+   --------------------------------------------------------------------------------------------- */
+.decision-insignia {
+  display: inline-block;
+  align-self: flex-start;  /* dentro de las tarjetas flex del dashboard no debe estirarse */
+  margin-top: 0.85rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--surface-strong);
+  color: var(--navy);
+}
+.decision-postular { background: var(--brand-soft); color: #0a7a35; }
+.decision-ajustar_cv { background: var(--magneto-purple-soft); color: var(--magneto-purple); }
+.decision-cerrar_brecha { background: #fff4e0; color: #9a5b00; }
+.decision-descartar { background: var(--surface-strong); color: var(--muted-foreground); }
+.decision-sin_datos { background: var(--surface-strong); color: var(--navy-muted); }
+.decision-cubres { margin-top: 0.4rem; font-size: 0.8rem; color: var(--navy); }
+.decision-hoy {
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--brand-foreground);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.decision-nota { margin-top: 0.4rem; font-size: 0.75rem; color: var(--magneto-purple); font-weight: 600; }
+.decision-ocultas { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+.decision-acciones { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
+.decision-grupo summary { cursor: pointer; list-style: none; }
+.decision-grupo summary::-webkit-details-marker { display: none; }
+.decision-grupo .decision-insignia { margin-top: 0; }
+.decision-aprendizaje { margin-top: 1.5rem; }
+.decision-aprendizaje ul { margin-top: 0.75rem; padding-left: 1.1rem; font-size: 0.875rem; color: var(--navy); line-height: 1.7; }
+.decision-motivos { margin: 0.75rem 0; padding-left: 1.1rem; font-size: 0.8125rem; color: var(--navy); line-height: 1.6; }
+.decision-evidencia { display: block; font-size: 0.75rem; color: var(--muted-foreground); }
+.requirement-dot.decision-parcial { background: var(--magneto-purple-soft); color: var(--magneto-purple); }

@@ -216,3 +216,12 @@ def test_un_termino_que_falla_no_tira_la_corrida(monkeypatch):
     monkeypatch.setattr(fuente, "_enlaces", enlaces)
     monkeypatch.setattr("vacantes.fuentes.magneto_detalle.PAUSA_ENTRE_PAGINAS_S", 0)
     assert len(fuente._recorrer(_PaginaFalsa())) == 1
+
+
+def test_palabras_clave_al_principio_no_cortan_el_texto():
+    """Magneto pone a veces "Palabras clave:" justo después del título, antes de la descripción (Fase 2)."""
+    pagina = PAGINA.replace("2 años de experiencia, Técnico hasta Profesional\n$ 2.100.000\nBogotá, D.C.\n",
+                            "2 años de experiencia, Técnico hasta Profesional\n$ 2.100.000\nBogotá, D.C.\n"
+                            "Auxiliar Contable\nPalabras clave:\nAuxiliar contable\nNIIF\n\nSe requiere auxiliar.\n")
+    v = parsear_detalle(pagina, "https://www.magneto365.com/co/empleos/auxiliar-contable-1121542")
+    assert "Dominio de Excel intermedio." in v.texto_completo

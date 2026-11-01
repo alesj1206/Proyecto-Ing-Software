@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Matches de hoy | Scoutly{% endblock %}
+{% block title %}Tu plan de hoy | Scoutly{% endblock %}
 
 {% block content %}
 <section class="hero">
   <div class="container">
-    <p class="label-eyebrow">Matches de hoy</p>
+    <p class="label-eyebrow">Tu plan de hoy</p>
     <h1>Hola, {{ perfil.nombre|default:user.email }}</h1>
     {% if perfil %}
       <p style="margin-top:0.5rem;max-width:36rem;color:var(--muted-foreground);">
@@ -24,7 +24,15 @@
 
 <div class="container" style="padding-top:3rem;padding-bottom:3rem;">
   {% if perfil %}
-  <h2 style="font-size:1.25rem;color:var(--navy);">Matches de hoy</h2>
+  <h2 style="font-size:1.25rem;color:var(--navy);">Tu plan de hoy</h2>
+  {% if pendiente %}
+  <div class="cta-banner decision-pendiente">
+    <p style="margin:0;font-weight:600;color:var(--navy);">Estamos analizando tu hoja de vida. Vuelve en un minuto.</p>
+  </div>
+  {% endif %}
+  {% if ocultas_por_modalidad %}
+  <p class="decision-ocultas">{{ ocultas_por_modalidad }} vacante{{ ocultas_por_modalidad|pluralize }} {{ modalidad_oculta|lower }}{{ ocultas_por_modalidad|pluralize }} oculta{{ ocultas_por_modalidad|pluralize }} porque buscas otra modalidad.</p>
+  {% endif %}
   {% if top_matches %}
   <div class="matches-grid">
     {% for m in top_matches %}
@@ -40,6 +48,10 @@
           </div>
         </div>
       </div>
+      {% if m.decision %}
+      <p class="decision-insignia decision-{{ m.decision.accion|lower }}">{{ m.decision.get_accion_display }} · solidez {{ m.decision.solidez }}</p>
+      <p class="decision-cubres">Cubres {{ m.cubres }} obligatorios{% if m.postular_hoy %} <span class="decision-hoy">Postular hoy</span>{% endif %}</p>
+      {% endif %}
       <div style="margin-top:1rem;">
         {% for skill in m.coincidencias|slice:":3" %}
           <span class="skill-chip">{{ skill }}</span>
@@ -57,7 +69,45 @@
     {% endfor %}
   </div>
   {% else %}
-  <p style="margin-top:1rem;color:var(--muted-foreground);">Todavía no hay vacantes que coincidan con tus habilidades registradas.</p>
+  {% if not pendiente %}
+  <p style="margin-top:1rem;color:var(--muted-foreground);">No encontramos vacantes relevantes para tu perfil todavía: revisa que tu hoja de vida tenga tu experiencia y habilidades.</p>
+  {% endif %}
+  {% endif %}
+
+  {% if por_accion %}
+  <h2 style="font-size:1.25rem;color:var(--navy);margin-top:3rem;">Tus vacantes por acción</h2>
+  <div class="decision-acciones">
+    {% for accion, etiqueta, decisiones in por_accion %}
+    <details class="card decision-grupo"{% if forloop.first %} open{% endif %}>
+      <summary><span class="decision-insignia decision-{{ accion|lower }}">{{ etiqueta }} ({{ decisiones|length }})</span></summary>
+      <ul class="job-list">
+        {% for d in decisiones %}
+        <li>
+          <a href="{% url 'vacante_detalle' d.vacante.id %}" class="job-row">
+            <div>
+              <h3 style="font-size:1rem;color:var(--navy);">{{ d.vacante.titulo }}</h3>
+              <div class="job-meta"><span>{{ d.vacante.empresa }}</span><span>{{ d.motivos|first }}</span></div>
+            </div>
+            <p style="margin:0;font-size:0.875rem;font-weight:600;color:var(--navy);">{{ d.cobertura_pct }}%</p>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if aprendizaje %}
+  <div class="card decision-aprendizaje">
+    <h3 style="font-size:1rem;color:var(--navy);">Plan de aprendizaje</h3>
+    <p style="margin-top:0.25rem;font-size:0.8125rem;color:var(--muted-foreground);">Lo que más te piden en las vacantes donde te falta algo.</p>
+    <ul>
+      {% for brecha, veces in aprendizaje %}
+      <li>{{ brecha }} aparece en {{ veces }} de tus vacantes relevantes</li>
+      {% endfor %}
+    </ul>
+  </div>
   {% endif %}
   {% endif %}
 

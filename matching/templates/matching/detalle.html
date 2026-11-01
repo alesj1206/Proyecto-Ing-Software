@@ -57,6 +57,11 @@
           <p style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">
             Calculada sobre las habilidades registradas en tu hoja de vida.
           </p>
+          {% if decision %}
+          <p class="decision-insignia decision-{{ decision.accion|lower }}" style="margin-top:0.6rem;">{{ decision.get_accion_display }} · solidez {{ decision.solidez }}</p>
+          <p style="margin-top:0.35rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">{{ decision.motivo_solidez }}.</p>
+          {% if decision.con_nota %}<p class="decision-nota">{{ decision.con_nota }}</p>{% endif %}
+          {% endif %}
           {% if modificador.aplica %}
           <p style="margin-top:0.5rem;font-size:0.75rem;font-weight:600;color:{% if modificador.bono_pct > 0 %}var(--brand){% elif modificador.bono_pct < 0 %}#c0392b{% else %}var(--muted-foreground){% endif %};">
             {% if modificador.bono_pct > 0 %}▲ {{ modificador.bono_pct }}%{% elif modificador.bono_pct < 0 %}▼ {{ modificador.bono_pct }}%{% else %}Sin cambio{% endif %}
@@ -99,7 +104,7 @@
     <div class="card">
       <h3 style="font-size:0.875rem;color:var(--navy);">Desglose de compatibilidad</h3>
       <p style="margin-top:0.35rem;font-size:0.75rem;color:var(--muted-foreground);">
-        5 criterios, cada uno con su propio peso. Toca "¿Por qué?" para el detalle.
+        Tus habilidades frente a los requisitos y las 4 condiciones que buscas. Toca "¿Por qué?" para el detalle.
       </p>
 
       <div style="margin-top:1rem;display:flex;flex-direction:column;gap:0.9rem;">
@@ -107,7 +112,7 @@
         <div class="criterio-row">
           <div class="criterio-row-head">
             <span class="criterio-nombre">{{ c.etiqueta }}</span>
-            <span class="criterio-peso">peso {{ c.peso_pct }}%</span>
+            {% if c.peso_pct %}<span class="criterio-peso">peso {{ c.peso_pct }}%</span>{% endif %}
             {% if c.aplica %}
               <span class="criterio-score">{{ c.score_pct }}%</span>
             {% endif %}
@@ -169,6 +174,33 @@
         </p>
       {% endif %}
     </div>
+
+    {% if decision %}
+    <div class="card decision-requisitos" style="margin-top:1.5rem;">
+      <h3 style="font-size:0.875rem;color:var(--navy);">Qué hacer con esta vacante</h3>
+      <ul class="decision-motivos">
+        {% for motivo in decision.motivos %}<li>{{ motivo }}</li>{% endfor %}
+      </ul>
+      {% for req in requisitos.cubiertos %}
+      <div class="requirement-item">
+        <span class="requirement-dot matched">✓</span>
+        <span>{{ req.texto }}{% if req.evidencia %}<span class="decision-evidencia">tu evidencia: «{{ req.evidencia }}»</span>{% endif %}</span>
+      </div>
+      {% endfor %}
+      {% for req in requisitos.parciales %}
+      <div class="requirement-item">
+        <span class="requirement-dot decision-parcial">~</span>
+        <span>{{ req.texto }}<span class="decision-evidencia">hazlo explícito en tu CV — tu evidencia: «{{ req.evidencia }}»</span></span>
+      </div>
+      {% endfor %}
+      {% for req in requisitos.faltantes %}
+      <div class="requirement-item">
+        <span class="requirement-dot missing">–</span>
+        <span>{{ req.texto }}{% if req.tipo == "deseable" %} <span class="decision-evidencia">(deseable)</span>{% endif %}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
 
     <div class="card" style="margin-top:1.5rem;">
       <h3 style="font-size:0.875rem;color:var(--navy);">Sobre la empresa</h3>
