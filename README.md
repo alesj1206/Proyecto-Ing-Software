@@ -278,6 +278,21 @@ cp .env.example .env   # y pon una DJANGO_SECRET_KEY propia (instrucciones dentr
 
 Abre [http://localhost:3000](http://localhost:3000).
 
+### El decisor (v3)
+
+Requiere el Postgres de `infra/postgres/levantar.sh` y `.venv/bin/pip install -r requirements-dev.txt`. El modelo
+MiniLM se descarga solo la primera vez, en `~/.cache/scoutly-modelos`.
+
+```bash
+.venv/bin/python manage.py ingerir_vacantes --fuente magneto --terminos "analista de datos" --por-termino 10
+.venv/bin/python manage.py decidir --escuchar      # en otra terminal: atiende a quien carga su CV
+.venv/bin/python manage.py runserver --insecure 3000
+```
+
+- `decidir --todos` recalcula las decisiones de todos los perfiles; `--pendientes` atiende la cola una vez.
+- `evaluar_decisor --mitad ajuste [--barrido]` mide el decisor contra el set etiquetado (`docs/fase2/EVALUACION.md`).
+- El reranker es opcional: con GPU, pon `SCOUTLY_RERANKER=bge` en `.env`.
+
 DEBUG está apagado por defecto, así que el CSS se sirve con `--insecure`. Para depurar en local
 pon `DJANGO_DEBUG=true` en `.env`, pero nunca con el túnel abierto. Tests: `.venv/bin/python manage.py test`.
 
