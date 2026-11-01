@@ -28,7 +28,10 @@ class ResumenIngesta:
 
 
 def hash_contenido(cruda: VacanteCruda) -> str:
-    contenido = "\n".join([cruda.titulo, cruda.texto_completo, "|".join(cruda.etiquetas)])
+    """Todo lo que se guarda: una vacante republicada (fecha nueva) o marcada urgente también se actualiza."""
+    contenido = "\n".join(str(v) for v in (
+        cruda.titulo, cruda.empresa, cruda.ubicacion, cruda.modalidad, cruda.texto_completo, "|".join(cruda.etiquetas),
+        cruda.url, cruda.fecha_publicacion, cruda.salario_min, cruda.salario_max, cruda.urgente))
     return hashlib.sha256(contenido.encode("utf-8")).hexdigest()
 
 

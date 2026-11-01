@@ -35,9 +35,17 @@ def test_el_correo_es_unico_sin_importar_mayusculas(db):
 
 
 def test_paginas_legales_publicas(client, db):
-    for ruta in ("privacidad", "terminos"):
+    for ruta, version in (("privacidad", VERSION_POLITICA), ("terminos", VERSION_TERMINOS)):
         r = client.get(reverse(ruta))
-        assert r.status_code == 200 and VERSION_POLITICA in r.content.decode()
+        assert r.status_code == 200 and version in r.content.decode()
+
+
+def test_la_politica_describe_lo_que_hace_el_codigo(client, db):
+    """Revisión final: la política debe nombrar a quienes reciben datos, al responsable y cómo revocar."""
+    texto = client.get(reverse("privacidad")).content.decode()
+    for frase in ("Google, Microsoft, Facebook y LinkedIn", "Cloudflare", "Responsable del tratamiento",
+                  "Eliminar mi cuenta", "nombre y tu correo"):
+        assert frase in texto, frase
 
 
 def test_la_politica_dice_que_groq_no_recibe_el_cv(client, db):

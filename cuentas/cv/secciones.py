@@ -12,6 +12,8 @@ ENCABEZADOS = {
     "habilidades": {"habilidades", "habilidades tecnicas", "competencias", "conocimientos", "skills",
                     "herramientas", "aptitudes"},
 }
+MAX_LARGO_NOMBRE = 80  # pypdf a veces une todo el encabezado (nombre | cargo | correo | teléfono…) en una línea
+MAX_LARGO_CORREO = 254
 MAX_LINEAS_VISIBLES = 4  # lo que muestra /perfil por sección, igual que en v2
 PALABRAS_RUIDO_ARCHIVO = {"cv", "resume", "curriculum", "hoja", "de", "vida", "hv"}
 VINETA = re.compile(r"^\s*(?:[-*•▪●◦‣·–]|\d+[.)])\s+")
@@ -97,10 +99,16 @@ def _habilidades(lineas: list[str]) -> list[str]:
     return resultado
 
 
+def _parece_nombre(linea: str) -> bool:
+    return (len(linea) <= MAX_LARGO_NOMBRE and "@" not in linea and not any(c.isdigit() for c in linea)
+            and _seccion_de(linea) is None)
+
+
 def _nombre_desde_archivo(nombre_archivo: str) -> str | None:
     base = nombre_archivo.rsplit(".", 1)[0]
     tokens = [t for t in re.split(r"[_\-\s]+", base) if t and _normalizar(t) not in PALABRAS_RUIDO_ARCHIVO]
-    return " ".join(t.capitalize() for t in tokens) or None
+    nombre = " ".join(t.capitalize() for t in tokens)
+    return nombre if nombre and _parece_nombre(nombre) else None
 
 
 def analizar_cv(texto: str, nombre_archivo: str = "") -> CVAnalizado:
@@ -114,8 +122,8 @@ def analizar_cv(texto: str, nombre_archivo: str = "") -> CVAnalizado:
         habilidades = _habilidades(secciones.get("habilidades", []))
         correo = CORREO.search(texto)
         cv = CVAnalizado(
-            nombre=lineas[0] if _seccion_de(lineas[0]) is None else None,
-            contacto=correo.group(0) if correo else None,
+            nombre=lineas[0] if _parece_nombre(lineas[0]) else None,
+            contacto=correo.group(0) if correo and len(correo.group(0)) <= MAX_LARGO_CORREO else None,
             experiencia=experiencia[:MAX_LINEAS_VISIBLES],
             educacion=educacion[:MAX_LINEAS_VISIBLES],
             habilidades=habilidades,

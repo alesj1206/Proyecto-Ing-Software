@@ -200,3 +200,19 @@ def test_resumen_de_practica_sin_anios():
 def test_resumen_con_linea_de_inclusion():
     r = extraer_restricciones(RESUMEN.format("Apto para personas con discapacidad\n6 meses de experiencia, Técnico hasta Tecnólogo\nSalario a convenir\nPereira"))
     assert (r.nivel_formacion, r.ubicacion, r.anios_minimos) == ("Técnico hasta Tecnólogo", "Pereira", 0)
+
+
+# --- regresiones de la revisión final: restricciones sin resumen de Magneto -------------------------
+
+def test_los_anios_de_la_empresa_no_son_un_requisito():
+    texto = "Somos una compañía con más de 20 años de experiencia.\nRequisitos:\n- 2 años de experiencia en ventas"
+    assert extraer_restricciones(texto).anios_minimos == 2
+
+
+def test_una_palabra_suelta_no_define_la_modalidad():
+    assert extraer_restricciones("Requisitos:\n- Despliegues en nube híbrida").modalidad is None
+
+
+def test_el_auxilio_no_es_el_salario():
+    r = extraer_restricciones("Requisitos:\n- Excel\nAuxilio de transporte ($249.095)")
+    assert (r.salario_min, r.salario_max) == (None, None)

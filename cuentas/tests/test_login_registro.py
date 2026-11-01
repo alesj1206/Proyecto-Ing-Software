@@ -47,10 +47,10 @@ def test_login_paso2_sin_paso1_vuelve_al_inicio(client, usuario):
     assert r.status_code == 302 and r.url == reverse("login")
 
 
-def test_login_de_cuenta_social_sin_contrasena(client, db):
+def test_el_paso_2_recuerda_usar_la_red_social(client, db):
     crear_usuario_con_autorizacion("social@ejemplo.com", None)
     r = _login(client, "social@ejemplo.com", "cualquiera")
-    assert "Ingresa con el botón de tu red social" in r.content.decode()
+    assert "Si te registraste con una red social" in r.content.decode()
 
 
 def test_login_no_muestra_estadisticas_inventadas(client, db):

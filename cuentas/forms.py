@@ -66,26 +66,26 @@ class ClaveLoginForm(forms.Form):
     """Paso 2 del login. El mensaje de error es el mismo exista o no el correo."""
 
     ERROR_GENERICO = "Correo electrónico o contraseña incorrectos."
-    ERROR_CUENTA_SOCIAL = "Esta cuenta no tiene contraseña. Ingresa con el botón de tu red social."
+    ERROR_BLOQUEO = "Demasiados intentos fallidos. Espera 15 minutos y vuelve a intentarlo."
 
     password = forms.CharField(
         label="Contraseña",
         widget=forms.PasswordInput(attrs={"placeholder": "Escribe tu contraseña", "autocomplete": "current-password"}),
     )
 
-    def __init__(self, *args, email: str, request=None, **kwargs):
+    def __init__(self, *args, email: str, request=None, bloqueado: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
-        self.email, self.request, self.usuario = email, request, None
+        self.email, self.request, self.bloqueado, self.usuario = email, request, bloqueado, None
 
     def clean(self):
         datos = super().clean()
         password = datos.get("password")
+        if self.bloqueado:  # demasiados intentos: ni se prueba la contraseña
+            raise forms.ValidationError(self.ERROR_BLOQUEO)
         if password:
             self.usuario = authenticate(self.request, username=self.email, password=password)
-            if self.usuario is None:
-                existente = Usuario.objects.filter(email=self.email).first()
-                social = existente is not None and not existente.has_usable_password()
-                raise forms.ValidationError(self.ERROR_CUENTA_SOCIAL if social else self.ERROR_GENERICO)
+            if self.usuario is None:  # mismo mensaje exista o no la cuenta, tenga o no contraseña
+                raise forms.ValidationError(self.ERROR_GENERICO)
         return datos
 
 
@@ -147,6 +147,18 @@ class RegistroSocialForm(SignupSocialBase):
 
     autoriza_datos = AutorizacionForm.base_fields["autoriza_datos"]
     acepta_terminos = AutorizacionForm.base_fields["acepta_terminos"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].widget.attrs["readonly"] = True
+
+    def clean_email(self):
+        """El correo es el que entregó el proveedor: si se pudiera cambiar, alguien registraría un correo ajeno."""
+        email = normalizar_correo(self.cleaned_data["email"])
+        del_proveedor = {normalizar_correo(e.email) for e in self.sociallogin.email_addresses}
+        if email not in del_proveedor:
+            raise forms.ValidationError("Usa el correo que te dio tu red social.")
+        return super().clean_email()
 
     @transaction.atomic
     def save(self, request):

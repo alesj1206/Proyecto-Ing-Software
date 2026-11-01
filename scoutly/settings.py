@@ -173,6 +173,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
+# Medio de contacto del responsable del tratamiento de datos (Ley 1581), que aparece en /privacidad.
+SCOUTLY_CONTACTO_DATOS = os.environ.get('SCOUTLY_CONTACTO_DATOS', 'contacto pendiente de definir por el equipo')
+
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = 'raiz'  # raiz decide entre onboarding y dashboard
 
@@ -193,10 +196,12 @@ ACCOUNT_SIGNUP_REDIRECT_URL = 'onboarding'
 # Todo alta social pasa por el formulario con las casillas de autorización (Ley 1581).
 SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_FORMS = {'signup': 'cuentas.forms.RegistroSocialForm'}
-# Solo con correos que el proveedor marca como verificados; allauth además borra la contraseña de
-# la cuenta local si su correo no estaba verificado (evita la toma de cuentas pre-registradas).
-SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
-SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+# Nunca se enlaza una red social a una cuenta existente por coincidir el correo: nuestro registro no verifica
+# correos, así que quien registrara primero un correo ajeno compartiría la cuenta con su dueño real (revisión
+# final de la Fase 1). Si el correo ya existe, allauth pide ingresar con la contraseña.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = False
+ACCOUNT_ADAPTER = 'cuentas.adaptadores.AdaptadorCuenta'  # next= solo hacia el mismo host
 SOCIALACCOUNT_LOGIN_ON_GET = False
 
 # HU-06: token compartido que el workflow de n8n manda en el header

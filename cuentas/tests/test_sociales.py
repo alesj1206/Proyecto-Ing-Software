@@ -108,14 +108,6 @@ def test_correo_no_verificado_no_toma_una_cuenta_existente(usuario, con_google):
     assert not sl.is_existing
 
 
-def test_correo_verificado_entra_a_la_cuenta_existente(usuario, con_google):
-    request = RequestFactory().get("/")
-    with context.request_context(request):
-        sl = _sociallogin("ana@ejemplo.com", verificado=True, request=request)
-        sl.lookup()
-    assert sl.is_existing and sl.user == usuario
-    assert usuario.check_password(CLAVE_DE_PRUEBA)  # la contraseña se borra recién al aceptar el login
-
 
 def test_el_boton_de_google_lleva_a_google_con_nuestro_client_id(client, db, con_google):
     r = client.post("/cuentas/google/login/")

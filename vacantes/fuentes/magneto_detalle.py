@@ -4,15 +4,18 @@ Las vacantes se abren por su URL (/co/empleos/<nombre>-<id>): hacer clic en el l
 detalle. `parsear_detalle` es una función pura para poder probarla sin red."""
 
 import logging
+import os
 import re
 import time
+from urllib.parse import urlsplit
 from collections.abc import Iterator
 from datetime import date
 
 from . import VacanteCruda
 
 URL_BUSQUEDA = "https://www.magneto365.com/co/trabajos/buscar"
-CHROME = "/usr/bin/google-chrome"
+HOST_MAGNETO = "www.magneto365.com"
+CHROME = os.environ.get("SCOUTLY_CHROME") or None  # None = el Chromium que instala Playwright
 PAUSA_ENTRE_PAGINAS_S = 1.5  # no saturar el sitio
 LINEA_EMPRESA = re.compile(r"^(?P<empresa>.+?) \| .+, \d+ cupos?$")
 FECHA = re.compile(r"Fecha de publicación (\d{4}-\d{2}-\d{2})")
@@ -35,6 +38,18 @@ def _etiquetas(cuerpo: str, inicio: int) -> tuple[str, ...]:
     fines = [i for marca in ("\nPalabras clave:", "\nVer empresa:") if (i := cuerpo.find(marca, desde)) > 0]
     bloque = cuerpo[desde + len("\nHabilidades\n"): min(fines) if fines else None]
     return tuple(linea.strip() for linea in bloque.split("\n") if linea.strip())
+
+
+def enlaces_validos(hrefs: list[str]) -> list[str]:
+    """Solo páginas de detalle de magneto365.com por HTTPS, sin parámetros y sin repetir."""
+    urls = []
+    for href in hrefs:
+        partes = urlsplit(href)
+        url = f"https://{HOST_MAGNETO}{partes.path}"
+        if (partes.scheme == "https" and partes.hostname == HOST_MAGNETO and partes.path.startswith("/co/empleos/")
+                and partes.path.rstrip("/").rsplit("-", 1)[-1].isdigit() and url not in urls):
+            urls.append(url)
+    return urls
 
 
 def parsear_detalle(cuerpo: str, url: str) -> VacanteCruda | None:
@@ -81,32 +96,46 @@ class FuenteMagnetoDetalle:
     def _descargar(self) -> list[VacanteCruda]:
         from playwright.sync_api import sync_playwright  # solo se importa si se usa esta fuente
 
-        vacantes = []
         with sync_playwright() as p:
-            navegador = p.chromium.launch(executable_path=self.chrome, headless=True, args=["--no-sandbox"])
-            pagina = navegador.new_page(viewport={"width": 1440, "height": 1400})
+            navegador = p.chromium.launch(executable_path=self.chrome, headless=True)
             try:
-                for termino in self.terminos:
-                    for url in self._enlaces(pagina, termino):
-                        pagina.goto(url, timeout=30000)
-                        pagina.wait_for_timeout(2500)
-                        if vacante := parsear_detalle(pagina.inner_text("body"), url):
-                            vacantes.append(vacante)
-                        else:
-                            log.warning("Sin bloque de detalle en %s", url)
-                        time.sleep(PAUSA_ENTRE_PAGINAS_S)
+                return self._recorrer(navegador.new_page(viewport={"width": 1440, "height": 1400}))
             finally:
                 navegador.close()
+
+    def _recorrer(self, pagina) -> list[VacanteCruda]:
+        """Una búsqueda o una página que falla se registra y se salta: no se pierde lo ya descargado."""
+        vacantes = []
+        for termino in self.terminos:
+            try:
+                urls = self._enlaces(pagina, termino)
+            except Exception:  # timeouts de Playwright, cambios en la página de búsqueda
+                log.exception("No se pudo buscar %r en Magneto", termino)
+                continue
+            for url in urls:
+                try:
+                    pagina.goto(url, timeout=30000)
+                    pagina.wait_for_timeout(2500)
+                    vacante = parsear_detalle(pagina.inner_text("body"), url)
+                except Exception:
+                    log.exception("No se pudo abrir %s", url)
+                    continue
+                if vacante:
+                    vacantes.append(vacante)
+                else:
+                    log.warning("Sin bloque de detalle en %s", url)
+                time.sleep(PAUSA_ENTRE_PAGINAS_S)
         return vacantes
 
     def _enlaces(self, pagina, termino: str) -> list[str]:
         pagina.goto(URL_BUSQUEDA, timeout=30000)
         pagina.wait_for_timeout(3000)
         caja = pagina.get_by_text("Buscar por cargo o profesión").first.bounding_box()
+        if caja is None:
+            raise RuntimeError("Magneto cambió la página de búsqueda: no aparece la caja de búsqueda")
         pagina.mouse.click(caja["x"] + 10, caja["y"] + 10)
         pagina.keyboard.type(termino)
         pagina.keyboard.press("Enter")
         pagina.wait_for_timeout(3500)
         hrefs = pagina.eval_on_selector_all("a[href*='/co/empleos/']", "els => els.map(e => e.href)")
-        urls = dict.fromkeys(h.split("?")[0] for h in hrefs if h.rsplit("-", 1)[-1].isdigit())
-        return list(urls)[: self.por_termino]
+        return enlaces_validos(hrefs)[: self.por_termino]

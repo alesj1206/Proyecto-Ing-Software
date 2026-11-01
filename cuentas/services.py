@@ -43,7 +43,7 @@ def guardar_perfil_desde_cv(usuario: Usuario, archivo) -> Perfil:
     )
     perfil.evidencias.all().delete()
     EvidenciaPerfil.objects.bulk_create(
-        EvidenciaPerfil(perfil=perfil, texto=minimizar(u.texto), seccion=u.seccion, posicion=i)
+        EvidenciaPerfil(perfil=perfil, texto=minimizar(u.texto, cv.nombre), seccion=u.seccion, posicion=i)
         for i, u in enumerate(cv.unidades)
     )
     return perfil

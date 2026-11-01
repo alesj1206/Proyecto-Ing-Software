@@ -18,3 +18,6 @@ db.sqlite3
 spike/fase0/resultados/*.json
 spike/fase0/.venv-gpu/
 .omc/
+
+# Páginas crudas de Magneto (pueden traer datos de contacto de reclutadores)
+spike/exploracion/datos/

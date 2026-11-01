@@ -8,24 +8,43 @@
     <p>Scoutly es un proyecto académico construido para el reto de Magneto Empleos. Esta política explica qué
       hacemos con tus datos, conforme a la Ley 1581 de 2012 y sus decretos reglamentarios.</p>
 
+    <h2 style="font-size:1.1rem;margin-top:1.25rem;">Responsable del tratamiento</h2>
+    <p>El equipo del proyecto Scoutly (curso de Ingeniería de Software). Para consultas, reclamos o para ejercer tus
+      derechos escribe a: <strong>{{ contacto }}</strong>.</p>
+
     <h2 style="font-size:1.1rem;margin-top:1.25rem;">Finalidad</h2>
     <p>{{ finalidad }}</p>
 
     <h2 style="font-size:1.1rem;margin-top:1.25rem;">Qué datos tratamos</h2>
-    <p>Tu correo, tu hoja de vida (experiencia, educación y habilidades) y las expectativas que declares
-      (salario, modalidad, ubicación y disponibilidad). Antes de analizar tu hoja de vida quitamos tu correo,
-      teléfono, número de documento y dirección.</p>
+    <ul>
+      <li>Tu correo y, si entras con una red social (Google, Microsoft, Facebook y LinkedIn), el correo y el
+        identificador que esa red nos entrega. No recibimos tu contraseña de esas redes.</li>
+      <li>Tu hoja de vida. En tu perfil guardamos tu nombre y tu correo tal como aparecen en ella, y un resumen de
+        tu experiencia, educación y habilidades, que solo ves tú.</li>
+      <li>Para comparar tu perfil con las vacantes usamos una copia de tu experiencia, educación y habilidades a la
+        que antes le quitamos tu nombre, correo, teléfono, número de documento, dirección, edad, género y estado
+        civil.</li>
+      <li>Las expectativas que declares: salario, modalidad, ubicación y disponibilidad.</li>
+    </ul>
 
     <h2 style="font-size:1.1rem;margin-top:1.25rem;">Cómo usamos la inteligencia artificial</h2>
-    <p>La comparación entre tu perfil y cada vacante se hace con modelos que corren en nuestros propios
-      equipos. La decisión sobre cada vacante es automatizada: siempre te mostramos el motivo y puedes
-      revisar cualquier vacante por tu cuenta. Para redactar algunas explicaciones usamos el servicio Groq,
-      ubicado en Estados Unidos: a Groq solo le enviamos campos de criterio (por ejemplo, la modalidad que
-      buscas y la de la vacante), nunca el CV ni tus datos de contacto.</p>
+    <p>La comparación entre tu perfil y cada vacante se hace con modelos que corren en nuestros propios equipos. La
+      decisión sobre cada vacante es automatizada: siempre te mostramos el motivo y puedes revisar cualquier vacante
+      por tu cuenta. En una fase posterior usaremos el servicio Groq, ubicado en Estados Unidos, para redactar algunas
+      explicaciones: a Groq solo le enviaremos campos de criterio (por ejemplo, la modalidad que buscas y la de la
+      vacante), nunca el CV ni tus datos de contacto.</p>
+
+    <h2 style="font-size:1.1rem;margin-top:1.25rem;">Quién más recibe tus datos</h2>
+    <p>Durante las demostraciones la aplicación se publica a través de un túnel de Cloudflare (Estados Unidos), por
+      donde pasa el tráfico entre tu navegador y nuestro servidor.</p>
+
+    <h2 style="font-size:1.1rem;margin-top:1.25rem;">Cuánto tiempo los guardamos</h2>
+    <p>Mientras tengas tu cuenta. Al eliminarla se borra todo de inmediato.</p>
 
     <h2 style="font-size:1.1rem;margin-top:1.25rem;">Tus derechos</h2>
-    <p>Puedes conocer, actualizar y corregir tus datos desde tu perfil, revocar esta autorización y pedir que
-      los borremos con el botón «Eliminar mi cuenta», que borra todo de inmediato.</p>
+    <p>Puedes conocer tus datos en tu perfil y actualizarlos cargando de nuevo tu hoja de vida o cambiando tus
+      expectativas. Para revocar esta autorización y suprimir tus datos usa el botón «Eliminar mi cuenta» de tu perfil,
+      que borra todo de inmediato. Para cualquier otra consulta o reclamo, escribe al responsable.</p>
   </div>
 </div>
 {% endblock %}

@@ -1,7 +1,7 @@
 """Textos legales versionados. Cambiar un texto exige subir su versión: la autorización
 guardada apunta a la versión que la persona aceptó."""
 
-VERSION_POLITICA = "2026-11-01"
+VERSION_POLITICA = "2026-11-02"
 VERSION_TERMINOS = "2026-11-01"
 
 FINALIDAD = (

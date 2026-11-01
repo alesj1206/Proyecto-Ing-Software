@@ -160,3 +160,59 @@ def test_ingerir_desde_magneto_guarda_en_la_base(db):
     # Playwright sync deja un event loop activo: la fuente no puede ceder vacantes mientras el navegador está abierto.
     resumen = ingerir(FuenteMagnetoDetalle(["auxiliar contable"], 1))
     assert (resumen.creadas, resumen.errores) == (1, 0)
+
+
+# --- regresiones de la revisión final ------------------------------------------------------------
+
+def test_cambiar_urgencia_o_fecha_actualiza_la_vacante(db):
+    ingerir(FuenteEnMemoria([cruda("v1", "Requisitos:\n- SQL\n- Excel")]))
+    r = ingerir(FuenteEnMemoria([cruda("v1", "Requisitos:\n- SQL\n- Excel", urgente=True)]))
+    assert r.actualizadas == 1 and Vacante.objects.get(id="v1").urgente
+
+
+def test_solo_se_siguen_enlaces_de_magneto():
+    from vacantes.fuentes.magneto_detalle import enlaces_validos
+
+    hrefs = ["https://www.magneto365.com/co/empleos/analista-1", "https://evil.co/co/empleos/x-2",
+             "javascript:alert(1)//co/empleos/x-3", "https://www.magneto365.com/co/empleos/analista-1?ref=a"]
+    assert enlaces_validos(hrefs) == ["https://www.magneto365.com/co/empleos/analista-1"]
+
+
+class _PaginaFalsa:
+    """Una página de Playwright de mentira: la URL que contiene 'rota' falla al abrirse."""
+
+    def __init__(self):
+        self.url = None
+
+    def goto(self, url, timeout=None):
+        if "rota" in url:
+            raise TimeoutError("la página no respondió")
+        self.url = url
+
+    def wait_for_timeout(self, ms):
+        pass
+
+    def inner_text(self, selector):
+        return PAGINA
+
+
+def test_una_pagina_que_falla_no_tira_la_corrida(monkeypatch):
+    fuente = FuenteMagnetoDetalle(["x"], 2)
+    monkeypatch.setattr(fuente, "_enlaces", lambda pagina, termino: [
+        "https://www.magneto365.com/co/empleos/rota-1", "https://www.magneto365.com/co/empleos/buena-2"])
+    monkeypatch.setattr("vacantes.fuentes.magneto_detalle.PAUSA_ENTRE_PAGINAS_S", 0)
+    vacantes = fuente._recorrer(_PaginaFalsa())
+    assert [v.id for v in vacantes] == ["mag-2"]
+
+
+def test_un_termino_que_falla_no_tira_la_corrida(monkeypatch):
+    fuente = FuenteMagnetoDetalle(["roto", "bueno"], 1)
+
+    def enlaces(pagina, termino):
+        if termino == "roto":
+            raise TypeError("no apareció la caja de búsqueda")
+        return ["https://www.magneto365.com/co/empleos/buena-2"]
+
+    monkeypatch.setattr(fuente, "_enlaces", enlaces)
+    monkeypatch.setattr("vacantes.fuentes.magneto_detalle.PAUSA_ENTRE_PAGINAS_S", 0)
+    assert len(fuente._recorrer(_PaginaFalsa())) == 1

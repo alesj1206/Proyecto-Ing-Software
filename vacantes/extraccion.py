@@ -255,23 +255,30 @@ def _anios(texto: str) -> int | None:
 
 
 def _salario(texto: str) -> tuple[int | None, int | None]:
-    if m := _RANGO_SALARIO.search(texto):
-        return _entero(m.group(1)), _entero(m.group(2))
-    if m := _SALARIO.search(texto):
-        return _entero(m.group(1)), _entero(m.group(1))
+    """El primer monto de una línea que no hable de auxilios ni bonificaciones."""
+    for linea in texto.split("\n"):
+        if re.search(r"auxilio|bonificaci|comisi", linea, re.IGNORECASE):
+            continue
+        if m := _RANGO_SALARIO.search(linea):
+            return _entero(m.group(1)), _entero(m.group(2))
+        if m := _SALARIO.search(linea):
+            return _entero(m.group(1)), _entero(m.group(1))
     return None, None
+
+
+_FRASES_MODALIDAD = (  # solo frases sobre la forma de trabajo: "nube híbrida" no es una modalidad
+    (re.compile(r"modalidad (?:de trabajo )?(presencial|remot[oa]|hibrid[oa])"), None),
+    (re.compile(r"(?:esquema|trabajo|modelo) hibrido|hibrido \d|\d+ dias? (?:en casa|remoto)"), "Híbrido"),
+    (re.compile(r"100 remoto|trabajo remoto|teletrabajo|trabajo en casa|home office|trabajo desde casa"), "Remoto"),
+    (re.compile(r"100 presencial|trabajo presencial"), "Presencial"),
+)
 
 
 def _modalidad(texto: str) -> str | None:
     normal = normalizar(texto)
-    if m := re.search(r"modalidad\s+(presencial|remot[oa]|hibrid[oa])", normal):
-        return {"p": "Presencial", "r": "Remoto", "h": "Híbrido"}[m.group(1)[0]]
-    if "hibrid" in normal:
-        return "Híbrido"
-    if re.search(r"\b(remoto|teletrabajo|trabajo en casa|home office)\b", normal):
-        return "Remoto"
-    if "presencial" in normal:
-        return "Presencial"
+    for patron, modalidad in _FRASES_MODALIDAD:
+        if m := patron.search(normal):
+            return modalidad or {"p": "Presencial", "r": "Remoto", "h": "Híbrido"}[m.group(1)[0]]
     return None
 
 
@@ -310,8 +317,9 @@ def extraer_restricciones(texto: str) -> Restricciones:
         salario_min, salario_max = _salario(resumen.salario or "")
         anios = _anios(resumen.experiencia) if resumen.experiencia else None
         nivel, ubicacion = resumen.nivel or None, resumen.ubicacion
-    else:
+    else:  # sin resumen: los años salen de los requisitos, no de "somos una empresa con 20 años de experiencia"
         salario_min, salario_max = _salario(texto)
-        anios, nivel, ubicacion = _anios(texto), None, None
+        requisitos = "\n".join(u for _, u in _candidatos(texto))
+        anios, nivel, ubicacion = _anios(requisitos), None, None
     return Restricciones(anios_minimos=anios, salario_min=salario_min, salario_max=salario_max,
                          modalidad=_modalidad(texto), ubicacion=ubicacion, nivel_formacion=nivel)

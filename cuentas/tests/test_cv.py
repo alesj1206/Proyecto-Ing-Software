@@ -139,3 +139,34 @@ def test_un_error_de_programacion_no_se_oculta():
     with mock.patch("cuentas.cv.lector.PdfReader", side_effect=TypeError("bug")):
         with pytest.raises(TypeError):
             extraer_texto(pdf_cv())
+
+
+# --- regresiones de la revisión final ------------------------------------------------------------
+
+def test_cv_con_primera_linea_larga_no_falla(usuario):
+    encabezado = "Laura Gómez | Analista | laura@x.co | 300 123 4567 | Medellín | linkedin.com/in/laura " * 3
+    perfil = guardar_perfil_desde_cv(usuario, pdf_cv(nombre=encabezado[:180]))
+    assert perfil.nombre is None and "nombre" in perfil.campos_pendientes
+
+
+@pytest.mark.parametrize("texto,dato", [("Calle 10 Sur # 43-12 apto 301", "43-12"), ("Cel: 300.123.4567", "4567"),
+                                        ("Edad: 25 años", "25"), ("Estado civil: soltera", "soltera"),
+                                        ("Género: femenino", "femenino")])
+def test_minimizar_cubre_mas_formatos(texto, dato):
+    assert dato not in minimizar(texto)
+
+
+@pytest.mark.parametrize("texto", ["Soporte TI 2018 - 2020", "Analista del documento 2020-2021"])
+def test_minimizar_no_borra_fechas_de_experiencia(texto):
+    assert minimizar(texto) == texto
+
+
+def test_la_evidencia_no_lleva_el_nombre_de_la_persona(usuario):
+    perfil = guardar_perfil_desde_cv(usuario, pdf_cv(nombre="Laura Gómez Ríos",
+                                                     experiencia=["Laura Gómez lideró el equipo de soporte."]))
+    assert "Laura" not in " ".join(perfil.evidencias.values_list("texto", flat=True))
+
+
+def test_un_pdf_que_rompe_el_parser_no_da_error_500():
+    with mock.patch("cuentas.cv.lector.PdfReader", side_effect=ValueError("xref roto")):
+        assert extraer_texto(pdf_cv()) == ""

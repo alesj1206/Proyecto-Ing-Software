@@ -1,6 +1,7 @@
 """Login y registro en dos pasos, con la estructura del login de Magneto (correo primero)."""
 
 from django.contrib.auth import login, logout
+from django.core.cache import cache
 from django.db import IntegrityError
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
@@ -11,6 +12,8 @@ from .selectors import perfil_con_cv
 from .services import crear_usuario_con_autorizacion
 from .sociales import proveedores_activos
 
+MAX_INTENTOS_LOGIN = 5
+BLOQUEO_LOGIN_S = 15 * 60
 SESION_LOGIN = "login_correo"
 SESION_REGISTRO = "registro_paso1"
 BACKEND_CORREO = "django.contrib.auth.backends.ModelBackend"
@@ -18,6 +21,12 @@ BACKEND_CORREO = "django.contrib.auth.backends.ModelBackend"
 
 def _destino_tras_login(usuario):
     return "dashboard" if perfil_con_cv(usuario) else "onboarding"
+
+
+def _clave_intentos(request, email: str) -> str:
+    """Por correo y por IP (detrás de cloudflared la IP real llega en CF-Connecting-IP)."""
+    ip = request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("REMOTE_ADDR", "")
+    return f"login-fallidos:{email}:{ip}"
 
 
 def _render_login(request, *, correo_form=None, clave_form=None):
@@ -47,9 +56,13 @@ def login_view(request):
     email = request.session.get(SESION_LOGIN)
     if not email:
         return redirect("login")
-    clave_form = ClaveLoginForm(request.POST, email=email, request=request)
+    clave_intentos = _clave_intentos(request, email)
+    bloqueado = cache.get(clave_intentos, 0) >= MAX_INTENTOS_LOGIN
+    clave_form = ClaveLoginForm(request.POST, email=email, request=request, bloqueado=bloqueado)
     if not clave_form.is_valid():
+        cache.set(clave_intentos, cache.get(clave_intentos, 0) + 1, BLOQUEO_LOGIN_S)
         return _render_login(request, clave_form=clave_form)
+    cache.delete(clave_intentos)
     request.session.pop(SESION_LOGIN, None)
     login(request, clave_form.usuario)
     return redirect(_destino_tras_login(clave_form.usuario))
