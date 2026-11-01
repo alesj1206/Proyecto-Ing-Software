@@ -48,3 +48,22 @@ def test_cuda_ausente_falla_explicito():
         pytest.skip("este entorno sí tiene CUDA")
     with pytest.raises(RuntimeError, match="CUDAExecutionProvider"):
         _providers("cuda")
+
+
+def test_set_resumenes_tiene_20_casos_y_forma_real():
+    from spike.fase0.calidad import cargar_calidad_resumen
+
+    casos = cargar_calidad_resumen()
+    assert len(casos) == 20
+    assert all({"perfil", "buena", "trampa", "industria"} <= c.keys() for c in casos)
+    assert all(c["perfil"].count(";") >= 3 for c in casos)  # perfil resumido = varias unidades de evidencia
+    assert len({c["industria"] for c in casos}) >= 5
+
+
+@pytest.mark.lento
+@pytest.mark.parametrize("modelo", MODELOS_RERANKER)
+def test_reranker_resumen_mide_los_20(modelo):
+    from spike.fase0.calidad import evaluar_reranker_resumen
+
+    r = evaluar_reranker_resumen(modelo)
+    assert r["total"] == 20 and 0.0 <= r["exactitud"] <= 1.0

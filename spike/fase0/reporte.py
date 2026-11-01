@@ -53,18 +53,27 @@ def veredictos(r: dict) -> list[dict]:
     if "gpu_unidades_por_s" in r:
         horas = _horas_carga(r["gpu_unidades_por_s"], r.get("gpu_docs_por_s"), r["segundos_indice_hnsw"])
         filas.append(_fila("carga_inicial_gpu_h", horas, LIMITES["carga_inicial_gpu_h"]))
+    elif r.get("gpu_sin_medir"):
+        filas.append(_fila("carga_inicial_gpu_h", float("nan"), LIMITES["carga_inicial_gpu_h"], cumple=False))
     return filas
 
 
-def elegir(candidatos: list[dict]) -> dict | None:
-    """El de mayor calidad entre los que cumplen todo. Si difieren en ≤ 2 puntos, desempata en orden:
-    más rápido al embeber, mayor recall, mejor reranker, reranker más rápido."""
+CASOS_CALIDAD = 40
+
+
+def elegir(candidatos: list[dict], casos: int = CASOS_CALIDAD) -> dict | None:
+    """El de mayor calidad entre los que cumplen todo. Diferencias de un caso o menos del set de calidad
+    no se distinguen (con 40 casos, 1 caso = 2,5 puntos) y se desempatan en orden: más rápido al embeber,
+    mayor recall, mejor reranker, reranker más rápido."""
     validos = [c for c in candidatos if c["cumple_todo"]]
     if not validos:
         return None
     mejor = max(c["exactitud"] for c in validos)
-    empatados = [c for c in validos if mejor - c["exactitud"] <= 0.02]
-    return max(empatados, key=lambda c: (c["unidades_por_s"], c.get("recall", 0), c.get("calidad_rer", 0), c.get("pares_por_s", 0)))
+    ventana = max(0.02, 1 / casos) + 1e-9
+    empatados = [c for c in validos if mejor - c["exactitud"] <= ventana]
+    return max(empatados, key=lambda c: (c["unidades_por_s"], c.get("recall", 0),
+                                          PREFERENCIA_ARQUITECTURA.get(c.get("arquitectura"), 0),
+                                          c.get("calidad_rer", 0), c.get("pares_por_s", 0)))
 
 
 def _leer(nombre: str) -> dict | None:
@@ -85,7 +94,11 @@ def _calidad_emb(modelo: str) -> tuple[float, bool]:
 ARQUITECTURAS = {
     "hnsw": "pgvector HNSW + requisitos fila por fila",
     "exacta": "búsqueda exacta numpy f32 en memoria + requisitos en bytea por vacante",
+    "exacta_pg": "búsqueda exacta dentro de Postgres (sin índice) + requisitos en bytea por vacante",
 }
+# Ante empate total se prefiere una sola fuente de verdad (revisión de arquitectura: la matriz en memoria
+# se desincroniza entre workers y con cada delta diario).
+PREFERENCIA_ARQUITECTURA = {"hnsw": 0, "exacta": 1, "exacta_pg": 2}
 
 
 def _retrieval(arquitectura: str, dim_bench: int) -> dict | None:
@@ -94,12 +107,18 @@ def _retrieval(arquitectura: str, dim_bench: int) -> dict | None:
         return pg and {"segundos_indice_hnsw": pg["segundos_indice_hnsw"], "ms_busqueda_p95": pg["ms_busqueda_p95"],
                        "ms_fetch_requisitos_3000": pg["ms_fetch_requisitos_3000"], "recall": pg["k3000"]["recall_promedio"]}
     alt = _leer(f"alternativas_{dim_bench}")
-    return alt and {"segundos_indice_hnsw": alt["segundos_carga_bytea"], "ms_busqueda_p95": alt["ms_busqueda_exacta_f32_p50"],
-                    "ms_fetch_requisitos_3000": alt["ms_fetch_bytea_3000_p50"], "recall": 1.0}
+    if arquitectura == "exacta_pg":
+        return alt and "ms_busqueda_exacta_pg_p95" in alt and {
+            "segundos_indice_hnsw": alt["segundos_carga_bytea"], "ms_busqueda_p95": alt["ms_busqueda_exacta_pg_p95"],
+            "ms_fetch_requisitos_3000": alt["ms_fetch_bytea_3000_p95"], "recall": 1.0}
+    return alt and {"segundos_indice_hnsw": alt["segundos_carga_bytea"], "ms_busqueda_p95": alt["ms_busqueda_exacta_f32_p95"],
+                    "ms_fetch_requisitos_3000": alt["ms_fetch_bytea_3000_p95"], "recall": 1.0}
 
 
 def combinaciones() -> list[dict]:
-    cobertura = _leer("cobertura") or {}
+    cobertura = _leer("cobertura")
+    if cobertura is None:
+        raise FileNotFoundError("falta resultados/cobertura.json: corre python -m spike.fase0.bench_cobertura")
     filas = []
     for emb in MODELOS_EMBEDDING:
         rend = _leer(f"rend_embedding_{_slug(emb)}_cpu")
@@ -113,7 +132,8 @@ def combinaciones() -> list[dict]:
             if not ret:
                 continue
             for rer in MODELOS_RERANKER:
-                cal_rr = _leer(f"calidad_rer_{_slug(rer)}")
+                cal_unidad = _leer(f"calidad_rer_{_slug(rer)}")
+                cal_rr = _leer(f"calidad_rer_resumen_{_slug(rer)}")  # la tarea real: perfil resumido vs resumen de vacante
                 for modo in ("cpu", "cuda"):
                     rr = _leer(f"rend_reranker_{_slug(rer)}_{modo}")
                     if not (rr and cal_rr) or "error" in rr:
@@ -121,16 +141,19 @@ def combinaciones() -> list[dict]:
                     r = {
                         "unidades_por_s": rend["unidades_por_s"],  # vector de vacante = promedio de requisitos + título
                         **{k: v for k, v in ret.items() if k != "recall"},
-                        "ms_cobertura": cobertura.get(f"ms_cobertura_{dim_bench}", 0), "pares_por_s": rr["pares_por_s"],
+                        "ms_cobertura": cobertura[f"ms_cobertura_{dim_bench}"], "pares_por_s": rr["pares_por_s"],
                         "exactitud": min(exactitud_emb, cal_rr["exactitud"]),
                     }
                     if gpu and "error" not in gpu:
                         r |= {"gpu_unidades_por_s": gpu["unidades_por_s"]}
+                    else:
+                        r |= {"gpu_sin_medir": True}
                     vs = veredictos(r)
                     filas.append({
                         "nombre": f"{emb.split('/')[1]} + {rer.split('/')[1]} [{arq}, reranker {modo}]",
                         "embedding": emb, "reranker": rer, "arquitectura": arq, "modo_reranker": modo, "dim": DIMENSION[emb],
                         "prefijo_e5": con_prefijo, "calidad_emb": exactitud_emb, "calidad_rer": cal_rr["exactitud"],
+                        "calidad_rer_unidades": cal_unidad["exactitud"] if cal_unidad else float("nan"),
                         "recall": ret["recall"], "veredictos": vs, "pares_por_s": rr["pares_por_s"],
                         "exactitud": r["exactitud"], "unidades_por_s": r["unidades_por_s"],
                         "cumple_todo": all(v["cumple"] for v in vs),
@@ -139,11 +162,14 @@ def combinaciones() -> list[dict]:
 
 
 def veredicto_global(filas: list[dict]) -> tuple[str, dict | None]:
+    """Contra el spec aprobado (§3: todo debe funcionar en CPU; §9: si no, se vuelve al diseño)."""
     cpu = elegir([f for f in filas if f["modo_reranker"] == "cpu"])
     if cpu:
-        return "VIABLE EN CPU", cpu
+        return "CUMPLE §6 EN CPU", cpu
     gpu = elegir(filas)
-    return ("VIABLE SOLO CON GPU PARA EL RERANKER", gpu) if gpu else ("VOLVER AL DISEÑO", None)
+    if gpu:
+        return "NO CUMPLE §6 EN CPU → VOLVER AL DISEÑO; viable con GPU para el reranker si se aprueba P1", gpu
+    return "NO CUMPLE §6 → VOLVER AL DISEÑO", None
 
 
 def _md(filas: list[dict], estado: str, elegido: dict | None) -> str:
@@ -157,13 +183,16 @@ def _md(filas: list[dict], estado: str, elegido: dict | None) -> str:
         "Límites (spec §6): " + ", ".join(f"{k} ≤ {v}" for k, v in LIMITES.items()) + f", calidad ≥ {UMBRAL_CALIDAD}.", "",
         "Arquitecturas: " + "; ".join(f"**{k}** = {v}" for k, v in ARQUITECTURAS.items()) + ".", "",
         "Solo se listan las combinaciones que cumplen todos los umbrales; el resto queda en el JSON de resultados.", "",
-        "| Combinación | dim | cal. emb | cal. rer | recall | pares/s | " + " | ".join(umbrales) + " |",
-        "|---|---|---|---|---|---|" + "---|" * len(umbrales),
+        f"Calidad: 1 caso del set de embeddings = {100 / CASOS_CALIDAD:.1f} puntos; diferencias de un caso no se distinguen "
+        "(intervalo de 95% ≈ ±10 puntos), así que la elección de modelo es **provisional** hasta el set de evaluación de la Fase 4. "
+        "`cal. rer` = tarea real (perfil resumido vs. resumen de vacante); `cal. rer unid.` = pares cortos requisito/evidencia.", "",
+        "| Combinación | dim | cal. emb | cal. rer | cal. rer unid. | recall | pares/s | " + " | ".join(umbrales) + " |",
+        "|---|---|---|---|---|---|---|" + "---|" * len(umbrales),
     ]
     for f in sorted([f for f in filas if f["cumple_todo"]], key=lambda f: (-f["exactitud"], -f["pares_por_s"])):
         v = {x["umbral"]: x for x in f["veredictos"]}
         celdas = [f"{v[u]['medido']:.2f}" if u in v else "—" for u in umbrales]
-        lineas.append(f"| {f['nombre']} | {f['dim']} | {f['calidad_emb']:.2f} | {f['calidad_rer']:.2f} | {f['recall']:.2f} | "
+        lineas.append(f"| {f['nombre']} | {f['dim']} | {f['calidad_emb']:.2f} | {f['calidad_rer']:.2f} | {f['calidad_rer_unidades']:.2f} | {f['recall']:.2f} | "
                       f"{f['pares_por_s']:.1f} | " + " | ".join(celdas) + " |")
     lineas += ["", "## Por qué falla cada combinación descartada (primer umbral incumplido)", ""]
     motivos = {}

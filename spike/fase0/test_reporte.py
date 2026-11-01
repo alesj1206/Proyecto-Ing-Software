@@ -60,3 +60,46 @@ def test_desempate_prefiere_recall_y_mejor_reranker():
         base | {"nombre": "exacta_bge", "recall": 1.0, "calidad_rer": 0.95},
     ]
     assert elegir(cands)["nombre"] == "exacta_bge"
+
+
+def test_ventana_de_empate_es_al_menos_un_caso():
+    # 40 casos: 1 caso = 2,5 puntos; 0,900 vs 0,875 no se distingue → gana el más rápido
+    cands = [
+        {"nombre": "minilm", "exactitud": 0.900, "unidades_por_s": 400, "cumple_todo": True},
+        {"nombre": "potion", "exactitud": 0.875, "unidades_por_s": 67_000, "cumple_todo": True},
+    ]
+    assert elegir(cands, casos=40)["nombre"] == "potion"
+    assert elegir(cands, casos=400)["nombre"] == "minilm"
+
+
+def test_veredicto_contra_el_spec_no_pasa_si_solo_cumple_con_gpu():
+    from spike.fase0.reporte import veredicto_global
+
+    fila = {"exactitud": 0.9, "unidades_por_s": 400, "cumple_todo": True, "modo_reranker": "cuda"}
+    estado, elegido = veredicto_global([fila, fila | {"modo_reranker": "cpu", "cumple_todo": False}])
+    assert estado.startswith("NO CUMPLE §6 EN CPU")
+    assert elegido is fila
+
+
+def test_falta_cobertura_falla_en_voz_alta(monkeypatch):
+    from spike.fase0 import reporte
+
+    monkeypatch.setattr(reporte, "_leer", lambda nombre: None if nombre == "cobertura" else {})
+    with pytest.raises(FileNotFoundError, match="cobertura"):
+        reporte.combinaciones()
+
+
+def test_gpu_sin_medir_no_cumple():
+    v = {x["umbral"]: x for x in veredictos(BASE | {"gpu_sin_medir": True})}
+    assert v["carga_inicial_gpu_h"]["cumple"] is False
+
+
+def test_exacta_en_postgres_se_prefiere_ante_empate_total(monkeypatch):
+    from spike.fase0 import reporte
+
+    alt = {"segundos_carga_bytea": 4, "ms_busqueda_exacta_f32_p95": 11, "ms_fetch_bytea_3000_p95": 72, "ms_busqueda_exacta_pg_p95": 17}
+    monkeypatch.setattr(reporte, "_leer", lambda nombre: alt if nombre.startswith("alternativas") else None)
+    r = reporte._retrieval("exacta_pg", 384)
+    assert r["ms_busqueda_p95"] == 17 and r["recall"] == 1.0
+    base = {"exactitud": 0.9, "unidades_por_s": 400, "cumple_todo": True, "recall": 1.0}
+    assert elegir([base | {"arquitectura": "exacta"}, base | {"arquitectura": "exacta_pg"}])["arquitectura"] == "exacta_pg"

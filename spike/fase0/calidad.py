@@ -61,3 +61,23 @@ def evaluar_reranker(modelo: str) -> dict:
         s_pos, s_neg = rr.rerank(c["requisito"], [c["positivo"], c["negativo"]])
         aciertos.append(s_pos > s_neg)
     return _guardar(f"calidad_rer_{_slug(modelo)}", _resumen(modelo, casos, aciertos, tipo="reranker"))
+
+
+DATOS_RESUMEN = Path(__file__).resolve().parent / "datos" / "calidad_resumen.yaml"
+
+
+def cargar_calidad_resumen() -> list[dict]:
+    return yaml.safe_load(DATOS_RESUMEN.read_text(encoding="utf-8"))
+
+
+def evaluar_reranker_resumen(modelo: str, proveedor: str = "cpu") -> dict:
+    casos = cargar_calidad_resumen()
+    rr = cargar_reranker(modelo, proveedor)
+    aciertos = []
+    for c in casos:
+        s_buena, s_trampa = rr.rerank(c["perfil"], [c["buena"], c["trampa"]])
+        aciertos.append(s_buena > s_trampa)
+    fallos = [c["buena"].split(".")[0] for c, ok in zip(casos, aciertos) if not ok]
+    resultado = {"modelo": modelo, "tipo": "reranker_resumen", "aciertos": sum(aciertos), "total": len(casos),
+                 "exactitud": sum(aciertos) / len(casos), "fallos": fallos}
+    return _guardar(f"calidad_rer_resumen_{_slug(modelo)}", resultado)

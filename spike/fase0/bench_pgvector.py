@@ -73,6 +73,13 @@ def buscar_por_umbral(conn, vector: list[float], tau: float, tope: int = 5_000, 
     return sorted(dentro, key=lambda f: f[1], reverse=True)[:tope]
 
 
+def leer_requisitos(conn, vacantes: list[int], tabla: str = "requisitos") -> np.ndarray:
+    """Vectores de los requisitos de esas vacantes. Protocolo binario: en texto, parsear los
+    vectores cuesta ~25 veces más y falsea la comparación con la alternativa bytea."""
+    filas = conn.cursor(binary=True).execute(f"SELECT v FROM {tabla} WHERE vacante = ANY(%s)", (vacantes,)).fetchall()
+    return np.array([v.to_numpy() for (v,) in filas], dtype=np.float32)
+
+
 def _normalizar(x: np.ndarray) -> np.ndarray:
     return (x / np.linalg.norm(x, axis=1, keepdims=True)).astype(np.float32)
 
@@ -140,8 +147,8 @@ def main() -> None:
             }
 
         ids = rnd.choice(N_DOCS, VACANTES_RELEVANTES, replace=False).tolist()
-        c.execute("SELECT v FROM requisitos WHERE vacante = ANY(%s)", (ids,)).fetchall()  # calentamiento
-        ms_fetch = _seg(lambda: c.execute("SELECT vacante, v FROM requisitos WHERE vacante = ANY(%s)", (ids,)).fetchall()) * 1000
+        leer_requisitos(c, rnd.choice(N_DOCS, VACANTES_RELEVANTES, replace=False).tolist())  # calentamiento con otras vacantes
+        ms_fetch = _seg(lambda: leer_requisitos(c, ids)) * 1000
 
         resultado = {
             "dim": dim,

@@ -1,0 +1,82 @@
+# Tarea real del reranker: perfil resumido (varias unidades de evidencia) frente a resúmenes de vacante.
+# Acierto = score(perfil, buena) > score(perfil, trampa). La trampa comparte industria o palabras.
+- industria: tecnología
+  perfil: "Desarrollé microservicios en Java con Spring Boot; 3 años en backend para banca; manejo de PostgreSQL y Docker; integraciones REST con sistemas core"
+  buena: "Desarrollador Backend Java. Experiencia mínima de 2 años en Java y Spring Boot; APIs REST; bases de datos relacionales; deseable Docker"
+  trampa: "Desarrollador Frontend JavaScript. Experiencia en React y TypeScript; maquetación HTML y CSS; consumo de APIs; deseable Next.js"
+- industria: tecnología
+  perfil: "Configuré pipelines de CI/CD en GitHub Actions; administré clústeres de Kubernetes en AWS; monitoreo con Prometheus y Grafana; scripting en Bash y Python"
+  buena: "Ingeniero DevOps. Kubernetes y contenedores; pipelines CI/CD; nube AWS o Azure; observabilidad y métricas"
+  trampa: "Técnico de soporte. Mantenimiento de equipos de cómputo; instalación de impresoras; atención de mesa de ayuda; redes LAN"
+- industria: datos
+  perfil: "Construí tableros en Power BI para el área comercial; consultas SQL sobre ventas; limpieza de datos con Python y pandas; reportes mensuales a gerencia"
+  buena: "Analista BI. Power BI y SQL; análisis comercial; Python deseable; generación de indicadores de negocio"
+  trampa: "Ingeniero de datos. Construcción de pipelines en Spark y Airflow; data lake en AWS; modelado dimensional a gran escala; Scala"
+- industria: datos
+  perfil: "Digitación y validación de bases de datos en Excel; tablas dinámicas y macros; cargue de información a sistemas internos; 1 año de experiencia"
+  buena: "Analista de datos junior. Excel avanzado con macros y tablas dinámicas; cargue y validación de bases de datos; 1 año de experiencia"
+  trampa: "Científico de datos senior. Modelos de machine learning en producción; 5 años de experiencia; estadística avanzada; MLOps"
+- industria: contabilidad
+  perfil: "Contador público con tarjeta profesional; cierres contables mensuales bajo NIIF; declaraciones de renta e IVA; manejo de SAP FI"
+  buena: "Contador. Profesional en contaduría pública con tarjeta; NIIF; impuestos nacionales; experiencia en SAP"
+  trampa: "Auxiliar de cartera. Gestión de cobro telefónico; seguimiento a clientes morosos; registro de pagos en Excel"
+- industria: contabilidad
+  perfil: "Auxiliar contable; causación de facturas de proveedores; conciliaciones bancarias; manejo de Siigo; técnico en contabilidad"
+  buena: "Auxiliar contable. Técnico o tecnólogo en contabilidad; causación de cuentas por pagar; conciliaciones bancarias; Siigo o similar"
+  trampa: "Revisor fiscal. Contador con especialización en revisoría fiscal; 8 años de experiencia; dictamen de estados financieros"
+- industria: comercial
+  perfil: "Ejecutivo de ventas corporativas; manejo de cuentas empresariales B2B; cumplimiento de metas trimestrales; CRM Salesforce; negociación de contratos"
+  buena: "Ejecutivo comercial B2B. Venta consultiva a empresas; gestión de pipeline en CRM; cumplimiento de presupuesto; negociación"
+  trampa: "Asesor de ventas en tienda. Atención en punto de venta; manejo de caja; exhibición de producto; turnos rotativos fines de semana"
+- industria: comercial
+  perfil: "Asesor de servicio al cliente en call center; resolución de PQRS; manejo de CRM; atención por chat y teléfono; 2 años de experiencia"
+  buena: "Agente de servicio al cliente. Experiencia en contact center; atención de peticiones, quejas y reclamos; manejo de herramientas CRM"
+  trampa: "Gerente de servicio al cliente. Liderazgo de equipos de más de 50 personas; diseño de estrategia de experiencia; 10 años de experiencia"
+- industria: salud
+  perfil: "Enfermera jefe en UCI adultos; manejo de ventilación mecánica; administración de medicamentos de alto riesgo; registro en historia clínica"
+  buena: "Enfermero(a) jefe UCI. Profesional en enfermería; experiencia en cuidado intensivo; manejo de pacientes críticos; historia clínica"
+  trampa: "Auxiliar de veterinaria. Asistencia en consulta de mascotas; baño y peluquería canina; manejo de inventario de medicamentos veterinarios"
+- industria: salud
+  perfil: "Auxiliar de laboratorio clínico; toma de muestras de sangre; procesamiento en química sanguínea; normas de bioseguridad"
+  buena: "Auxiliar de laboratorio clínico. Flebotomía y toma de muestras; procesamiento de muestras; bioseguridad"
+  trampa: "Auxiliar de odontología. Asistencia al odontólogo en consulta; esterilización de instrumental; agendamiento de citas"
+- industria: logística
+  perfil: "Operario de bodega; manejo de montacargas con certificación; picking y packing; control de inventarios con WMS; despachos"
+  buena: "Auxiliar de bodega con montacargas. Certificación vigente de montacargas; alistamiento de pedidos; inventarios en WMS"
+  trampa: "Conductor de tractocamión. Licencia C3; rutas nacionales; experiencia en carga pesada; disponibilidad para viajar"
+- industria: logística
+  perfil: "Coordiné importaciones y exportaciones; trámites ante la DIAN y agencias de aduana; incoterms; seguimiento de navieras"
+  buena: "Analista de comercio exterior. Gestión de importaciones y exportaciones; trámites aduaneros; incoterms; relación con agentes de carga"
+  trampa: "Auxiliar de inventarios en tienda. Conteo de mercancía; recepción de proveedores locales; organización de estanterías"
+- industria: diseño
+  perfil: "Investigación con usuarios y entrevistas; wireframes y prototipos en Figma; pruebas de usabilidad; sistemas de diseño para apps móviles"
+  buena: "Diseñador UX/UI. Investigación de usuarios; prototipado en Figma; pruebas de usabilidad; diseño de interfaces móviles"
+  trampa: "Diseñador gráfico para impresos. Diseño de piezas publicitarias impresas; Illustrator; preprensa; gran formato"
+- industria: diseño
+  perfil: "Edición de video en Premiere y DaVinci; motion graphics en After Effects; contenido para redes sociales; guion de piezas cortas"
+  buena: "Editor audiovisual. Edición en Premiere o DaVinci; motion graphics; producción de contenido para redes"
+  trampa: "Community manager. Programación de publicaciones; respuesta a comentarios; reportes de métricas de redes; redacción de copies"
+- industria: recursos humanos
+  perfil: "Liquidé nómina quincenal para 300 empleados; prestaciones sociales y seguridad social; novedades de nómina; manejo de software de nómina"
+  buena: "Analista de nómina. Liquidación de nómina y prestaciones; aportes a seguridad social; novedades; software de nómina"
+  trampa: "Analista de selección. Reclutamiento de personal; entrevistas por competencias; pruebas psicotécnicas; publicación de vacantes"
+- industria: recursos humanos
+  perfil: "Psicóloga organizacional; procesos de selección masiva; entrevistas por competencias; aplicación de pruebas psicotécnicas; assessment center"
+  buena: "Profesional de selección. Psicólogo(a); selección por competencias; pruebas psicotécnicas; procesos masivos"
+  trampa: "Psicólogo clínico. Atención psicoterapéutica individual; evaluación y diagnóstico clínico; consultorio particular"
+- industria: administración
+  perfil: "Asistente administrativa; manejo de agenda de gerencia; elaboración de actas e informes; gestión documental; Excel intermedio"
+  buena: "Asistente de gerencia. Manejo de agenda; redacción de actas e informes; archivo y gestión documental; Office"
+  trampa: "Recepcionista de hotel. Check-in y check-out de huéspedes; manejo de sistema hotelero; turnos nocturnos; inglés conversacional"
+- industria: educación
+  perfil: "Docente de matemáticas de secundaria; licenciado en matemáticas; planeación de clases; evaluación por competencias; 4 años en colegio privado"
+  buena: "Docente de matemáticas bachillerato. Licenciatura en matemáticas; planeación curricular; evaluación; experiencia en colegio"
+  trampa: "Tutor de inglés para niños. Clases particulares de inglés; actividades lúdicas; nivel B2 de inglés"
+- industria: tecnología
+  perfil: "Tester QA; diseño y ejecución de casos de prueba; automatización con Selenium y Python; reporte de bugs en Jira; pruebas de API con Postman"
+  buena: "Analista QA. Pruebas funcionales y de regresión; automatización con Selenium; Postman; gestión de incidencias en Jira"
+  trampa: "Desarrollador Python backend. Desarrollo de APIs con Django; bases de datos PostgreSQL; despliegue en la nube"
+- industria: tecnología
+  perfil: "Estudiante de ingeniería de sistemas en último semestre; proyectos académicos en Python y SQL; monitor de programación; inglés B1"
+  buena: "Practicante de desarrollo. Estudiante de últimos semestres de ingeniería de sistemas; conocimientos en Python y bases de datos; contrato de aprendizaje"
+  trampa: "Arquitecto de software senior. 10 años de experiencia; diseño de arquitecturas distribuidas; liderazgo técnico de equipos"

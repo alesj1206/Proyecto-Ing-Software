@@ -17,3 +17,4 @@ db.sqlite3
 !infra/postgres/.env.ejemplo
 spike/fase0/resultados/*.json
 spike/fase0/.venv-gpu/
+.omc/

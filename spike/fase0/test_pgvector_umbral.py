@@ -48,3 +48,30 @@ def test_tamano_tabla_es_serializable(conn_y_consulta):
 
     conn, _ = conn_y_consulta
     json.dumps({"mb": _mb(conn, "test_docs")})
+
+
+def test_leer_requisitos_binario_devuelve_matriz(conn_y_consulta):
+    import numpy as np
+    from pgvector import HalfVector
+
+    from spike.fase0.bench_pgvector import leer_requisitos
+
+    conn, _ = conn_y_consulta
+    with conn.cursor().copy("COPY test_requisitos (id, vacante, v) FROM STDIN WITH (FORMAT BINARY)") as copy:
+        copy.set_types(["int8", "int8", "halfvec"])
+        for i in range(18):
+            copy.write_row((i, i // 9, HalfVector(np.full(32, i, dtype=np.float32))))
+    m = leer_requisitos(conn, [0, 1], tabla="test_requisitos")
+    assert m.shape == (18, 32) and m.dtype == np.float32
+
+
+def test_busqueda_exacta_en_postgres_igual_a_numpy(conn_y_consulta):
+    from spike.fase0.bench_alternativas import busqueda_exacta_postgres
+
+    conn, consulta = conn_y_consulta
+    filas = busqueda_exacta_postgres(conn, consulta.tolist(), tau=0.9, tabla="test_docs")
+    assert len(filas) >= 1400  # sin índice: recall total, sin límite de ef_search
+    assert all(s >= 0.9 for _, s in filas)
+    sims = [s for _, s in filas]
+    assert sims == sorted(sims, reverse=True)
+    assert len(busqueda_exacta_postgres(conn, consulta.tolist(), tau=0.0, tope=300, tabla="test_docs")) == 300
