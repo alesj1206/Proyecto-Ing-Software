@@ -13,5 +13,8 @@ urlpatterns = [
     path("onboarding", views.onboarding_view, name="onboarding"),
     path("perfil", views.perfil_view, name="perfil"),
     path("cuenta/eliminar", views.eliminar_cuenta_view, name="eliminar_cuenta"),
+    path("cuenta/magneto/conectar", views.conectar_magneto_view, name="conectar_magneto"),
+    path("cuenta/magneto/callback", views.callback_magneto_view, name="callback_magneto"),
+    path("cuenta/magneto/desconectar", views.desconectar_magneto_view, name="desconectar_magneto"),
     path("expectativas", views.expectativas_view, name="expectativas"),
 ]

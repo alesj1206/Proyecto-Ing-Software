@@ -123,3 +123,11 @@ class EvidenciaPerfil(models.Model):
     class Meta:
         ordering = ["posicion"]
         constraints = [models.UniqueConstraint(fields=["perfil", "posicion"], name="evidencia_posicion_unica")]
+
+
+class ConexionMagneto(models.Model):
+    """Token OAuth del MCP de Magneto de un candidato (B1), guardado cifrado y revocable con "Desconectar"."""
+
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="conexion_magneto")
+    token_cifrado = models.TextField()
+    expira_en = models.DateTimeField()

@@ -34,7 +34,8 @@ def hash_contenido(cruda: VacanteCruda) -> str:
     """Todo lo que se guarda: una vacante republicada (fecha nueva) o marcada urgente también se actualiza."""
     contenido = "\n".join(str(v) for v in (
         cruda.titulo, cruda.empresa, cruda.ubicacion, cruda.modalidad, cruda.texto_completo, "|".join(cruda.etiquetas),
-        cruda.url, cruda.fecha_publicacion, cruda.salario_min, cruda.salario_max, cruda.urgente))
+        cruda.url, cruda.fecha_publicacion, cruda.salario_min, cruda.salario_max, cruda.urgente,
+        "|".join(cruda.prefiltro)))
     return hashlib.sha256(contenido.encode("utf-8")).hexdigest()
 
 
@@ -68,6 +69,7 @@ def _guardar(cruda: VacanteCruda, fuente: str, firma: str) -> bool:
             "activa": True,
             "etiquetas": list(cruda.etiquetas),
             "modalidad_inferida": not (cruda.modalidad or restricciones.modalidad),
+            "prefiltro": list(cruda.prefiltro),
         },
     )
     vacante.requisito_set.all().delete()

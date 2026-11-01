@@ -181,6 +181,14 @@ SCOUTLY_EMBEDDER = os.environ.get('SCOUTLY_EMBEDDER', 'fastembed')
 SCOUTLY_RERANKER = os.environ.get('SCOUTLY_RERANKER', '')
 SCOUTLY_DIMENSION = 384  # MiniLM-L12; la columna halfvec de vacantes y perfiles
 
+# B1 (spec §13.3): MCP oficial de candidatos de Magneto. APAGADO hasta que el equipo revise los términos de uso.
+SCOUTLY_MAGNETO_MCP = os.environ.get('SCOUTLY_MAGNETO_MCP', '')
+SCOUTLY_MAGNETO_MCP_URL = os.environ.get('SCOUTLY_MAGNETO_MCP_URL', 'https://api.magneto365.com/mcp/candidates')
+SCOUTLY_MAGNETO_OAUTH_AUTORIZAR = os.environ.get('SCOUTLY_MAGNETO_OAUTH_AUTORIZAR', '')
+SCOUTLY_MAGNETO_OAUTH_TOKEN = os.environ.get('SCOUTLY_MAGNETO_OAUTH_TOKEN', '')
+SCOUTLY_MAGNETO_OAUTH_CLIENT_ID = os.environ.get('SCOUTLY_MAGNETO_OAUTH_CLIENT_ID', '')
+SCOUTLY_CLAVE_TOKENS = os.environ.get('SCOUTLY_CLAVE_TOKENS', '')  # Fernet: cifra los tokens OAuth guardados
+
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = 'raiz'  # raiz decide entre onboarding y dashboard
 

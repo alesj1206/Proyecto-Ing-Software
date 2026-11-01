@@ -11,3 +11,5 @@ django-allauth>=65.21,<66
 fastembed>=0.9.1,<0.10
 numpy>=2.5,<3
 pyyaml>=6.0.3,<7
+# B1: cifrado de los tokens OAuth de Magneto
+cryptography>=46,<48

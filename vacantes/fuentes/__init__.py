@@ -20,6 +20,7 @@ class VacanteCruda:
     salario_min: int | None = None  # solo si la fuente lo trae estructurado
     salario_max: int | None = None
     urgente: bool = False
+    prefiltro: tuple[str, ...] = ()  # preguntas de la empresa (solo las trae el MCP de Magneto, B1)
 
 
 class FuenteVacantes(Protocol):

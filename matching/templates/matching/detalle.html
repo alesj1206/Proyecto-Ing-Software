@@ -208,6 +208,14 @@
     </div>
     {% endif %}
 
+    {% if vacante.prefiltro %}
+    <div class="card" style="margin-top:1.5rem;">
+      <h3 style="font-size:0.875rem;color:var(--navy);">Preguntas de la empresa</h3>
+      <p class="decision-evidencia">Te las harán al postularte: prepara tus respuestas.</p>
+      <ul class="decision-motivos">{% for pregunta in vacante.prefiltro %}<li>{{ pregunta }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+
     <div class="card" style="margin-top:1.5rem;">
       <h3 style="font-size:0.875rem;color:var(--navy);">Sobre la empresa</h3>
       <p style="margin-top:0.75rem;font-size:0.875rem;color:var(--muted-foreground);line-height:1.6;">
