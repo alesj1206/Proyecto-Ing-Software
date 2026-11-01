@@ -47,6 +47,14 @@
         {{ form.anios_experiencia }}
         {% if form.anios_experiencia.errors %}<p class="form-error">{{ form.anios_experiencia.errors.0 }}</p>{% endif %}
       </div>
+      <div class="field">
+        <label for="{{ form.notif_modo.id_for_label }}">{{ form.notif_modo.label }}</label>
+        {{ form.notif_modo }}
+      </div>
+      <div class="field">
+        <label for="{{ form.notif_max.id_for_label }}">{{ form.notif_max.label }}</label>
+        {{ form.notif_max }}
+      </div>
     </div>
 
     <div style="margin-top:1.25rem;display:flex;align-items:center;gap:0.9rem;">

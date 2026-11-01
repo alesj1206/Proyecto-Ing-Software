@@ -80,6 +80,14 @@ class Perfil(models.Model):
     exp_disponibilidad = models.CharField(max_length=20, choices=Disponibilidad.choices, blank=True)
     anios_experiencia = models.PositiveIntegerField(null=True, blank=True)
 
+    class ModoNotificacion(models.TextChoices):  # spec §5.7: preferencia del candidato
+        RESUMEN = "resumen", "Un resumen diario por correo"
+        INDIVIDUAL = "individual", "Un correo por vacante (con un máximo al día)"
+        DESACTIVADO = "desactivado", "Solo en la campana, sin correos"
+
+    notif_modo = models.CharField(max_length=12, choices=ModoNotificacion.choices, default=ModoNotificacion.RESUMEN)
+    notif_max = models.PositiveSmallIntegerField(default=3)
+
     # Vectores (Fase 2): promedio normalizado de la evidencia y su matriz (float16), al día si hash_embebido coincide.
     vector = HalfVectorField(dimensions=settings.SCOUTLY_DIMENSION, null=True, blank=True)
     matriz_evidencia = models.BinaryField(null=True, blank=True)

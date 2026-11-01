@@ -27,6 +27,17 @@ class CVUploadForm(forms.Form):
 
 
 class ExpectativasForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["notif_modo"].required = False
+        self.fields["notif_max"].required = False
+
+    def clean_notif_modo(self):
+        return self.cleaned_data.get("notif_modo") or self.instance.notif_modo
+
+    def clean_notif_max(self):
+        return self.cleaned_data.get("notif_max") or self.instance.notif_max
+
     class Meta:
         model = Perfil
         fields = [
@@ -35,6 +46,8 @@ class ExpectativasForm(forms.ModelForm):
             "exp_ubicacion",
             "exp_disponibilidad",
             "anios_experiencia",
+            "notif_modo",
+            "notif_max",
         ]
         labels = {
             "exp_salario_min": "Salario mínimo esperado (COP/mes)",
@@ -42,6 +55,8 @@ class ExpectativasForm(forms.ModelForm):
             "exp_ubicacion": "Ubicación preferida",
             "exp_disponibilidad": "Disponibilidad",
             "anios_experiencia": "Años de experiencia",
+            "notif_modo": "Avisos de vacantes nuevas para postular",
+            "notif_max": "Máximo de correos al día (si eliges uno por vacante)",
         }
         widgets = {
             "exp_salario_min": forms.NumberInput(attrs={"placeholder": "Ej: 3000000"}),
