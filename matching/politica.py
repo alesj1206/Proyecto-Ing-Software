@@ -14,8 +14,8 @@ from .restricciones import ResultadoRestriccion
 
 @dataclass(frozen=True)
 class Politica:
-    version: str = "2026-11-02"
-    tau_alto: float = 0.50
+    version: str = "2026-11-02.2"  # τ_alto 0,50 → 0,45 tras el barrido sobre la mitad de ajuste (docs/fase2/EVALUACION.md)
+    tau_alto: float = 0.45
     tau_bajo: float = 0.40
     tau_relevancia: float = 0.40
     max_faltantes_descartar: int = 3

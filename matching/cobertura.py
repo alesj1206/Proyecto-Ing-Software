@@ -17,6 +17,20 @@ _RELLENO_ANIOS = {"experiencia", "minimo", "minima", "de", "en", "al", "menos", 
                   "como", "similar", "similares", "cargos", "relacionada", "relacionados"}
 
 
+# Competencias blandas y condiciones (disponibilidad, documentos): casi nunca están en un CV y no se "cierran"
+# estudiando, así que no cuentan como brecha. Se comparan por palabras clave sobre el texto normalizado.
+PALABRAS_BLANDAS = ("trabajo en equipo", "disponibilidad", "aprendizaje", "actitud", "proactiv", "responsabilidad",
+                    "compromiso", "etica", "valores", "adaptabilidad", "puntualidad", "atencion al detalle",
+                    "orientacion al logro", "comunicacion asertiva", "comunicacion efectiva", "creatividad",
+                    "liderazgo", "agilidad", "humanizacion", "resolucion de problemas", "trabajo bajo presion",
+                    "vacunacion", "habilidades de comunicacion", "capacidad de aprendizaje", "empatia")
+
+
+def es_blando(texto: str) -> bool:
+    normal = normalizar(texto)
+    return any(p in normal for p in PALABRAS_BLANDAS)
+
+
 def es_solo_anios(texto: str) -> bool:
     """Un requisito que solo pide tiempo de experiencia: lo evalúa la restricción de experiencia, no la similitud."""
     palabras = normalizar(texto).split()
@@ -29,14 +43,14 @@ class RequisitoEvaluado:
     texto: str
     tipo: str
     origen: str
-    estado: str  # "cubierto" | "parcial" | "faltante" | "formacion" | "experiencia"
+    estado: str  # "cubierto" | "parcial" | "faltante" | "formacion" | "experiencia" | "blando"
     similitud: float
     evidencia: str | None
 
     @property
     def cuenta(self) -> bool:
         """Entra al porcentaje: obligatorio y medido por similitud (no formación ni años de experiencia)."""
-        return self.tipo == "obligatorio" and self.estado not in ("formacion", "experiencia")
+        return self.tipo == "obligatorio" and self.estado not in ("formacion", "experiencia", "blando")
 
 
 @dataclass
@@ -89,6 +103,8 @@ def cubrir(requisitos, matriz_req: np.ndarray, evidencias: list[str], matriz_evi
             estado = "formacion"
         elif es_solo_anios(r.texto):
             estado = "experiencia"
+        elif es_blando(r.texto):
+            estado = "blando"
         elif sim >= tau_alto:
             estado = "cubierto"
         elif sim >= tau_bajo:

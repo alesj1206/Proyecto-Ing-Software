@@ -87,3 +87,27 @@ def test_requisitos_con_contenido_no_son_solo_anios(texto):
 def test_los_anios_no_cuentan_ni_generan_ajustes():
     c = _cubrir([req("Experiencia: mínimo 1–2 años"), req("a")], [_fila(0.45), _fila(0.6)])
     assert c.requisitos[0].estado == "experiencia" and c.obligatorios_total == 1 and c.parciales_con_evidencia == []
+
+
+# --- calibración (Task 10): competencias blandas y condiciones no son brechas --------------------------
+
+from matching.cobertura import es_blando
+
+
+@pytest.mark.parametrize("texto", ["Trabajo en equipo", "Disponibilidad para laborar en horarios rotativos",
+                                   "Aprendizaje rápido", "Ética y valores", "Compromiso con la organización",
+                                   "Esquema de vacunación completo (3 dosis Hepatitis B)", "Adaptabilidad",
+                                   "Demostrar atención al detalle organización orientación al logro"])
+def test_competencias_blandas_y_condiciones(texto):
+    assert es_blando(texto)
+
+
+@pytest.mark.parametrize("texto", ["Atención al cliente en punto de venta", "Manejo de Excel", "Programación",
+                                   "Facturación electrónica"])
+def test_requisitos_tecnicos_no_son_blandos(texto):
+    assert not es_blando(texto)
+
+
+def test_lo_blando_no_cuenta_como_brecha():
+    c = _cubrir([req("Trabajo en equipo"), req("a")], [_fila(0.1), _fila(0.6)])
+    assert c.requisitos[0].estado == "blando" and c.faltantes_obligatorios == [] and c.obligatorios_total == 1

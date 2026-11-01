@@ -216,3 +216,15 @@ def test_una_palabra_suelta_no_define_la_modalidad():
 def test_el_auxilio_no_es_el_salario():
     r = extraer_restricciones("Requisitos:\n- Excel\nAuxilio de transporte ($249.095)")
     assert (r.salario_min, r.salario_max) == (None, None)
+
+
+def test_sub_vinetas_o_dentro_de_una_linea_se_separan():
+    texto = ("Requisitos:\n- Conocimientos técnicos obligatorios: o Power Platform: Power BI y Power Apps. "
+             "o Lenguajes y Consultas: Python y SQL.")
+    textos = [r.texto for r in extraer_requisitos(texto, [])]
+    assert any(t.startswith("Power Platform") for t in textos) and any(t.startswith("Lenguajes") for t in textos)
+
+
+def test_una_o_normal_no_separa():
+    [r] = extraer_requisitos("Requisitos:\n- Técnico o Tecnólogo en Contabilidad", [])
+    assert r.texto == "Técnico o Tecnólogo en Contabilidad"

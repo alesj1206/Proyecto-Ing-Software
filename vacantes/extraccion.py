@@ -52,6 +52,9 @@ RUIDO = re.compile(
 )
 VINETA = re.compile(r"^\s*(?:[-*•▪●◦‣·–✓✔➢►o]\s+|\d+[.)]\s*|[-*•▪●◦‣·–✓✔➢►])\s*")
 VINETA_EN_LINEA = re.compile(r"\s+[•▪●]\s+")
+# Sub-viñetas "o" en una misma línea ("Conocimientos: o Power BI… o Python y SQL"). Solo se separan si la línea las
+# abre con ": o ", para no partir "Técnico o Tecnólogo".
+SUB_VINETA_O = re.compile(r"(?:(?<=:)|(?<=[.;]))\s+o\s+(?=[A-ZÁÉÍÓÚÑ])")
 ENCABEZADO_AL_FINAL = re.compile(r"(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿][^.:]{2,40}:\s*$)")
 # Un encabezado corto sin dos puntos solo puede tener estas palabras ("Perfil requerido", "Condiciones laborales").
 VOCABULARIO_ENCABEZADO = set("""
@@ -95,7 +98,8 @@ def _lineas(texto: str) -> list[str]:
     """Líneas limpias; separa viñetas metidas en la misma línea y encabezados pegados al final de una oración."""
     lineas = []
     for cruda in texto.replace("\xa0", " ").split("\n"):
-        for parte in VINETA_EN_LINEA.split(cruda):
+        partes = SUB_VINETA_O.split(cruda) if re.search(r":\s+o\s+[A-ZÁÉÍÓÚÑ]", cruda) else [cruda]
+        for parte in (p for trozo in partes for p in VINETA_EN_LINEA.split(trozo)):
             for trozo in ENCABEZADO_AL_FINAL.split(parte):
                 trozo = re.sub(r"\s+", " ", trozo).strip()
                 if trozo:

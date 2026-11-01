@@ -39,7 +39,8 @@ def test_el_motivo_nombra_el_dato_que_falta():
 
 
 def test_solidez_baja_cerca_del_umbral():
-    assert ORDEN[solidez(ctx(CINCO[:4] + [req("e", sim=0.51)]))[0]] < ORDEN["alta"]
+    cerca = POLITICA.tau_alto + 0.01
+    assert ORDEN[solidez(ctx(CINCO[:4] + [req("e", sim=cerca)]))[0]] < ORDEN["alta"]
 
 
 def test_pocos_requisitos_baja_la_solidez():

@@ -24,8 +24,8 @@ pares:
      justificacion: "Deep learning, visión por computador y PyTorch: no es su perfil"}
   - {cv: desarrollador_backend, vacante: mag-1090133, accion_esperada: DESCARTAR, mitad: ajuste,
      justificacion: "Es en Bogotá y él busca Santa Marta o Barranquilla"}
-  - {cv: desarrollador_backend, vacante: mag-1094241, accion_esperada: DESCARTAR, mitad: ajuste,
-     justificacion: "Medellín o Bogotá, fuera de sus ciudades"}
+  - {cv: desarrollador_backend, vacante: mag-1094241, accion_esperada: AJUSTAR_CV, mitad: ajuste,
+     justificacion: "Corregida (la vacante también es en Barranquilla): tiene programación y bases de datos; debe hacer explícito el desarrollo web"}
   - {cv: auxiliar_contable, vacante: mag-1121542, accion_esperada: POSTULAR, mitad: ajuste,
      justificacion: "Facturación electrónica, conciliaciones, Excel y DIAN: lo cubre todo en Bogotá"}
   - {cv: auxiliar_contable, vacante: mag-1121313, accion_esperada: AJUSTAR_CV, mitad: ajuste,
