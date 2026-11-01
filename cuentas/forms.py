@@ -82,6 +82,7 @@ class ClaveLoginForm(forms.Form):
 
     ERROR_GENERICO = "Correo electrónico o contraseña incorrectos."
     ERROR_BLOQUEO = "Demasiados intentos fallidos. Espera 15 minutos y vuelve a intentarlo."
+    ERROR_SIN_VERIFICAR = "Confirma tu correo para entrar: abre el enlace que te enviamos al registrarte."
 
     password = forms.CharField(
         label="Contraseña",
@@ -91,6 +92,7 @@ class ClaveLoginForm(forms.Form):
     def __init__(self, *args, email: str, request=None, bloqueado: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
         self.email, self.request, self.bloqueado, self.usuario = email, request, bloqueado, None
+        self.sin_verificar = False
 
     def clean(self):
         datos = super().clean()
@@ -100,6 +102,10 @@ class ClaveLoginForm(forms.Form):
         if password:
             self.usuario = authenticate(self.request, username=self.email, password=password)
             if self.usuario is None:  # mismo mensaje exista o no la cuenta, tenga o no contraseña
+                pendiente = Usuario.objects.filter(email=self.email, is_active=False).first()
+                if pendiente and pendiente.check_password(password):  # solo lo sabe quien conoce la contraseña
+                    self.sin_verificar = True
+                    raise forms.ValidationError(self.ERROR_SIN_VERIFICAR)
                 raise forms.ValidationError(self.ERROR_GENERICO)
         return datos
 

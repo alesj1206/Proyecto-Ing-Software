@@ -10,7 +10,11 @@
       Scoutly
     </a>
 
-    {% if clave_form %}
+    {% if enviado %}
+      <p class="auth-eyebrow">Revisa tu correo</p>
+      <h1 class="auth-title">Confirma tu cuenta</h1>
+      <p class="auth-subtitle">Te enviamos un enlace a {{ enviado }}. Ábrelo para activar tu cuenta (vence en 3 días).</p>
+    {% elif clave_form %}
       <p class="auth-eyebrow">Último paso</p>
       <h1 class="auth-title">Crea tu contraseña</h1>
       <p class="auth-subtitle">Para la cuenta <strong>{{ email }}</strong>.</p>

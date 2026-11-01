@@ -18,9 +18,10 @@ def registrar_autorizacion(usuario: Usuario) -> Autorizacion:
 
 
 @transaction.atomic
-def crear_usuario_con_autorizacion(email: str, password: str | None) -> Usuario:
-    """Nunca existe un usuario sin autorización: los dos se crean en la misma transacción."""
-    usuario = Usuario.objects.create_user(email=email, password=password)
+def crear_usuario_con_autorizacion(email: str, password: str | None, activo: bool = True) -> Usuario:
+    """Nunca existe un usuario sin autorización: los dos se crean en la misma transacción. El registro por correo crea
+    la cuenta inactiva hasta verificarla (`activo=False`)."""
+    usuario = Usuario.objects.create_user(email=email, password=password, is_active=activo)
     registrar_autorizacion(usuario)
     return usuario
 

@@ -83,12 +83,13 @@ def test_registro_paso2_sin_paso1_vuelve_al_inicio(client, db):
     assert not Usuario.objects.exists()
 
 
-def test_registro_completo_crea_usuario_autorizado_y_va_a_onboarding(client, db):
+def test_registro_completo_crea_usuario_autorizado_pendiente_de_verificar(client, db):
+    """Fase 3: la cuenta queda inactiva hasta abrir el enlace del correo (cuentas/tests/test_verificacion.py)."""
     client.post(reverse("registro"), DATOS_REGISTRO)
     r = client.post(reverse("registro"), {"paso": "clave", "password1": CLAVE_DE_PRUEBA,
                                           "password2": CLAVE_DE_PRUEBA})
-    assert r.url == reverse("onboarding")
-    assert Usuario.objects.get(email="n@e.com").autorizacion_set.exists()
+    usuario = Usuario.objects.get(email="n@e.com")
+    assert r.status_code == 200 and not usuario.is_active and usuario.autorizacion_set.exists()
     assert "registro_paso1" not in client.session
 
 
