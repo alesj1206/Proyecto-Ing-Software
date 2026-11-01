@@ -84,3 +84,15 @@ class SugerenciaCV(models.Model):
         constraints = [models.UniqueConstraint(fields=["perfil", "vacante", "tipo", "requisito"],
                                                name="una_sugerencia_por_requisito")]
         ordering = ["tipo", "id"]
+
+
+class ExplicacionDecision(models.Model):
+    """Caché de la explicación en prosa (Groq) de una decisión, válida mientras no cambien sus insumos (firma)."""
+
+    decision = models.ForeignKey(Decision, on_delete=models.CASCADE, related_name="explicaciones")
+    firma = models.CharField(max_length=64)
+    texto = models.TextField()
+    generada_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["decision", "firma"], name="una_explicacion_por_firma")]

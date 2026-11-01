@@ -12,6 +12,8 @@ from postulaciones.models import Postulacion
 from vacantes.models import Vacante
 
 from . import selectors, taller as taller_cv
+from .explicaciones import explicar
+from .ia import obtener_redactor
 from .models import Decision, SugerenciaCV
 from .politica import Accion
 
@@ -80,3 +82,10 @@ def taller_responder_view(request, vacante_id, sugerencia_id):
                                    perfil=perfil_con_cv(request.user))
     taller_cv.responder(sugerencia, acepta=request.POST.get("acepta") == "1")
     return redirect("taller", vacante_id=vacante_id)
+
+
+@login_required
+def explicacion_view(request, vacante_id):
+    """Fragmento HTML que el detalle carga a pedido ("Explícamelo"); así la página nunca espera a Groq."""
+    decision = get_object_or_404(Decision, perfil=perfil_con_cv(request.user), vacante_id=vacante_id)
+    return render(request, "matching/_explicacion.html", {"texto": explicar(decision, obtener_redactor())})

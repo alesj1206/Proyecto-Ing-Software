@@ -2,7 +2,7 @@
 
 from django.conf import settings
 
-from ..puertos import Embedder, Reordenador
+from ..puertos import Embedder, Redactor, Reordenador
 
 
 def obtener_embedder() -> Embedder:
@@ -26,3 +26,12 @@ def obtener_reordenador() -> Reordenador | None:
     from .fastembed import ReordenadorFastembed
 
     return ReordenadorFastembed()
+
+
+def obtener_redactor() -> Redactor | None:
+    """Groq si hay clave (GROQ_API_KEY); si no, None y se usa el texto de respaldo."""
+    if not settings.GROQ_API_KEY:
+        return None
+    from .groq import RedactorGroq
+
+    return RedactorGroq(settings.GROQ_API_KEY)

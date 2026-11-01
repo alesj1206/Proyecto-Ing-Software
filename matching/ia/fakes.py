@@ -37,3 +37,15 @@ class ReordenadorFalso:
     def puntuar(self, consulta: str, documentos: list[str]) -> list[float]:
         claves = set(_palabras(consulta))
         return [len(claves & set(_palabras(d))) / (len(claves) or 1) for d in documentos]
+
+
+class RedactorFalso:
+    """Guarda lo que recibió (para comprobar que no lleva datos del CV) y cuenta las llamadas."""
+
+    def __init__(self, falla: bool = False):
+        self.falla, self.llamadas, self.recibido = falla, 0, None
+
+    def redactar(self, insumos: dict) -> str | None:
+        self.llamadas += 1
+        self.recibido = insumos
+        return None if self.falla else f"Explicación falsa de {insumos['accion']} ({self.llamadas})."

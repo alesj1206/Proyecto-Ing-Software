@@ -14,6 +14,12 @@ class Embedder(Protocol):
         ...
 
 
+class Redactor(Protocol):
+    def redactar(self, insumos: dict) -> str | None:
+        """Una explicación en prosa de la decisión, o None si no se pudo (el llamador usa un texto de respaldo)."""
+        ...
+
+
 class Reordenador(Protocol):
     def puntuar(self, consulta: str, documentos: list[str]) -> list[float]:
         """Un puntaje por documento: más alto = más relevante para la consulta."""

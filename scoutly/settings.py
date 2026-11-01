@@ -223,6 +223,7 @@ N8N_SCORING_TOKEN = os.environ.get('N8N_SCORING_TOKEN', N8N_SCORING_TOKEN_DEV_DE
 # Sin esta variable, obtener_explicacion() cae directo al texto de
 # respaldo (no genérico, pero sin redactar por IA) — no rompe nada.
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+SCOUTLY_GROQ_MODELO = os.environ.get('SCOUTLY_GROQ_MODELO', 'qwen/qwen3.8-27b')  # el que funcionaba en v2
 
 # HU-11: notificaciones de nuevos matches (vacantes/notificaciones.py).
 # Único canal: correo (se evaluó WhatsApp vía Twilio y se descartó —

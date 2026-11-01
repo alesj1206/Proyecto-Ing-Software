@@ -181,6 +181,9 @@
       <ul class="decision-motivos">
         {% for motivo in decision.motivos %}<li>{{ motivo }}</li>{% endfor %}
       </ul>
+      <div id="explicacion" data-url="{% url 'explicacion' vacante.id %}">
+        <button type="button" class="btn btn-outline" onclick="fetch(this.parentElement.dataset.url).then(r => r.text()).then(h => { this.parentElement.innerHTML = h; })">Explícamelo</button>
+      </div>
       {% if decision.accion == "AJUSTAR_CV" %}
       <a href="{% url 'taller' vacante.id %}" class="btn btn-brand" style="margin-bottom:1rem;">Abrir el taller de CV</a>
       {% endif %}
