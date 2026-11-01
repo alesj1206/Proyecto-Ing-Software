@@ -1,9 +1,9 @@
 from django.urls import path
 
-from scoutly.views import pendiente
+from . import views
 
 urlpatterns = [
-    path("dashboard", pendiente, name="dashboard"),
-    path("historial", pendiente, name="historial"),
-    path("vacantes/<str:vacante_id>", pendiente, name="vacante_detalle"),
+    path("dashboard", views.dashboard_view, name="dashboard"),
+    path("historial", views.historial_view, name="historial"),
+    path("vacantes/<str:vacante_id>", views.detalle_view, name="vacante_detalle"),
 ]

@@ -1,4 +1,3 @@
-from django.http import HttpResponse
 from django.shortcuts import redirect
 
 
@@ -9,8 +8,3 @@ def raiz(request):
     if not request.user.is_authenticated:
         return redirect("login")
     return redirect("dashboard" if perfil_con_cv(request.user) else "onboarding")
-
-
-def pendiente(request, *args, **kwargs):
-    """Ruta reservada: su vista la implementa una tarea posterior de la Fase 1 (se borra en la Task 10)."""
-    return HttpResponse("En construcción", status=501)

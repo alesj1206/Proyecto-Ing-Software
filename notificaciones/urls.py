@@ -1,7 +1,5 @@
 from django.urls import path
 
-from scoutly.views import pendiente
+from . import views
 
-urlpatterns = [
-    path("notificaciones", pendiente, name="notificaciones"),
-]
+urlpatterns = [path("notificaciones", views.notificaciones_view, name="notificaciones")]
