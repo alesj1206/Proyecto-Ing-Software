@@ -1,3 +1,8 @@
+> **v3 (Sprint 3):** el workflow llama, en orden, a `POST /api/importar-vacantes` (202; la ingesta corre en segundo
+> plano y responde 409 si ya hay una en curso), `POST /api/decidir` (202; solo encola) y
+> `POST /api/generar-notificaciones` (200, con el resumen). Las decisiones las calcula
+> `manage.py decidir --escuchar`, **que debe estar corriendo** en otra terminal: la web nunca carga modelos.
+
 # HU-06 + HU-11 — workflow de n8n: ingesta real + ranking diario + notificación
 
 El documento del reto (Magneto, "Idea 4: Workflow con n8n") pide que n8n
@@ -28,7 +33,7 @@ navegador real con esperas entre búsquedas, puede tardar varios minutos
 eso su nodo en n8n tiene un timeout de 10 min (`600000`), muy por encima de
 los 15s de los otros dos, que solo hacen trabajo de base de datos.
 
-**Paso 1 — scoring** (`POST /api/recalcular-matches`): recorre todos los
+**Paso 1 — scoring** (`POST /api/decidir`): recorre todos los
 perfiles con CV cargado, recalcula su score contra todas las vacantes
 (`vacantes/scoring.py::recalcular_matches_todos`) y reemplaza las filas de
 `MatchDiario` del día. El dashboard lee de ahí; si nadie ha corrido el
@@ -66,12 +71,12 @@ no tenía credenciales accesibles) y el workflow quedó importado y
    `POST /rest/workflows/{id}/activate` lo activó.
 5. Se disparó una ejecución manual real
    (`POST /rest/workflows/{id}/run`) para confirmarlo de punta a punta: el
-   log de Django mostró `POST /api/recalcular-matches HTTP/1.1 200` viniendo
+   log de Django mostró `POST /api/decidir HTTP/1.1 200` viniendo
    del contenedor, y `MatchDiario` quedó actualizado.
 6. (2026-10-05) Se agregó el segundo nodo (HU-11) con el mismo método —
    `PATCH /rest/workflows/{id}` por API, sin tocar el navegador — y se
    volvió a disparar una ejecución real: el log de Django mostró los dos
-   POST en cadena (`/api/recalcular-matches` seguido de
+   POST en cadena (`/api/decidir` seguido de
    `/api/generar-notificaciones`), confirmando que n8n corre los dos pasos
    en el orden correcto.
 7. (2026-10-05) Se agregó el nodo de ingesta (paso 0) con el mismo método.
@@ -82,7 +87,7 @@ no tenía credenciales accesibles) y el workflow quedó importado y
    n8n ya se había rendido). Se subió el timeout del nodo a 10 min
    (`600000`) y se repitió la ejecución: los 3 nodos corrieron en cadena
    sin error, confirmado en el log de Django (`/api/importar-vacantes` →
-   `/api/recalcular-matches` → `/api/generar-notificaciones`, los tres 200,
+   `/api/decidir` → `/api/generar-notificaciones`, los tres 200,
    mismo segundo).
 
 Si quieres verlo en la interfaz (para capturas del informe, por ejemplo):
@@ -122,7 +127,7 @@ curl -X POST -H "X-Scoutly-Token: dev-local-token-change-me" \
   http://localhost:8000/api/importar-vacantes   # lento: scraping real
 
 curl -X POST -H "X-Scoutly-Token: dev-local-token-change-me" \
-  http://localhost:8000/api/recalcular-matches
+  http://localhost:8000/api/decidir
 
 curl -X POST -H "X-Scoutly-Token: dev-local-token-change-me" \
   http://localhost:8000/api/generar-notificaciones

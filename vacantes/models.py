@@ -86,3 +86,11 @@ class Requisito(models.Model):
 
     def __str__(self):
         return self.texto
+
+
+class EstadoIngesta(models.Model):
+    """Fila única que evita dos ingestas a la vez (n8n puede reintentar mientras la anterior sigue corriendo)."""
+
+    en_curso = models.BooleanField(default=False)
+    iniciada_en = models.DateTimeField(null=True, blank=True)
+    ultimo_resumen = models.CharField(max_length=255, blank=True)

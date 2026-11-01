@@ -18,7 +18,10 @@
       "name": "Cada día a las 6am",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
@@ -41,12 +44,15 @@
       "name": "0. Importar vacantes (ingesta)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [460, 300]
+      "position": [
+        460,
+        300
+      ]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.containers.internal:8000/api/recalcular-matches",
+        "url": "http://host.containers.internal:8000/api/decidir",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -61,10 +67,13 @@
         }
       },
       "id": "http-request-1",
-      "name": "1. Recalcular matches (scoring)",
+      "name": "1. Decidir (encolar para el batch)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [680, 300]
+      "position": [
+        680,
+        300
+      ]
     },
     {
       "parameters": {
@@ -87,7 +96,10 @@
       "name": "2. Generar notificaciones",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [900, 300]
+      "position": [
+        900,
+        300
+      ]
     }
   ],
   "connections": {
@@ -106,14 +118,14 @@
       "main": [
         [
           {
-            "node": "1. Recalcular matches (scoring)",
+            "node": "1. Decidir (encolar para el batch)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "1. Recalcular matches (scoring)": {
+    "1. Decidir (encolar para el batch)": {
       "main": [
         [
           {

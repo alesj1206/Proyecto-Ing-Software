@@ -12,6 +12,7 @@ urlpatterns = [
     path("", include("matching.urls")),
     path("", include("notificaciones.urls")),
     path("", include("vacantes.urls")),
+    path("", include("api.urls")),
     # allauth solo se usa para el login social: sus pantallas propias redirigen a las nuestras.
     path("cuentas/login/", RedirectView.as_view(pattern_name="login")),
     path("cuentas/signup/", RedirectView.as_view(pattern_name="registro")),

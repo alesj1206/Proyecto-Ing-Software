@@ -2,13 +2,16 @@
 
 import hashlib
 import logging
+import threading
+from datetime import timedelta
 from dataclasses import dataclass
 
-from django.db import transaction
+from django.db import connection, models, transaction
+from django.utils import timezone
 
 from .extraccion import extraer_requisitos, extraer_restricciones, requisitos_insuficientes
 from .fuentes import FuenteVacantes, VacanteCruda
-from .models import Requisito, Vacante
+from .models import EstadoIngesta, Requisito, Vacante
 
 log = logging.getLogger(__name__)
 MODALIDAD_POR_DEFECTO = Vacante.Modalidad.PRESENCIAL  # como en v2, si ni la fuente ni el texto la dicen
@@ -96,3 +99,43 @@ def ingerir(fuente: FuenteVacantes) -> ResumenIngesta:
         hashes[cruda.id] = firma
         resumen.insuficientes += insuficiente
     return resumen
+
+
+INGESTA_COLGADA = timedelta(minutes=30)  # una ingesta que murió sin soltar el candado se puede retomar
+
+
+def lanzar_hilo(funcion) -> None:
+    def en_su_propia_conexion():
+        try:
+            funcion()
+        finally:
+            connection.close()  # el hilo abrió su propia conexión a la base
+
+    threading.Thread(target=en_su_propia_conexion, daemon=True).start()
+
+
+def _tomar_candado() -> bool:
+    """Atómico: solo una petición puede pasar de libre (o colgada) a en curso."""
+    EstadoIngesta.objects.get_or_create(id=1)
+    libre = EstadoIngesta.objects.filter(id=1).filter(
+        models.Q(en_curso=False) | models.Q(iniciada_en__lt=timezone.now() - INGESTA_COLGADA))
+    return libre.update(en_curso=True, iniciada_en=timezone.now()) == 1
+
+
+def ingerir_en_segundo_plano(fuente: FuenteVacantes) -> bool:
+    """Lanza la ingesta en un hilo (la pide n8n). Devuelve False si ya había una en curso."""
+    if not _tomar_candado():
+        return False
+
+    def trabajar():
+        resumen = ""
+        try:
+            resumen = str(ingerir(fuente))
+        except Exception:  # se registra; el candado se suelta igual
+            log.exception("La ingesta en segundo plano falló")
+            resumen = "falló (ver el log)"
+        finally:
+            EstadoIngesta.objects.filter(id=1).update(en_curso=False, ultimo_resumen=resumen[:255])
+
+    lanzar_hilo(trabajar)
+    return True
