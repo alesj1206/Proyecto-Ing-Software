@@ -64,6 +64,7 @@ def _guardar(cruda: VacanteCruda, fuente: str, firma: str) -> bool:
             "hash_contenido": firma,
             "activa": True,
             "etiquetas": list(cruda.etiquetas),
+            "modalidad_inferida": not (cruda.modalidad or restricciones.modalidad),
         },
     )
     vacante.requisito_set.all().delete()

@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.db import models
+from pgvector.django import HalfVectorField
 
 
 class Vacante(models.Model):
@@ -36,6 +38,13 @@ class Vacante(models.Model):
     etiquetas = models.JSONField(default=list, blank=True)  # las "Habilidades" que trae Magneto
     prefiltro = models.JSONField(default=list, blank=True)  # preguntas de prefiltro (B1, Fase 3)
     ingerida_en = models.DateTimeField(auto_now=True)
+    modalidad_inferida = models.BooleanField(default=False)  # True si ni la fuente ni el texto la decían
+
+    # Vectores (Fase 2): promedio normalizado de título + requisitos de texto, y la matriz de todos los requisitos
+    # en orden de posicion (float16). hash_embebido == hash_contenido cuando están al día.
+    vector = HalfVectorField(dimensions=settings.SCOUTLY_DIMENSION, null=True, blank=True)
+    matriz_requisitos = models.BinaryField(null=True, blank=True)
+    hash_embebido = models.CharField(max_length=64, blank=True, default="")
 
     class Meta:
         ordering = ["-fecha_publicacion"]

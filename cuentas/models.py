@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from pgvector.django import HalfVectorField
 
 
 def normalizar_correo(email: str) -> str:
@@ -78,6 +79,11 @@ class Perfil(models.Model):
     exp_ubicacion = models.CharField(max_length=150, blank=True)
     exp_disponibilidad = models.CharField(max_length=20, choices=Disponibilidad.choices, blank=True)
     anios_experiencia = models.PositiveIntegerField(null=True, blank=True)
+
+    # Vectores (Fase 2): promedio normalizado de la evidencia y su matriz (float16), al día si hash_embebido coincide.
+    vector = HalfVectorField(dimensions=settings.SCOUTLY_DIMENSION, null=True, blank=True)
+    matriz_evidencia = models.BinaryField(null=True, blank=True)
+    hash_embebido = models.CharField(max_length=64, blank=True, default="")
 
     def __str__(self):
         return f"Perfil de {self.usuario.email}"
