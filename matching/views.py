@@ -37,6 +37,7 @@ def dashboard_view(request):
             "por_accion": [(a, Accion(a).label, ds, conteos.get(a, 0), conteos.get(a, 0) - len(ds))
                            for a, ds in grupos.items() if ds],
             "aprendizaje": selectors.plan_de_aprendizaje(perfil),
+            "mercado": selectors.mercado(perfil),
             "ocultas_por_modalidad": selectors.ocultas_por_modalidad(perfil),
             "modalidad_oculta": selectors.MODALIDAD_OPUESTA.get(perfil.exp_modalidad, ""),
         }

@@ -124,8 +124,8 @@ def conteo_por_accion(perfil) -> dict[str, int]:
 def plan_de_aprendizaje(perfil, n: int = 5) -> list[tuple[str, int]]:
     """Las brechas agregadas: qué requisito obligatorio te falta en más vacantes de CERRAR_BRECHA."""
     conteo, nombres = Counter(), {}
-    for cobertura in Decision.objects.filter(perfil=perfil, accion=Accion.CERRAR_BRECHA).values_list("cobertura",
-                                                                                                      flat=True):
+    decisiones = Decision.objects.filter(perfil=perfil, accion=Accion.CERRAR_BRECHA).order_by("id")
+    for cobertura in decisiones.values_list("cobertura", flat=True):  # orden fijo: el nombre mostrado no varía
         for r in cobertura:
             if r["estado"] == "faltante" and r["tipo"] == "obligatorio":
                 clave = normalizar(r["texto"])
@@ -193,3 +193,17 @@ def ocultas_por_modalidad(perfil) -> int:
 
 def pendiente_de_decision(perfil) -> bool:
     return SolicitudDecision.objects.filter(perfil=perfil).exists()
+
+
+def _pesos(valor: int) -> str:
+    return f"$ {valor:,.0f}".replace(",", ".")
+
+
+def mercado(perfil) -> dict | None:
+    """La tarjeta "Tu mercado" (D, §13.3), calculada por el batch en la última FotoDiaria."""
+    datos = FotoDiaria.objects.filter(perfil=perfil).values_list("mercado", flat=True).first()
+    if not datos or not datos.get("relevantes"):
+        return None
+    rango = (f"{_pesos(datos['salario_min'])} a {_pesos(datos['salario_max'])}"
+             if datos.get("salario_min") and datos.get("salario_max") else "")
+    return {"relevantes": datos["relevantes"], "rango": rango, "empresas": [e[0] for e in datos["empresas"]]}

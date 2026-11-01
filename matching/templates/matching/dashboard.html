@@ -102,6 +102,15 @@
   </div>
   {% endif %}
 
+  {% if mercado %}
+  <div class="card decision-aprendizaje">
+    <h3 style="font-size:1rem;color:var(--navy);">Tu mercado</h3>
+    <p style="margin-top:0.5rem;font-size:0.875rem;color:var(--navy);line-height:1.7;">
+      {{ mercado.relevantes }} vacantes relevantes para ti{% if mercado.rango %} · salarios de {{ mercado.rango }}{% endif %}{% if mercado.empresas %} · más publican: {{ mercado.empresas|join:", " }}{% endif %}
+    </p>
+  </div>
+  {% endif %}
+
   {% if aprendizaje %}
   <div class="card decision-aprendizaje">
     <h3 style="font-size:1rem;color:var(--navy);">Plan de aprendizaje</h3>

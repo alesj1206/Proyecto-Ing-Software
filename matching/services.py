@@ -65,6 +65,19 @@ def decidir_par(perfil: Perfil, vacante: Vacante, similitud: float, politica: Po
     return _decision(perfil, vacante, similitud, evidencias, de_bytes(perfil.matriz_evidencia), politica)
 
 
+TOP_EMPRESAS = 3
+
+
+def _mercado(decisiones: list[Decision]) -> dict:
+    """Sobre las relevantes que no son DESCARTAR: cuántas, el rango de salarios y las empresas que más publican."""
+    utiles = [d.vacante for d in decisiones if d.accion != Accion.DESCARTAR]
+    minimos = [v.salario_min for v in utiles if v.salario_min]
+    maximos = [v.salario_max for v in utiles if v.salario_max]
+    empresas = Counter(v.empresa for v in utiles if v.empresa).most_common(TOP_EMPRESAS)
+    return {"relevantes": len(utiles), "salario_min": min(minimos, default=None),
+            "salario_max": max(maximos, default=None), "empresas": [list(e) for e in empresas]}
+
+
 def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date, ocultas: int, inicio) -> None:
     anteriores = {v: (a, c) for v, a, c in Decision.objects.filter(perfil=perfil)
                   .values_list("vacante_id", "accion", "cambio_en")}
@@ -82,7 +95,8 @@ def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date, ocultas: int
         top[accion] = [{"vacante_id": d.vacante_id, "cobertura_pct": d.cobertura_pct, "orden": d.orden}
                        for d in de_accion[:TOP_POR_ACCION_EN_FOTO]]
     FotoDiaria.objects.update_or_create(perfil=perfil, fecha=hoy, defaults={
-        "conteos": dict(Counter(str(d.accion) for d in decisiones)), "top": top, "ocultas_por_modalidad": ocultas})
+        "conteos": dict(Counter(str(d.accion) for d in decisiones)), "top": top, "ocultas_por_modalidad": ocultas,
+        "mercado": _mercado(decisiones)})
     SolicitudDecision.objects.filter(perfil=perfil, creada_en__lte=inicio).delete()  # las nuevas se quedan
 
 

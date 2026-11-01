@@ -44,6 +44,7 @@ class FotoDiaria(models.Model):
     conteos = models.JSONField(default=dict)  # {accion: n}
     top = models.JSONField(default=dict)  # {accion: [{vacante_id, cobertura_pct, orden}]} (hasta 10 por acción)
     ocultas_por_modalidad = models.PositiveIntegerField(default=0)  # lo lee el dashboard sin buscar de nuevo
+    mercado = models.JSONField(default=dict)  # "Tu mercado": relevantes, rango de salarios y empresas que más publican
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["perfil", "fecha"], name="una_foto_por_dia")]
