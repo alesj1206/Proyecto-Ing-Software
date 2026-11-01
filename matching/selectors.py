@@ -34,7 +34,7 @@ def total_vacantes() -> int:
 
 
 def _contables(decision: Decision) -> list[dict]:
-    return [r for r in decision.cobertura if r["tipo"] == "obligatorio" and r["estado"] != "formacion"]
+    return [r for r in decision.cobertura if r["tipo"] == "obligatorio" and r["estado"] not in ("formacion", "experiencia")]
 
 
 def _cubres(decision: Decision) -> str:

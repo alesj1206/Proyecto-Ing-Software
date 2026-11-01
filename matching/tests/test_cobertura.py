@@ -63,3 +63,27 @@ def test_sin_evidencia_todo_es_faltante():
 
 def test_sin_obligatorios_el_porcentaje_es_cero():
     assert _cubrir([req("x", "deseable")], [_fila(0.9)]).porcentaje == 0
+
+
+# --- calibración (Task 10): los años de experiencia los evalúa la restricción, no la similitud --------
+
+import pytest
+
+from matching.cobertura import es_solo_anios
+
+
+@pytest.mark.parametrize("texto", ["Experiencia: mínimo 1–2 años", "Mínimo 1 año de experiencia",
+                                   "Experiencia mínima de 6 meses", "2 años de experiencia comprobable"])
+def test_requisitos_que_solo_piden_anios(texto):
+    assert es_solo_anios(texto)
+
+
+@pytest.mark.parametrize("texto", ["Experiencia mínima de 1 año en el sector educativo",
+                                   "Mínimo 2 años de experiencia en análisis de datos", "Manejo de Excel"])
+def test_requisitos_con_contenido_no_son_solo_anios(texto):
+    assert not es_solo_anios(texto)
+
+
+def test_los_anios_no_cuentan_ni_generan_ajustes():
+    c = _cubrir([req("Experiencia: mínimo 1–2 años"), req("a")], [_fila(0.45), _fila(0.6)])
+    assert c.requisitos[0].estado == "experiencia" and c.obligatorios_total == 1 and c.parciales_con_evidencia == []

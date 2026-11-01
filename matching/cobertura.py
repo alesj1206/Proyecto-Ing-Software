@@ -11,19 +11,32 @@ INICIOS_FORMACION = ("tecnico", "tecnologo", "profesional", "bachiller", "estudi
                      "carrera", "ingeniero")
 
 
+# Palabras que no aportan contenido a un requisito de años ("Experiencia: mínimo 1–2 años comprobables").
+_RELLENO_ANIOS = {"experiencia", "minimo", "minima", "de", "en", "al", "menos", "anos", "ano", "meses", "mes",
+                  "comprobable", "comprobables", "certificable", "certificada", "laboral", "laborales", "y", "a", "o",
+                  "como", "similar", "similares", "cargos", "relacionada", "relacionados"}
+
+
+def es_solo_anios(texto: str) -> bool:
+    """Un requisito que solo pide tiempo de experiencia: lo evalúa la restricción de experiencia, no la similitud."""
+    palabras = normalizar(texto).split()
+    tiene_tiempo = any(p in ("ano", "anos", "mes", "meses") for p in palabras) and any(p.isdigit() for p in palabras)
+    return tiene_tiempo and all(p.isdigit() or p in _RELLENO_ANIOS for p in palabras)
+
+
 @dataclass(frozen=True)
 class RequisitoEvaluado:
     texto: str
     tipo: str
     origen: str
-    estado: str  # "cubierto" | "parcial" | "faltante" | "formacion"
+    estado: str  # "cubierto" | "parcial" | "faltante" | "formacion" | "experiencia"
     similitud: float
     evidencia: str | None
 
     @property
     def cuenta(self) -> bool:
-        """Entra al porcentaje: obligatorio y no de formación."""
-        return self.tipo == "obligatorio" and self.estado != "formacion"
+        """Entra al porcentaje: obligatorio y medido por similitud (no formación ni años de experiencia)."""
+        return self.tipo == "obligatorio" and self.estado not in ("formacion", "experiencia")
 
 
 @dataclass
@@ -74,6 +87,8 @@ def cubrir(requisitos, matriz_req: np.ndarray, evidencias: list[str], matriz_evi
         sim = float(sim)
         if es_formacion(r.texto):
             estado = "formacion"
+        elif es_solo_anios(r.texto):
+            estado = "experiencia"
         elif sim >= tau_alto:
             estado = "cubierto"
         elif sim >= tau_bajo:

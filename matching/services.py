@@ -55,6 +55,12 @@ def _decision(perfil, vacante, similitud, evidencias, matriz_evid, politica) -> 
     )
 
 
+def decidir_par(perfil: Perfil, vacante: Vacante, similitud: float, politica: Politica = POLITICA) -> Decision:
+    """La decisión para un solo par, sin guardarla (la usa la evaluación)."""
+    evidencias = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))
+    return _decision(perfil, vacante, similitud, evidencias, de_bytes(perfil.matriz_evidencia), politica)
+
+
 def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date) -> None:
     anteriores = dict(Decision.objects.filter(perfil=perfil).values_list("vacante_id", "accion"))
     for d in decisiones:

@@ -1,0 +1,140 @@
+# CVs ficticios del set de evaluación (spec §10). Ninguno corresponde a una persona real: están modelados sobre la
+# estructura y la redacción típicas de perfiles de Magneto y LinkedIn. Se convierten en PDF y pasan por el parser real.
+# `expectativas` usa los campos de Perfil (exp_modalidad, exp_salario_min, exp_ubicacion, anios_experiencia).
+
+datos_junior:
+  nombre: Laura Gómez Ríos
+  contacto: laura.gomez@correo-ficticio.co
+  experiencia:
+    - Analista de datos junior en Comercial Andina (2023-2025).
+    - Construí reportes de ventas e inventarios en Excel con tablas dinámicas y BUSCARV.
+    - Diseñé tableros en Power BI para el área comercial.
+    - Escribí consultas SQL para cruzar información de cartera.
+  educacion:
+    - Ingeniería Industrial, Universidad EAFIT
+  habilidades: Excel avanzado, Power BI, SQL, análisis de datos
+  expectativas: {exp_modalidad: Híbrido, exp_salario_min: 2500000, exp_ubicacion: "Medellín, Bogotá", anios_experiencia: 2}
+
+bi_senior:
+  nombre: Andrés Felipe Cardona
+  contacto: andres.cardona@correo-ficticio.co
+  experiencia:
+    - Líder de inteligencia de negocios en Banco Ficticio (2018-2025).
+    - Modelé bodegas de datos y automaticé procesos con Python y Power Automate.
+    - Desarrollé tableros en Power BI y apps en Power Apps para el sector financiero.
+    - Administré consultas SQL sobre un Data Lake con grandes volúmenes de datos.
+  educacion:
+    - Especialización en Analítica, Universidad Nacional
+    - Ingeniería de Sistemas, Universidad de Antioquia
+  habilidades: Python, SQL, Power BI, Power Apps, Power Automate, modelado de datos, Big Data
+  expectativas: {exp_modalidad: Remoto, exp_salario_min: 7000000, anios_experiencia: 7}
+
+desarrollador_backend:
+  nombre: Camilo Restrepo Vélez
+  contacto: camilo.restrepo@correo-ficticio.co
+  experiencia:
+    - Desarrollador backend en Software Ficticio S.A.S. (2021-2025).
+    - Construí microservicios con Java Spring Boot y bases de datos Oracle y MySQL.
+    - Implementé APIs REST con JSON y control de versiones con Git.
+    - Apliqué buenas prácticas de desarrollo seguro y revisión de código con SonarQube.
+  educacion:
+    - Ingeniería de Sistemas, Universidad del Magdalena
+  habilidades: Java, Spring Boot, Angular, JavaScript, Oracle, MySQL, Git, microservicios
+  expectativas: {exp_modalidad: Híbrido, exp_ubicacion: "Santa Marta, Barranquilla", anios_experiencia: 4}
+
+auxiliar_contable:
+  nombre: Diana Marcela Ospina
+  contacto: diana.ospina@correo-ficticio.co
+  experiencia:
+    - Auxiliar contable en Distribuidora Ficticia (2022-2025).
+    - Causé facturas de proveedores y realicé conciliaciones bancarias mensuales.
+    - Emití facturación electrónica en el portal de la DIAN y seguí la cartera.
+    - Manejé World Office y Siigo para registrar operaciones contables.
+  educacion:
+    - Tecnología en Contabilidad y Finanzas, SENA
+  habilidades: Excel intermedio, facturación electrónica, conciliaciones bancarias, NIIF, World Office, Siigo
+  expectativas: {exp_modalidad: Presencial, exp_salario_min: 1900000, exp_ubicacion: "Bogotá", anios_experiencia: 3}
+
+asesora_comercial:
+  nombre: Valentina Arango Mejía
+  contacto: valentina.arango@correo-ficticio.co
+  experiencia:
+    - Asesora de ventas en tienda de cosméticos Belleza Ficticia (2023-2025).
+    - Atendí y asesoré clientes en punto de venta y cumplí metas de ventas en retail.
+    - Organicé la exhibición y el surtido de productos de belleza y cuidado facial.
+  educacion:
+    - Bachiller académico, Colegio Ficticio
+  habilidades: ventas, servicio al cliente, exhibición comercial, maquillaje
+  expectativas: {exp_modalidad: Presencial, exp_ubicacion: "Neiva, Ibagué", anios_experiencia: 2}
+
+auxiliar_enfermeria:
+  nombre: Paola Andrea Quintero
+  contacto: paola.quintero@correo-ficticio.co
+  experiencia:
+    - Auxiliar de enfermería en Clínica Ficticia, servicio de urgencias y hospitalización (2021-2025).
+    - Apoyé la administración de medicamentos y la monitorización de pacientes.
+    - Registré la atención en historias clínicas bajo protocolos de bioseguridad.
+  educacion:
+    - Técnico laboral en Auxiliar de Enfermería, Instituto Ficticio
+    - Curso de reanimación cardiopulmonar básica (RCP)
+  habilidades: atención al paciente, toma de signos vitales, RETHUS vigente, trabajo en equipo
+  expectativas: {exp_modalidad: Presencial, exp_ubicacion: "Bogotá, Medellín", anios_experiencia: 4}
+
+disenadora_junior:
+  nombre: Sara Lucía Henao
+  contacto: sara.henao@correo-ficticio.co
+  experiencia:
+    - Diseñadora gráfica en agencia de publicidad Ficticia (2024-2025).
+    - Creé piezas gráficas para redes sociales y campañas digitales.
+    - Edité video para contenidos de marca.
+  educacion:
+    - Tecnología en Diseño Gráfico, Pascual Bravo
+  habilidades: Illustrator, Photoshop, After Effects, Premiere Pro, fotografía
+  expectativas: {exp_modalidad: Híbrido, exp_salario_min: 2000000, exp_ubicacion: "Medellín", anios_experiencia: 1}
+
+operario_produccion:
+  nombre: Jhon Fredy Marín
+  experiencia:
+    - Operario de producción en planta de alimentos Ficticia (2020-2025).
+    - Operé maquinaria de empaque y sellado en turnos rotativos.
+    - Cumplí normas de Buenas Prácticas de Manufactura (BPM) y manipulación de alimentos.
+    - Hice mantenimiento básico de equipos y control visual de calidad.
+  educacion:
+    - Bachiller académico
+  habilidades: BPM, manipulación de alimentos, operación de maquinaria, trabajo en equipo
+  expectativas: {exp_modalidad: Presencial, exp_ubicacion: "Bogotá, Funza", anios_experiencia: 5}
+
+# --- casos difíciles --------------------------------------------------------------------------------
+
+sin_experiencia_practicante:
+  nombre: Mateo Zapata Ruiz
+  contacto: mateo.zapata@correo-ficticio.co
+  experiencia:
+    - Proyecto de aula sobre análisis financiero de una pyme.
+    - Monitor académico de la asignatura de costos.
+  educacion:
+    - Estudiante de Administración de Empresas, octavo semestre, Universidad Ficticia
+  habilidades: Excel, análisis financiero, trabajo en equipo
+  expectativas: {exp_ubicacion: "Medellín", anios_experiencia: 0}
+
+habilidad_nombrada_distinto:
+  # Hace análisis de datos, pero nunca dice "Excel" ni "Power BI": usa "hojas de cálculo" y "tableros de control".
+  nombre: Natalia Bermúdez Toro
+  contacto: natalia.bermudez@correo-ficticio.co
+  experiencia:
+    - Analista de información en empresa de logística Ficticia (2022-2025).
+    - Preparé informes gerenciales y de indicadores con hojas de cálculo y fórmulas de búsqueda.
+    - Creé tableros de control para ventas, inventarios y cartera.
+  educacion:
+    - Administración de Empresas, Universidad Ficticia
+  habilidades: hojas de cálculo, tableros de control, indicadores de gestión
+  expectativas: {anios_experiencia: 3}
+
+experiencia_implicita_y_datos_incompletos:
+  # Sin sección de habilidades y con poca experiencia escrita; no declaró expectativas.
+  nombre: Carlos Andrés Mejía
+  experiencia:
+    - Trabajé en el área administrativa de un taller de vehículos.
+    - Me encargaba de la papelería, las facturas y atender a los clientes.
+  educacion: []
+  expectativas: {}
