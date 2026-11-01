@@ -5,6 +5,13 @@ import pytest
 CLAVE_DE_PRUEBA = "Lienzo-Tardio-73"
 
 
+@pytest.fixture(autouse=True)
+def embedder_falso(settings):
+    """Ningún test carga modelos reales salvo los marcados `lento`."""
+    settings.SCOUTLY_EMBEDDER = "falso"
+    settings.SCOUTLY_RERANKER = ""
+
+
 @pytest.fixture
 def usuario(db):
     from cuentas.services import crear_usuario_con_autorizacion

@@ -176,6 +176,11 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # Medio de contacto del responsable del tratamiento de datos (Ley 1581), que aparece en /privacidad.
 SCOUTLY_CONTACTO_DATOS = os.environ.get('SCOUTLY_CONTACTO_DATOS', 'contacto pendiente de definir por el equipo')
 
+# Decisor (matching/ia): "fastembed" (MiniLM, local) o "falso" (tests). Reranker opcional (P1-b): "" apagado, "bge".
+SCOUTLY_EMBEDDER = os.environ.get('SCOUTLY_EMBEDDER', 'fastembed')
+SCOUTLY_RERANKER = os.environ.get('SCOUTLY_RERANKER', '')
+SCOUTLY_DIMENSION = 384  # MiniLM-L12; la columna halfvec de vacantes y perfiles
+
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = 'raiz'  # raiz decide entre onboarding y dashboard
 
