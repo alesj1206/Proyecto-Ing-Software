@@ -315,3 +315,19 @@ Antes de eso se cierran las deudas de la Fase 3 que afectan la evidencia o el c�
 - **D2. El benchmark reutiliza los vectores por plantilla en la carga masiva.** Embeber 1,1M textos tomaría horas y no cambia lo que se mide en la decisión. La ingesta con embeddings se mide de verdad sobre la muestra y se proyecta. El informe lo dice.
 - **D3. La clave de la evaluación ciega vive fuera del repo.** Así el equipo no la ve antes de tabular.
 - **D4. Si la prueba no cumple los anti-objetivos, no se recalibra.** Se reporta y se decide con el usuario: un número honesto vale más que uno ajustado a la prueba.
+
+## Enmienda tras la Task 4 (decisión del usuario, 2026-11-01)
+
+La prueba dio 46% (< 70%). El usuario eligió **corregir y medir con una prueba nueva**:
+
+### Task 4b: correcciones generales del decisor + tercera mitad nunca vista
+
+- Se corrigen las causas generales del diagnóstico (`docs/fase4/EVALUACION.md`), con TDD:
+  1. el pie "Otras habilidades / Habilidades técnicas…" de Magneto deja de ser requisito;
+  2. la experiencia con área se compara por su núcleo (sin "mínimo N años de experiencia en");
+  3. las listas dentro de un requisito se separan: entre paréntesis, o con calificador "avanzado/intermedio/básico";
+  4. las frases de presentación ("Serás responsable…", "Si tienes…") son ruido;
+  5. la ubicación acepta los municipios del área metropolitana.
+- Las causas 5 y 7 (límites del modelo) quedan como limitación documentada.
+- **Validación:** solo con lo ya visto, es decir, el ajuste más la prueba de 46% (que pasa a llamarse `prueba_1`).
+- **Medición final:** se construye una prueba **nueva** con vacantes que ninguna mitad usa, balanceada igual que la Task 3. Sus etiquetas se commitean antes de correrla, se corre una sola vez y se reportan las dos cifras (46% y la nueva).
