@@ -141,9 +141,14 @@ class RestriccionEstudiante:
         anio = timezone.localdate().year
         return bool(self.EN_CURSO.search(normal)) or any(int(fin) > anio for fin in self.RANGO_DE_ANIOS.findall(normal))
 
+    def _pide_contrato_de_aprendizaje(self, descripcion: str) -> bool:
+        # Filtro barato antes de normalizar: casi ninguna descripción menciona "aprend…", y normalizar el texto completo
+        # de 3.000 vacantes por candidato era lo más caro de esta regla.
+        return "aprend" in descripcion.lower() and bool(self.DESCRIPCION.search(normalizar(descripcion)))
+
     def evaluar(self, perfil, vacante, politica) -> ResultadoRestriccion | None:
         if not (self.TITULO.search(normalizar(vacante.titulo))
-                or self.DESCRIPCION.search(normalizar(vacante.descripcion or ""))):
+                or self._pide_contrato_de_aprendizaje(vacante.descripcion or "")):
             return None
         educacion = list(perfil.evidencias.filter(seccion="educacion").values_list("texto", flat=True))
         if not educacion:

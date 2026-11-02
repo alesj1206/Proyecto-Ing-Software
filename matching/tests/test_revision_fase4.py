@@ -155,3 +155,21 @@ def test_tabular_rechaza_una_clave_cambiada(tmp_path, monkeypatch):
     monkeypatch.setattr(comando, "HUELLA", huella)
     with pytest.raises(CommandError, match="SHA-256"):
         call_command("evaluacion_ciega", "tabular", respuestas=respuestas, clave=clave)
+
+
+@pytest.mark.parametrize("descripcion", ["Ofrecemos CONTRATO DE APRENDIZAJE SENA.", "Contrato de Aprendízaje (etapa práctica)",
+                                         "contrato   de\naprendizaje."])
+def test_contrato_de_aprendizaje_en_la_descripcion_activa_la_regla(client_con_cv, usuario, descripcion):
+    """El filtro rápido antes de normalizar la descripción no debe perder variantes de mayúsculas, tildes o espacios."""
+    r = _estudiante(usuario.perfil, ["Bachiller, 2015"], "Auxiliar de bodega", descripcion)
+    assert r is not None and r.estado == "no_cumple"
+
+
+def test_descripcion_sin_aprendizaje_no_se_normaliza(client_con_cv, usuario, monkeypatch):
+    import matching.restricciones as restricciones
+
+    vistos = []
+    original = restricciones.normalizar
+    monkeypatch.setattr(restricciones, "normalizar", lambda t: vistos.append(t) or original(t))
+    assert _estudiante(usuario.perfil, ["Bachiller, 2015"], "Auxiliar de bodega", "Texto largo " * 50) is None
+    assert vistos == ["Auxiliar de bodega"]  # solo el título: la descripción no menciona aprendizaje

@@ -15,6 +15,7 @@ Reglas, en orden:
 import re
 import unicodedata
 from dataclasses import dataclass
+from functools import lru_cache
 
 RESUMEN_MAGNETO = "requisitos para aplicar a la vacante"
 MAX_LINEAS_RESUMEN = 4  # años y nivel, salario, ciudad (y a veces "Apto para personas con discapacidad")
@@ -95,8 +96,22 @@ class Restricciones:
     nivel_formacion: str | None = None
 
 
+LARGO_CON_MEMORIA = 300  # requisitos y títulos; las descripciones completas no se guardan en memoria
+
+
 def normalizar(texto: str) -> str:
-    """Minúsculas, sin acentos ni puntuación, con espacios simples."""
+    """Minúsculas, sin acentos ni puntuación, con espacios simples. Los textos cortos se recuerdan: los mismos
+    requisitos se repiten en miles de vacantes y, sin memoria, normalizar era el 40% del tiempo de decidir por
+    candidato (perfil en la base *_bench). Las descripciones largas no, para que la memoria no crezca con el catálogo."""
+    return _normalizar_corto(texto) if len(texto) <= LARGO_CON_MEMORIA else _normalizar(texto)
+
+
+@lru_cache(maxsize=1 << 15)
+def _normalizar_corto(texto: str) -> str:
+    return _normalizar(texto)
+
+
+def _normalizar(texto: str) -> str:
     sin_acentos = "".join(c for c in unicodedata.normalize("NFD", texto) if unicodedata.category(c) != "Mn")
     return " ".join(re.sub(r"[^\w\s]", " ", sin_acentos.lower()).split())
 
