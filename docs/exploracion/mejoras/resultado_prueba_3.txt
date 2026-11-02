@@ -1,0 +1,5 @@
+V1 actual (MiniLM, .45/.35)      54% (14/26) | máx acción 27% | DESCARTAR 4/6 (precisión 4/5) | {'CERRAR_BRECHA': 7, 'POSTULAR': 5, 'DESCARTAR': 5, 'AJUSTAR_CV': 7, 'SIN_DATOS': 2}
+V2 fusión (MiniLM)               62% (16/26) | máx acción 46% | DESCARTAR 4/6 (precisión 4/5) | {'CERRAR_BRECHA': 7, 'POSTULAR': 12, 'DESCARTAR': 5, 'SIN_DATOS': 2}
+V3 mpnet (.475/.425)             62% (16/26) | máx acción 42% | DESCARTAR 4/6 (precisión 4/5) | {'CERRAR_BRECHA': 11, 'POSTULAR': 4, 'AJUSTAR_CV': 4, 'DESCARTAR': 5, 'SIN_DATOS': 2}
+V4 mpnet + fusión (.425/.425)    69% (18/26) | máx acción 42% | DESCARTAR 4/6 (precisión 4/5) | {'CERRAR_BRECHA': 11, 'POSTULAR': 8, 'DESCARTAR': 5, 'SIN_DATOS': 2}
+clase mayoritaria: 27%

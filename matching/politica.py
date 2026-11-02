@@ -22,6 +22,9 @@ class Politica:
     cobertura_nota: float = 0.70
     factor_experiencia: float = 0.5
     max_palabras_herramienta: int = 4
+    # Exploración (docs/exploracion/2026-11-02-mejoras-decisor.md): AJUSTAR_CV se vuelve POSTULAR con lo que hay que
+    # resaltar. Subió la exactitud 8–21 puntos en todos los sets, incluida una prueba nueva. Apagada por defecto.
+    fusionar_ajustar: bool = False
 
 
 POLITICA = Politica()
@@ -98,8 +101,11 @@ class AjustarCV:
         c = contexto.cobertura
         if c.faltantes_obligatorios or not c.parciales_con_evidencia:
             return None
-        return Veredicto(Accion.AJUSTAR_CV, motivos=[f"Haz explícito «{r.texto}» (tu evidencia: «{r.evidencia}»)"
-                                                      for r in c.parciales_con_evidencia])
+        motivos = [f"Haz explícito «{r.texto}» (tu evidencia: «{r.evidencia}»)" for r in c.parciales_con_evidencia]
+        if contexto.politica.fusionar_ajustar:
+            resaltar = ", ".join(r.texto for r in c.parciales_con_evidencia)
+            return Veredicto(Accion.POSTULAR, f"Resalta en tu hoja de vida: {resaltar}"[:255], motivos)
+        return Veredicto(Accion.AJUSTAR_CV, motivos=motivos)
 
 
 class CerrarBrecha:

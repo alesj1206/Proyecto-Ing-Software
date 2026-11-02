@@ -167,3 +167,109 @@ pares:
      justificacion: "Solo pide experiencia administrativa y actitudes: que la revise él"}
   - {cv: disenadora_junior, vacante: mag-1051473, accion_esperada: SIN_DATOS, mitad: prueba,
      justificacion: "Solo pide título y años, no dice herramientas: que la revise ella"}
+  # --- prueba_2 (exploración): 19 vacantes nuevas, sin clones por texto, etiquetada ANTES de medir variantes ---
+  # PENDIENTE: el equipo debe revisarlas.
+  - {cv: datos_junior, vacante: mag-1097287, accion_esperada: POSTULAR, mitad: prueba_2,
+     justificacion: "Power BI, Excel avanzado, informes y bases de datos; 2 años; salario dentro de su rango"}
+  - {cv: datos_junior, vacante: mag-985171, accion_esperada: POSTULAR, mitad: prueba_2,
+     justificacion: "SQL, Power BI, reportes y tableros en Medellín; solo le falta familiaridad con la nube"}
+  - {cv: auxiliar_enfermeria, vacante: mag-1115376, accion_esperada: POSTULAR, mitad: prueba_2,
+     justificacion: "Técnica auxiliar con experiencia en pacientes hospitalizados, en Bogotá"}
+  - {cv: asesora_comercial, vacante: mag-1117535, accion_esperada: POSTULAR, mitad: prueba_2,
+     justificacion: "Asesora de tienda en retail en Ibagué: ventas, presupuesto y surtido"}
+  - {cv: datos_junior, vacante: mag-1070101, accion_esperada: AJUSTAR_CV, mitad: prueba_2,
+     justificacion: "Power BI y SQL los tiene; debe hacer explícita la reportería financiera (cartera)"}
+  - {cv: datos_junior, vacante: mag-1093562, accion_esperada: AJUSTAR_CV, mitad: prueba_2,
+     justificacion: "SQL, Power BI e indicadores; debe hacer explícita la automatización de procesos"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1097287, accion_esperada: AJUSTAR_CV, mitad: prueba_2,
+     justificacion: "Informes de gestión y tableros los tiene; debe nombrar Power BI y Excel avanzado"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1096259, accion_esperada: AJUSTAR_CV, mitad: prueba_2,
+     justificacion: "KPIs, tableros e informes gerenciales los tiene; debe nombrar Power BI y Excel"}
+  - {cv: auxiliar_contable, vacante: mag-1090359, accion_esperada: CERRAR_BRECHA, mitad: prueba_2,
+     justificacion: "Siigo y contabilidad sí; le faltan Excel avanzado y apoyo a recursos humanos"}
+  - {cv: auxiliar_enfermeria, vacante: mag-1115359, accion_esperada: CERRAR_BRECHA, mitad: prueba_2,
+     justificacion: "Le falta experiencia en hospitalización pediátrica y monitoreo pediátrico"}
+  - {cv: auxiliar_enfermeria, vacante: mag-994993, accion_esperada: CERRAR_BRECHA, mitad: prueba_2,
+     justificacion: "Le faltan cursos: humanización, víctimas de violencia sexual, cuidado paliativo y duelo"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1070101, accion_esperada: CERRAR_BRECHA, mitad: prueba_2,
+     justificacion: "Le falta SQL; Power BI lo tiene con otro nombre"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1093562, accion_esperada: CERRAR_BRECHA, mitad: prueba_2,
+     justificacion: "Le falta SQL; indicadores y reportes los tiene"}
+  - {cv: datos_junior, vacante: mag-1040154, accion_esperada: CERRAR_BRECHA, mitad: prueba_2,
+     justificacion: "SQL y Power BI sí; le faltan cálculo de comisiones y sector financiero/fintech"}
+  - {cv: datos_junior, vacante: mag-1057289, accion_esperada: DESCARTAR, mitad: prueba_2,
+     justificacion: "Python, macros y mercado de energía: le faltan tres o más obligatorios"}
+  - {cv: datos_junior, vacante: mag-996870, accion_esperada: DESCARTAR, mitad: prueba_2,
+     justificacion: "Pide 5 años de experiencia y tiene 2"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1040154, accion_esperada: DESCARTAR, mitad: prueba_2,
+     justificacion: "Le faltan SQL, cálculo de comisiones y sector financiero"}
+  - {cv: bi_senior, vacante: mag-1096259, accion_esperada: DESCARTAR, mitad: prueba_2,
+     justificacion: "Ofrece $ 4.570.618 y su mínimo es $ 7.000.000"}
+  - {cv: auxiliar_contable, vacante: mag-1120826, accion_esperada: DESCARTAR, mitad: prueba_2,
+     justificacion: "Ofrece $ 1.750.905 y su mínimo es $ 1.900.000"}
+  - {cv: disenadora_junior, vacante: mag-977911, accion_esperada: DESCARTAR, mitad: prueba_2,
+     justificacion: "Ofrece $ 1.890.000 y su mínimo es $ 2.000.000"}
+  - {cv: sin_experiencia_practicante, vacante: mag-1020178, accion_esperada: DESCARTAR, mitad: prueba_2,
+     justificacion: "Prácticas para estudiantes de Contaduría; ella estudia Administración"}
+  - {cv: auxiliar_contable, vacante: mag-1091964, accion_esperada: SIN_DATOS, mitad: prueba_2,
+     justificacion: "Solo pide técnico/tecnólogo, un año y actitudes: que la revise él"}
+  - {cv: experiencia_implicita_y_datos_incompletos, vacante: mag-1091964, accion_esperada: SIN_DATOS, mitad: prueba_2,
+     justificacion: "Solo pide formación, un año y actitudes: que la revise él"}
+  - {cv: sin_experiencia_practicante, vacante: mag-1038906, accion_esperada: SIN_DATOS, mitad: prueba_2,
+     justificacion: "Práctica contable sin requisitos concretos: que la revise ella"}
+  - {cv: sin_experiencia_practicante, vacante: mag-1099742, accion_esperada: SIN_DATOS, mitad: prueba_2,
+     justificacion: "Práctica en contabilidad que solo describe funciones: que la revise ella"}
+  # --- prueba_3 (exploración, preregistrada): 23 vacantes nuevas sin clones, etiquetada ANTES de medir ---
+  # PENDIENTE: el equipo debe revisarlas. Solo 2 SIN_DATOS (el preregistro pedía 3): no había más vacantes escuetas.
+  - {cv: datos_junior, vacante: mag-1039088, accion_esperada: POSTULAR, mitad: prueba_3,
+     justificacion: "SQL, bases de datos, hojas de cálculo y Power BI básico; 2 años, en Bogotá"}
+  - {cv: datos_junior, vacante: mag-1094660, accion_esperada: POSTULAR, mitad: prueba_3,
+     justificacion: "Excel avanzado y Power BI; La Estrella es del área metropolitana; salario dentro de su rango"}
+  - {cv: auxiliar_contable, vacante: mag-1113130, accion_esperada: POSTULAR, mitad: prueba_3,
+     justificacion: "Auxiliar contable con técnica/tecnología contable, como piden, en Bogotá"}
+  - {cv: auxiliar_contable, vacante: mag-1116793, accion_esperada: POSTULAR, mitad: prueba_3,
+     justificacion: "Experiencia administrativa, contable y de facturación; Excel intermedio; programas contables"}
+  - {cv: auxiliar_enfermeria, vacante: mag-1115707, accion_esperada: POSTULAR, mitad: prueba_3,
+     justificacion: "Técnica auxiliar con RETHUS en Bogotá: cumple"}
+  - {cv: auxiliar_enfermeria, vacante: mag-1078897, accion_esperada: POSTULAR, mitad: prueba_3,
+     justificacion: "Semillero de auxiliares de urgencias en Medellín: técnica con experiencia, cumple"}
+  - {cv: asesora_comercial, vacante: mag-1121410, accion_esperada: POSTULAR, mitad: prueba_3,
+     justificacion: "Ventas presenciales en retail en Ibagué; solo no muestra ofimática"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1094660, accion_esperada: AJUSTAR_CV, mitad: prueba_3,
+     justificacion: "Indicadores y tableros los tiene; debe nombrar Excel avanzado y Power BI"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1092626, accion_esperada: AJUSTAR_CV, mitad: prueba_3,
+     justificacion: "Indicadores de ventas los tiene; debe nombrar Excel intermedio-avanzado"}
+  - {cv: disenadora_junior, vacante: mag-1038542, accion_esperada: AJUSTAR_CV, mitad: prueba_3,
+     justificacion: "Redes y video los tiene; debe hacer explícito el contenido para e-commerce y conversión"}
+  - {cv: auxiliar_contable, vacante: mag-1085388, accion_esperada: AJUSTAR_CV, mitad: prueba_3,
+     justificacion: "Facturación y cartera en distribuidora; debe hacer explícitos recaudo y manejo de caja"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1039088, accion_esperada: CERRAR_BRECHA, mitad: prueba_3,
+     justificacion: "Le falta SQL; hojas de cálculo y tableros los tiene"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1049390, accion_esperada: CERRAR_BRECHA, mitad: prueba_3,
+     justificacion: "Le faltan SQL y SAP; Excel y Power BI con otro nombre"}
+  - {cv: auxiliar_contable, vacante: mag-1118964, accion_esperada: CERRAR_BRECHA, mitad: prueba_3,
+     justificacion: "Conciliaciones sí; le faltan glosas y acuerdos de pago en salud"}
+  - {cv: auxiliar_enfermeria, vacante: mag-1109020, accion_esperada: CERRAR_BRECHA, mitad: prueba_3,
+     justificacion: "Le faltan control de líquidos y manejo de equipos de infusión"}
+  - {cv: auxiliar_enfermeria, vacante: mag-1107997, accion_esperada: CERRAR_BRECHA, mitad: prueba_3,
+     justificacion: "Le faltan certificados de violencia sexual y de agentes químicos"}
+  - {cv: disenadora_junior, vacante: mag-1108147, accion_esperada: CERRAR_BRECHA, mitad: prueba_3,
+     justificacion: "Le falta experiencia en branding y diseño de empaques"}
+  - {cv: disenadora_junior, vacante: mag-1068028, accion_esperada: CERRAR_BRECHA, mitad: prueba_3,
+     justificacion: "Le falta diseño editorial y diagramación de libros"}
+  - {cv: datos_junior, vacante: mag-1119492, accion_esperada: DESCARTAR, mitad: prueba_3,
+     justificacion: "Programas de lealtad, CRM y mercadeo estratégico: le faltan tres o más"}
+  - {cv: experiencia_implicita_y_datos_incompletos, vacante: mag-1119619, accion_esperada: DESCARTAR, mitad: prueba_3,
+     justificacion: "Recepción y facturación en clínicas, agendamiento y software hospitalario: le faltan tres o más"}
+  - {cv: auxiliar_contable, vacante: mag-1109375, accion_esperada: DESCARTAR, mitad: prueba_3,
+     justificacion: "Mosquera, fuera de Bogotá"}
+  - {cv: auxiliar_contable, vacante: mag-1115843, accion_esperada: DESCARTAR, mitad: prueba_3,
+     justificacion: "Ofrece $ 1.750.000 y su mínimo es $ 1.900.000"}
+  - {cv: auxiliar_enfermeria, vacante: mag-1121244, accion_esperada: DESCARTAR, mitad: prueba_3,
+     justificacion: "Soledad, fuera de Bogotá y Medellín"}
+  - {cv: operario_produccion, vacante: mag-1120573, accion_esperada: DESCARTAR, mitad: prueba_3,
+     justificacion: "Barranquilla, fuera de Bogotá y Funza"}
+  - {cv: auxiliar_contable, vacante: mag-1116658, accion_esperada: SIN_DATOS, mitad: prueba_3,
+     justificacion: "Solo pide soporte administrativo genérico: que la revise él"}
+  - {cv: experiencia_implicita_y_datos_incompletos, vacante: mag-1116658, accion_esperada: SIN_DATOS, mitad: prueba_3,
+     justificacion: "Solo pide soporte administrativo genérico: que la revise él"}

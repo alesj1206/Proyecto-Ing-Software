@@ -25,10 +25,10 @@ def decision(client_con_cv, usuario, vacante_v1):
                                    cobertura_pct=63, version_politica="t", cobertura=COBERTURA, restricciones=[])
 
 
-def test_sugerencia_por_requisito_parcial_con_su_evidencia(decision):
-    [s] = [s for s in generar_sugerencias(decision, ["Hice tableros en Excel."]) if s.tipo == "requisito"]
-    assert (s.requisito, s.evidencia, s.propuesta) == ("Power BI", "Hice tableros en Excel.",
-                                                       "Hice tableros en Excel (Power BI).")
+def test_la_sugerencia_es_una_pregunta_con_la_evidencia_como_pista(decision):
+    [s] = generar_sugerencias(decision, ["Hice tableros en Excel."])
+    assert (s.requisito, s.evidencia) == ("Power BI", "Hice tableros en Excel.")
+    assert s.propuesta == "¿Has trabajado con «Power BI»? Si es así, cuéntalo con tus palabras."
 
 
 def test_sin_evidencia_no_hay_sugerencia(decision):
@@ -39,19 +39,23 @@ def test_evidencia_que_ya_no_esta_en_el_cv_no_se_sugiere(decision):
     assert not [s for s in generar_sugerencias(decision, ["Otra cosa"]) if s.tipo == "requisito"]
 
 
-def test_resumen_solo_con_requisitos_cubiertos(decision):
-    [r] = [s for s in generar_sugerencias(decision, ["Usé SQL en reportes", "Reportes en Excel"]) if s.tipo == "resumen"]
-    assert r.propuesta == "Resumen sugerido: experiencia en SQL y Excel." and "Docker" not in r.propuesta
+def test_no_genera_texto_de_resumen(decision):
+    assert not [s for s in generar_sugerencias(decision, ["Usé SQL en reportes", "Reportes en Excel"])
+                if s.tipo == "resumen"]
 
 
-def test_aceptar_y_rechazar_y_texto_para_copiar(decision, usuario, vacante_v1):
-    sugerencias = taller(usuario.perfil, vacante_v1)
-    req = next(s for s in sugerencias if s.tipo == "requisito")
-    resumen = next(s for s in sugerencias if s.tipo == "resumen")
-    responder(req, acepta=True)
-    responder(resumen, acepta=False)
-    assert texto_adaptado(usuario.perfil, vacante_v1) == "Hice tableros en Excel (Power BI)."
-    assert len(taller(usuario.perfil, vacante_v1)) == 2  # sincronizar no duplica ni borra las respondidas
+def test_el_texto_para_copiar_son_las_palabras_del_candidato(decision, usuario, vacante_v1):
+    [s] = taller(usuario.perfil, vacante_v1)
+    responder(s, acepta=True, respuesta="  Construí tableros en Power BI para el área de ventas. ")
+    assert texto_adaptado(usuario.perfil, vacante_v1) == "Construí tableros en Power BI para el área de ventas."
+    assert len(taller(usuario.perfil, vacante_v1)) == 1  # sincronizar no duplica ni borra las respondidas
+
+
+def test_aceptar_sin_escribir_nada_no_cuenta(decision, usuario, vacante_v1):
+    [s] = taller(usuario.perfil, vacante_v1)
+    with pytest.raises(ValueError):
+        responder(s, acepta=True, respuesta="   ")
+    assert SugerenciaCV.objects.get(id=s.id).estado == "pendiente"
 
 
 def test_no_se_puede_responder_la_sugerencia_de_otro(client, decision, usuario, vacante_v1, django_user_model):
@@ -64,13 +68,19 @@ def test_no_se_puede_responder_la_sugerencia_de_otro(client, decision, usuario, 
 
 def test_la_pagina_avisa_que_el_cv_debe_ser_verdadero(client_con_cv, decision):
     html = client_con_cv.get(reverse("taller", args=["v1"])).content.decode()
-    assert "Solo acepta lo que sea verdad" in html and "tu evidencia: «Hice tableros en Excel.»" in html
+    assert "Escribe solo lo que sea verdad" in html and "Pista: en tu hoja de vida dice «Hice tableros en Excel.»" in html
 
 
 def test_responder_desde_la_pagina(client_con_cv, decision, usuario, vacante_v1):
-    s = next(s for s in taller(usuario.perfil, vacante_v1) if s.tipo == "requisito")
-    client_con_cv.post(reverse("taller_responder", args=["v1", s.id]), {"acepta": "1"})
-    assert "Hice tableros en Excel (Power BI)." in client_con_cv.get(reverse("taller", args=["v1"])).content.decode()
+    [s] = taller(usuario.perfil, vacante_v1)
+    client_con_cv.post(reverse("taller_responder", args=["v1", s.id]), {"acepta": "1", "respuesta": "Usé Power BI a diario"})
+    assert "Usé Power BI a diario" in client_con_cv.get(reverse("taller", args=["v1"])).content.decode()
+
+
+def test_aceptar_sin_texto_desde_la_pagina_avisa(client_con_cv, decision, usuario, vacante_v1):
+    [s] = taller(usuario.perfil, vacante_v1)
+    r = client_con_cv.post(reverse("taller_responder", args=["v1", s.id]), {"acepta": "1", "respuesta": ""}, follow=True)
+    assert "Escribe con tus palabras" in r.content.decode() and SugerenciaCV.objects.get(id=s.id).estado == "pendiente"
 
 
 def test_el_detalle_ofrece_el_taller_solo_en_ajustar_cv(client_con_cv, decision):
@@ -86,14 +96,9 @@ def test_sin_decision_el_taller_es_404(client_con_cv, vacante_v1):
 
 # --- revisión final de la Fase 3 -----------------------------------------------------------------------
 
-def test_el_resumen_no_cita_cubiertos_cuya_evidencia_ya_no_esta(decision, usuario, vacante_v1):
-    sugerencias = generar_sugerencias(decision, ["Hice tableros en Excel."])  # el CV ya no tiene SQL ni Excel
-    assert not [s for s in sugerencias if s.tipo == "resumen"]
-
-
 def test_el_texto_para_copiar_no_lleva_evidencia_que_ya_no_esta(decision, usuario, vacante_v1):
-    s = next(s for s in taller(usuario.perfil, vacante_v1) if s.tipo == "requisito")
-    responder(s, acepta=True)
+    [s] = taller(usuario.perfil, vacante_v1)
+    responder(s, acepta=True, respuesta="Usé Power BI")
     usuario.perfil.evidencias.filter(texto="Hice tableros en Excel.").delete()
     assert texto_adaptado(usuario.perfil, vacante_v1) == ""
 

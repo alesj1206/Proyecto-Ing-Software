@@ -77,7 +77,8 @@ class SugerenciaCV(models.Model):
     tipo = models.CharField(max_length=10, choices=Tipo.choices)
     requisito = models.TextField(blank=True)
     evidencia = models.TextField(blank=True)
-    propuesta = models.TextField()
+    propuesta = models.TextField()  # la pregunta que se le hace al candidato
+    respuesta = models.TextField(blank=True)  # lo que el candidato escribió con sus palabras (lo único que se copia)
     estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PENDIENTE)
     creada_en = models.DateTimeField(auto_now_add=True)
 

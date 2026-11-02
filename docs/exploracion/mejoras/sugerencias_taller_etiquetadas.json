@@ -1,0 +1,292 @@
+[
+ {
+  "cv": "disenadora_junior",
+  "vacante": "mag-1051473",
+  "requisito": "Empresa ubicada en Medellín, solicita para su equipo de trabajo, personal con experiencia mínima de 2 años para desempeñar el cargo de diseñador/a gráfico/a",
+  "evidencia": "Diseñadora gráfica en agencia de publicidad Ficticia (2024-2025).",
+  "cos": 0.4182570278644562,
+  "ce": 0.13364955505190088,
+  "sim_par": 0.5705307722091675,
+  "sensata": false
+ },
+ {
+  "cv": "experiencia_implicita_y_datos_incompletos",
+  "vacante": "mag-1108121",
+  "requisito": "Manejo de paquete Office, especialmente Excel",
+  "evidencia": "Me encargaba de la papelería, las facturas y atender a los clientes.",
+  "cos": 0.41388148069381714,
+  "ce": 3.6738486268826955e-05,
+  "sim_par": 0.6697787046432495,
+  "sensata": false
+ },
+ {
+  "cv": "auxiliar_contable",
+  "vacante": "mag-1120255",
+  "requisito": "Experiencia en elaboración de comprobantes de egreso y apoyo en procesos tributarios",
+  "evidencia": "Tecnología en Contabilidad y Finanzas, SENA",
+  "cos": 0.4363882541656494,
+  "ce": 0.0019136045163353353,
+  "sim_par": 0.7550580501556396,
+  "sensata": false
+ },
+ {
+  "cv": "desarrollador_backend",
+  "vacante": "mag-1009047",
+  "requisito": "RPG/ILE",
+  "evidencia": "Git",
+  "cos": 0.3587160110473633,
+  "ce": 0.0003648598778536427,
+  "sim_par": 0.7759811878204346,
+  "sensata": false
+ },
+ {
+  "cv": "datos_junior",
+  "vacante": "mag-1086437",
+  "requisito": "Indicadores y segmentación comercial",
+  "evidencia": "Diseñé tableros en Power BI para el área comercial.",
+  "cos": 0.3831755518913269,
+  "ce": 0.0014530413121258598,
+  "sim_par": 0.8363735675811768,
+  "sensata": true
+ },
+ {
+  "cv": "sin_experiencia_practicante",
+  "vacante": "mag-1008663",
+  "requisito": "Se busca un practicante recursos humanos con enfoque en tareas administrativas y de apoyo operativo",
+  "evidencia": "trabajo en equipo",
+  "cos": 0.4420284628868103,
+  "ce": 0.0468872169650173,
+  "sim_par": 0.444679319858551,
+  "sensata": false
+ },
+ {
+  "cv": "datos_junior",
+  "vacante": "mag-1082501",
+  "requisito": "Funciones de agregación y agrupación",
+  "evidencia": "análisis de datos",
+  "cos": 0.4021872282028198,
+  "ce": 0.022635222732738706,
+  "sim_par": 0.7755045294761658,
+  "sensata": false
+ },
+ {
+  "cv": "sin_experiencia_practicante",
+  "vacante": "mag-1008663",
+  "requisito": "Este rol contribuye al soporte administrativo de la gestión de personal, apoyando procesos de archivo, manejo de información de empleados y apoyo operativo en el área de recursos humanos",
+  "evidencia": "trabajo en equipo",
+  "cos": 0.40815991163253784,
+  "ce": 0.0817162120051905,
+  "sim_par": 0.444679319858551,
+  "sensata": false
+ },
+ {
+  "cv": "datos_junior",
+  "vacante": "mag-1086437",
+  "requisito": "Análisis de ventas, márgenes, clientes, canales y productos",
+  "evidencia": "Diseñé tableros en Power BI para el área comercial.",
+  "cos": 0.43490150570869446,
+  "ce": 0.013058144003184497,
+  "sim_par": 0.8363735675811768,
+  "sensata": true
+ },
+ {
+  "cv": "sin_experiencia_practicante",
+  "vacante": "mag-1008663",
+  "requisito": "Se requiere aprendiz SENA gestión humana para apoyar funciones administrativas del área de recursos humanos en una empresa de servicios temporales en Bogotá",
+  "evidencia": "trabajo en equipo",
+  "cos": 0.4126991033554077,
+  "ce": 0.0032183331603923304,
+  "sim_par": 0.444679319858551,
+  "sensata": false
+ },
+ {
+  "cv": "datos_junior",
+  "vacante": "mag-961531",
+  "requisito": "Concentración",
+  "evidencia": "análisis de datos",
+  "cos": 0.42902031540870667,
+  "ce": 0.014191979557345148,
+  "sim_par": 0.7233771085739136,
+  "sensata": false
+ },
+ {
+  "cv": "auxiliar_enfermeria",
+  "vacante": "mag-1118625",
+  "requisito": "Cursos actualizados",
+  "evidencia": "RETHUS vigente",
+  "cos": 0.4299548864364624,
+  "ce": 0.005275885744682633,
+  "sim_par": 0.7642989754676819,
+  "sensata": false
+ },
+ {
+  "cv": "auxiliar_enfermeria",
+  "vacante": "mag-1118625",
+  "requisito": "Experiencia de 6 meses en UCI",
+  "evidencia": "trabajo en equipo",
+  "cos": 0.3666728734970093,
+  "ce": 0.00017045765461511501,
+  "sim_par": 0.7642989754676819,
+  "sensata": false
+ },
+ {
+  "cv": "auxiliar_contable",
+  "vacante": "mag-1120255",
+  "requisito": "Experiencia mínima de 18 meses desempeñando funciones como Auxiliar Contable Auxiliar de Contabilidad o Asistente Contable",
+  "evidencia": "Auxiliar contable en Distribuidora Ficticia (2022-2025).",
+  "cos": 0.44513922929763794,
+  "ce": 0.04892304482170705,
+  "sim_par": 0.7550580501556396,
+  "sensata": true
+ },
+ {
+  "cv": "auxiliar_enfermeria",
+  "vacante": "mag-1101647",
+  "requisito": "Con o sin experiencia, según los requerimientos del servicio",
+  "evidencia": "Auxiliar de enfermería en Clínica Ficticia, servicio de urgencias y hospitalización (2021-2025).",
+  "cos": 0.4011175036430359,
+  "ce": 0.0009655617728313453,
+  "sim_par": 0.7613998651504517,
+  "sensata": false
+ },
+ {
+  "cv": "datos_junior",
+  "vacante": "mag-1105803",
+  "requisito": "Pensamiento analítico y estratégico",
+  "evidencia": "análisis de datos",
+  "cos": 0.38315531611442566,
+  "ce": 0.09986298687380636,
+  "sim_par": 0.7474794983863831,
+  "sensata": true
+ },
+ {
+  "cv": "sin_experiencia_practicante",
+  "vacante": "mag-1120768",
+  "requisito": "Atención al usuario con orientación a la calidad",
+  "evidencia": "Monitor académico de la asignatura de costos.",
+  "cos": 0.3686625361442566,
+  "ce": 2.0766467008620815e-05,
+  "sim_par": 0.6968274116516113,
+  "sensata": false
+ },
+ {
+  "cv": "operario_produccion",
+  "vacante": "mag-1119278",
+  "requisito": "Habilidades matemáticas y de lectoescritura desarrolladas",
+  "evidencia": "Bachiller académico",
+  "cos": 0.37759676575660706,
+  "ce": 0.09206777102798629,
+  "sim_par": 0.651405394077301,
+  "sensata": false
+ },
+ {
+  "cv": "auxiliar_enfermeria",
+  "vacante": "mag-1120506",
+  "requisito": "Contar con el curso de aplicación de inmunobiológicos realizado por el SENA",
+  "evidencia": "Registré la atención en historias clínicas bajo protocolos de bioseguridad.",
+  "cos": 0.3887946903705597,
+  "ce": 3.879498462742132e-05,
+  "sim_par": 0.5290615558624268,
+  "sensata": false
+ },
+ {
+  "cv": "datos_junior",
+  "vacante": "mag-1105803",
+  "requisito": "Habilidades blandas",
+  "evidencia": "Power BI",
+  "cos": 0.3531351685523987,
+  "ce": 3.5616352838059855e-05,
+  "sim_par": 0.7474794983863831,
+  "sensata": false
+ },
+ {
+  "cv": "habilidad_nombrada_distinto",
+  "vacante": "mag-1073362",
+  "requisito": "Conocimiento y experiencia en Power BI",
+  "evidencia": "Administración de Empresas, Universidad Ficticia",
+  "cos": 0.42641425132751465,
+  "ce": 1.826664358590634e-05,
+  "sim_par": 0.7127186059951782,
+  "sensata": false
+ },
+ {
+  "cv": "auxiliar_enfermeria",
+  "vacante": "mag-1121592",
+  "requisito": "Cursos actualizados",
+  "evidencia": "RETHUS vigente",
+  "cos": 0.4299548864364624,
+  "ce": 0.005275885744682633,
+  "sim_par": 0.7391847372055054,
+  "sensata": false
+ },
+ {
+  "cv": "datos_junior",
+  "vacante": "mag-1105803",
+  "requisito": "Interés por conectar la analítica con la estrategia y los resultados del negocio",
+  "evidencia": "análisis de datos",
+  "cos": 0.38306599855422974,
+  "ce": 0.031610548340641746,
+  "sim_par": 0.7474794983863831,
+  "sensata": false
+ },
+ {
+  "cv": "auxiliar_enfermeria",
+  "vacante": "mag-1121592",
+  "requisito": "Experiencia de 6 meses en UCI",
+  "evidencia": "trabajo en equipo",
+  "cos": 0.3666728734970093,
+  "ce": 0.00017045765461511501,
+  "sim_par": 0.7391847372055054,
+  "sensata": false
+ },
+ {
+  "cv": "datos_junior",
+  "vacante": "mag-1090491",
+  "requisito": "Consultas: Python",
+  "evidencia": "Escribí consultas SQL para cruzar información de cartera.",
+  "cos": 0.3666641116142273,
+  "ce": 0.006984120772564701,
+  "sim_par": 0.7817878723144531,
+  "sensata": false
+ },
+ {
+  "cv": "datos_junior",
+  "vacante": "mag-961531",
+  "requisito": "Inteligencia de negocios",
+  "evidencia": "Ingeniería Industrial, Universidad EAFIT",
+  "cos": 0.35594484210014343,
+  "ce": 7.902545253697637e-05,
+  "sim_par": 0.7233771085739136,
+  "sensata": false
+ },
+ {
+  "cv": "habilidad_nombrada_distinto",
+  "vacante": "mag-1073362",
+  "requisito": "Manejo de bases de datos y consultas en SQL",
+  "evidencia": "Preparé informes gerenciales y de indicadores con hojas de cálculo y fórmulas de búsqueda.",
+  "cos": 0.4450831413269043,
+  "ce": 0.0017749867707775252,
+  "sim_par": 0.7127186059951782,
+  "sensata": false
+ },
+ {
+  "cv": "auxiliar_enfermeria",
+  "vacante": "mag-1120341",
+  "requisito": "Experiencia mínina de 1 año en servicios de UCI-UCE",
+  "evidencia": "Técnico laboral en Auxiliar de Enfermería, Instituto Ficticio",
+  "cos": 0.38298892974853516,
+  "ce": 0.0024012830810978213,
+  "sim_par": 0.7879853248596191,
+  "sensata": false
+ },
+ {
+  "cv": "desarrollador_backend",
+  "vacante": "mag-1009047",
+  "requisito": "Capacidad analítica, orientación a la solución de problemas y trabajo colaborativo",
+  "evidencia": "Ingeniería de Sistemas, Universidad del Magdalena",
+  "cos": 0.4006747305393219,
+  "ce": 0.0006319739456260899,
+  "sim_par": 0.7759811878204346,
+  "sensata": false
+ }
+]
