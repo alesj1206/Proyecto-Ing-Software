@@ -40,6 +40,7 @@ def informe_markdown(mediciones: list[Medicion], contexto: dict[str, str]) -> st
               "| etapa | n | valor | umbral §6 | tipo | nota | cumple |", "|---|---:|---:|---:|---|---|---|"]
     for m in mediciones:
         valor, cumple = _valor(m)
-        umbral = UMBRALES.get(m.etapa, ("—",))[0]
+        umbral = UMBRALES.get(m.etapa, (None,))[0]
+        umbral = "—" if umbral is None else umbral
         lineas.append(f"| {m.etapa} | {m.n} | {valor:.2f} | {umbral} | {m.tipo} | {m.nota} | {cumple} |")
     return "\n".join(lineas) + "\n"

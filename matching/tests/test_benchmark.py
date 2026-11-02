@@ -59,3 +59,9 @@ def test_cada_vacante_sintetica_es_de_un_area():
         plantilla = fuente.plantilla_de[v.id]
         propios = sum(any(r.lower() in l.lower() for r in fuente.requisitos_de[plantilla]) for l in lineas)
         assert propios >= len(lineas) - 1
+
+
+def test_etapa_sin_umbral_muestra_guion():
+    texto = informe_markdown([Medicion("carga_masiva_min", 10, 60.0, "medido")], {})
+    fila = [f for f in texto.splitlines() if f.startswith("| carga_masiva_min")][0]
+    assert "None" not in fila and fila.split("|")[4].strip() == "—"

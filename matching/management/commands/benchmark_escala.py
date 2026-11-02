@@ -27,6 +27,16 @@ VACANTES_120K = 120_000
 DELTA_DIARIO = 3_000
 
 
+def _cpu() -> str:
+    try:
+        for linea in Path("/proc/cpuinfo").read_text().splitlines():
+            if linea.startswith("model name"):
+                return linea.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    return platform.processor() or platform.machine()
+
+
 class EmbedderConMemoria:
     """Para la carga masiva: los textos sintéticos se repiten, así que se embebe cada texto distinto una vez. Mide la
     escritura en la base, no el modelo (el costo del modelo se mide sin memoria sobre la muestra)."""
@@ -100,7 +110,7 @@ class Command(BaseCommand):
                        Medicion("decision_candidato_s", len(tiempos), max(tiempos), "medido", "el peor candidato")]
 
         contexto = {"fecha": timezone.now().strftime("%Y-%m-%d %H:%M"), "vacantes en la base": Vacante.objects.count(),
-                    "CPU": platform.processor() or platform.machine(), "embeddings": settings.SCOUTLY_EMBEDDER or "falso",
+                    "CPU": _cpu(), "embeddings": settings.SCOUTLY_EMBEDDER or "falso",
                     "política": f"{POLITICA.version} (τ_relevancia {POLITICA.tau_relevancia})",
                     "reranker": "apagado (el umbral de 1,5 s por página no aplica, §13.1)"}
         informe = informe_markdown(mediciones, contexto)
