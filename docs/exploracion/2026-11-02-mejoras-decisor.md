@@ -3,6 +3,25 @@
 Rama `exploracion/mejoras-decisor`, que sale de `sprint-3` en `013a80b`. No se unió a `sprint-3`: esa decisión es del
 equipo. Los scripts están en `docs/exploracion/mejoras/`.
 
+## Resumen (para leer primero)
+
+La mejor combinación encontrada es **mpnet para medir la cobertura + fusionar Postular y Ajustar CV**. En una prueba
+nueva y preregistrada (`prueba_3`, 26 pares nunca vistos) dio **69%**, contra 54% del decisor actual. Queda a un par
+del 70% de la spec.
+
+| `prueba_3` (preregistrada, medida una vez) | Exactitud |
+|---|---|
+| V1. Actual (MiniLM) | 54% |
+| V2. Fusión | 62% |
+| V3. mpnet | 62% |
+| **V4. mpnet + fusión** | **69%** |
+
+- **El orden se repite:** V4 > V2 ≈ V3 > V1, igual que en la validación cruzada (que daba 71% para V4).
+- **El Taller pasa a preguntas guiadas:** prototipo listo, porque ningún ajuste lo vuelve confiable redactando texto.
+- **Lo que no sirvió:** el cross-encoder, la compuerta léxica y un clasificador aprendido.
+- **Cuánto varía la cifra entre sets:** el decisor actual dio 36%, 46% y 54% en tres pruebas nuevas, así que cualquier
+  número de unos 25 pares tiene un margen de ±10 puntos.
+
 ## Qué se buscaba
 
 La Fase 4 dejó dos problemas abiertos:
@@ -61,6 +80,43 @@ Aun con la fusión, 48% en vacantes nuevas sigue lejos del 70%.
   nombra ninguna, el requisito no puede quedar cubierto. Se diseñó **después** de ver los errores de `prueba_2`, así
   que solo se probó sobre lo visto: sin fusión gana 4 puntos, con fusión no cambia nada. No compensa gastar otra prueba
   nueva en ella.
+
+## Un modelo de embeddings más fuerte: mpnet
+
+`mejoras/exp_modelos.py` re-embebe requisitos y evidencias con otros modelos ya descargados. Los umbrales se eligen con
+validación cruzada por set (con 3 sets se eligen, con el 4.º se mide), sobre los 101 pares vistos.
+
+| Modelo (cobertura) | 5 acciones | Con fusión | Textos/s en CPU |
+|---|---|---|---|
+| MiniLM-L12 (actual) | 51% | 63% | 424 |
+| multilingual-e5-small | 50% | 59% | — |
+| multilingual-e5-base | 52% | 64% | — |
+| **paraphrase-multilingual-mpnet-base-v2** | **62%** | **71%** | 110 |
+
+mpnet mejora en los cuatro sets, y sus umbrales elegidos son estables (0,425–0,475).
+
+**Confirmación en una prueba nueva y preregistrada.** `PREREGISTRO_prueba_3.md` (commit `f7c0ed3`) fijó las cuatro
+variantes y sus umbrales **antes** de buscar las vacantes. Las etiquetas de `prueba_3` (26 pares, 23 vacantes nuevas,
+sin clones) se commitearon en `b06781e`, también antes de medir. Hubo un desvío: quedaron 2 SIN_DATOS en vez de 3
+porque no había más vacantes escuetas. El resultado está en `mejoras/resultado_prueba_3.txt`.
+
+| Variante | Exactitud | Acción más frecuente | DESCARTAR |
+|---|---|---|---|
+| V1. Actual (MiniLM, 0,45/0,35) | 54% (14/26) | 27% | 4/6 (precisión 4/5) |
+| V2. Fusión (MiniLM) | 62% (16/26) | 46% | 4/6 (4/5) |
+| V3. mpnet (0,475/0,425) | 62% (16/26) | 42% | 4/6 (4/5) |
+| **V4. mpnet + fusión (0,425/0,425)** | **69% (18/26)** | 42% | 4/6 (4/5) |
+
+**Costo de adoptar mpnet:**
+- **Embeber:** es unas 4 veces más lento. Según el benchmark de la Fase 4, la carga inicial de 120.000 pasaría de ~1 h
+  a ~4 h (límite 8 h) y el delta diario de 1,5 a ~5 min (límite 15).
+- **Datos:** usa 768 dimensiones en vez de 384, así que la matriz de requisitos por vacante ocupa el doble.
+- **Decisión por candidato:** los productos punto de la cobertura cuestan el doble, y el peor candidato ya estaba en
+  4,8 s con un límite de 5 s. Hay que volver a correr `benchmark_escala`; probablemente obligue a bajar el tope o a
+  decidir en paralelo.
+- **Preselección:** puede seguir con MiniLM, porque solo cambió la cobertura.
+- **Migración:** cambiar el modelo implica re-embeber todo (`VERSION_EXTRACCION` ya lo fuerza) y migrar la columna de
+  la matriz.
 
 ## ¿Le gana un clasificador aprendido a las reglas?
 
@@ -134,6 +190,9 @@ escrito. Así el Taller conserva su valor (recordar qué hacer explícito) sin e
 
 ## Recomendaciones, en orden
 
+0. **mpnet para la cobertura + fusión:** 69% en la prueba preregistrada. Antes de adoptarlo hay que volver a correr el
+   benchmark de escala con mpnet (el riesgo es la decisión por candidato) y migrar la matriz de requisitos a 768
+   dimensiones.
 1. **Fusionar Postular y Ajustar CV:** +8 a +21 puntos en todos los sets, sin recalibrar nada. Es un cambio de
    producto (§13.2), pero el prototipo ya está. Hay que actualizar §13.2 de la spec, el informe y las capturas.
 2. **Taller como preguntas guiadas, sin texto propuesto:** elimina el riesgo de inventar. El prototipo ya está en
@@ -146,8 +205,8 @@ escrito. Así el Taller conserva su valor (recordar qué hacer explícito) sin e
    Ningún ajuste de reglas o umbrales probado esta noche cambia eso.
 4. **Mejorar la señal antes que la lógica:** un clasificador aprendido sobre las señales actuales empata con las
    reglas, así que calibrar con resultados reales (`ResultadoDecision`) solo ayudará si cambia la señal.
-   - **Modelos:** lo más prometedor es un modelo de embeddings más fuerte para pares requisito/evidencia (por ejemplo,
-     multilingual-e5 o bge-m3 con la GPU funcionando).
+   - **Modelos:** mpnet ya lo confirmó (recomendación 0). Los e5 no ayudan; bge-m3 queda por probar con la GPU
+     funcionando.
    - **Reconocimiento de herramientas:** detectar las herramientas y títulos que pide la vacante y comprobar si
      aparecen en el CV.
    - **Dónde sí sirven los datos reales:** para saber qué acciones llevan de verdad a entrevistas, no para afinar
@@ -157,7 +216,7 @@ escrito. Así el Taller conserva su valor (recordar qué hacer explícito) sin e
 
 ## Pendiente del equipo
 
-- Revisar las etiquetas de `prueba_2` (25 pares en `pares.yaml`).
+- Revisar las etiquetas de `prueba_2` (25 pares) y de `prueba_3` (26 pares) en `pares.yaml`.
 - Decidir si se adopta la fusión: el prototipo se enciende con `fusionar_ajustar=True` en `matching/politica.py`.
 - Decidir si se adopta el Taller guiado. Para unirlo a `sprint-3` hay que aplicar la migración
   `matching/0006_sugerencia_respuesta`; en la base de desarrollo se aplicó para la captura y luego se revirtió.
