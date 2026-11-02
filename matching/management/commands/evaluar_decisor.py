@@ -16,7 +16,7 @@ class Command(BaseCommand):
     help = "Evalúa el decisor contra el set etiquetado (en una transacción que se deshace al terminar)."
 
     def add_arguments(self, parser):
-        parser.add_argument("--mitad", choices=["ajuste", "prueba_1", "prueba"], default="ajuste")  # prueba_1 ya se vio
+        parser.add_argument("--mitad", choices=["ajuste", "prueba_1", "prueba", "prueba_2"], default="ajuste")  # prueba_1 ya se vio
         parser.add_argument("--barrido", action="store_true", help="probar la grilla de umbrales (solo ajuste)")
         parser.add_argument("--confirmo-prueba", action="store_true")
         parser.add_argument("--salida", type=Path, help="agrega el informe en Markdown al final de este archivo")

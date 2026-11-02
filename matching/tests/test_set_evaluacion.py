@@ -60,11 +60,20 @@ def test_la_prueba_no_tiene_clones_de_lo_ya_visto():
     from difflib import SequenceMatcher
     textos = {v["id"]: " ".join(v["descripcion"].lower().split())[:1500]
               for v in json.loads((DATOS / "vacantes.json").read_text(encoding="utf-8"))}
-    vistas = {p["vacante"] for p in PARES if p["mitad"] in ("ajuste", "prueba_1")}
+    anteriores = {"prueba": ("ajuste", "prueba_1"), "prueba_2": ("ajuste", "prueba_1", "prueba", "excluida")}
     clones = []
-    for nueva in {p["vacante"] for p in _mitad("prueba")}:
-        for vista in vistas:
-            comparador = SequenceMatcher(None, textos[nueva], textos[vista])
-            if comparador.quick_ratio() > 0.9 and comparador.ratio() > 0.9:
-                clones.append((nueva, vista))
+    for mitad, previas in anteriores.items():
+        vistas = {p["vacante"] for p in PARES if p["mitad"] in previas}
+        for nueva in {p["vacante"] for p in _mitad(mitad)}:
+            for vista in vistas:
+                comparador = SequenceMatcher(None, textos[nueva], textos[vista])
+                if comparador.quick_ratio() > 0.9 and comparador.ratio() > 0.9:
+                    clones.append((nueva, vista))
     assert clones == []
+
+
+def test_la_prueba_2_esta_balanceada():
+    prueba = _mitad("prueba_2")
+    conteo = Counter(p["accion_esperada"] for p in prueba)
+    assert 22 <= len(prueba) <= 30 and all(conteo[a] >= 4 for a in ("POSTULAR", "AJUSTAR_CV", "CERRAR_BRECHA", "DESCARTAR"))
+    assert conteo["SIN_DATOS"] >= 3 and conteo["DESCARTAR"] / len(prueba) <= 0.35
