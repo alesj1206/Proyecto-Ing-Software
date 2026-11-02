@@ -12,13 +12,14 @@ sequenceDiagram
     N->>API: POST /api/importar-vacantes
     API-->>N: 202 (o 409 si ya hay una en curso)
     API->>DB: ingesta en un hilo: texto completo, requisitos, restricciones
+    API->>DB: al terminar, una SolicitudDecision por perfil
     N->>API: POST /api/decidir
     API->>DB: una SolicitudDecision por perfil con CV
     API-->>N: 202 {encolados}
-    B->>DB: embebe vacantes nuevas, decide por perfil y guarda Decision y FotoDiaria
-    N->>API: POST /api/generar-notificaciones
-    API->>DB: Notificacion por cada POSTULAR nueva de hoy
-    API->>M: un resumen, uno por vacante (máximo N) o nada, según la preferencia
+    B->>DB: embebe vacantes nuevas, decide por perfil (hasta 3.000 relevantes) y guarda Decision y FotoDiaria
+    B->>M: al terminar el lote, notifica las POSTULAR nuevas (ventana de 36 h)
+    N->>API: POST /api/generar-notificaciones (red de seguridad, idempotente)
+    API->>M: un resumen, uno por vacante (máximo N al día) o nada, según la preferencia
     W->>DB: el dashboard lee el Plan de hoy, las acciones, el mercado y el aprendizaje
     W->>DB: Taller de CV (sugerencias con evidencia) y "Explícamelo" (Groq, sin datos del CV)
     W->>DB: tablero → Entrevista/Descartado → ResultadoDecision
