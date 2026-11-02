@@ -1,6 +1,7 @@
 """Restricciones duras como Strategy (spec §5.2.5): cada una evalúa un criterio y explica su resultado. `sin_datos`
 nunca descarta: solo baja la solidez (un candidato que no declaró algo no puede violarlo)."""
 
+import re
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -30,7 +31,7 @@ class ResultadoRestriccion:
 class Restriccion(Protocol):
     criterio: str
 
-    def evaluar(self, perfil, vacante, politica) -> ResultadoRestriccion: ...
+    def evaluar(self, perfil, vacante, politica) -> ResultadoRestriccion | None: ...  # None: no aplica
 
 
 class RestriccionModalidad:
@@ -100,5 +101,26 @@ class RestriccionExperiencia:
         return ResultadoRestriccion(self.criterio, "parcial", motivo)
 
 
+class RestriccionEstudiante:
+    """Las prácticas y los contratos de aprendizaje exigen ser estudiante: no basta con haber estudiado el área.
+    Solo aplica a esas vacantes (devuelve None en las demás, así no agrega una fila a cada decisión). "Técnico,
+    tecnólogo o estudiante de…" no la activa: ahí ser estudiante es una alternativa, no una exigencia."""
+
+    criterio = "estudiante"
+    TITULO = re.compile(r"\b(practicante|practica|practicas|aprendiz|pasante|pasantia)\b")
+    DESCRIPCION = re.compile(r"\bcontrato de aprendizaje\b")
+    EN_CURSO = re.compile(r"\b(en curso|cursando|actualmente|actual|a la fecha|presente|semestre)\b")
+    MOTIVO_NO = "La vacante es para estudiantes y tu CV no muestra estudios en curso"
+
+    def evaluar(self, perfil, vacante, politica) -> ResultadoRestriccion | None:
+        if not (self.TITULO.search(normalizar(vacante.titulo))
+                or self.DESCRIPCION.search(normalizar(vacante.descripcion or ""))):
+            return None
+        educacion = perfil.evidencias.filter(seccion="educacion").values_list("texto", flat=True)
+        if any(self.EN_CURSO.search(normalizar(t)) for t in educacion):
+            return ResultadoRestriccion(self.criterio, "cumple", "Tu CV muestra estudios en curso")
+        return ResultadoRestriccion(self.criterio, "no_cumple", self.MOTIVO_NO)
+
+
 RESTRICCIONES: list[Restriccion] = [RestriccionModalidad(), RestriccionSalario(), RestriccionUbicacion(),
-                                    RestriccionExperiencia()]
+                                    RestriccionExperiencia(), RestriccionEstudiante()]

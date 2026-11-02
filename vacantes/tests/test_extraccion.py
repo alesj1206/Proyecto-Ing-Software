@@ -228,3 +228,14 @@ def test_sub_vinetas_o_dentro_de_una_linea_se_separan():
 def test_una_o_normal_no_separa():
     [r] = extraer_requisitos("Requisitos:\n- Técnico o Tecnólogo en Contabilidad", [])
     assert r.texto == "Técnico o Tecnólogo en Contabilidad"
+
+
+def test_enumeracion_de_herramientas_se_separa():
+    textos = [r.texto for r in extraer_requisitos("Requisitos:\n- Manejo de Power BI, Power Apps y Power Automate", [])]
+    assert textos == ["Manejo de Power BI", "Manejo de Power Apps", "Manejo de Power Automate"]
+
+
+def test_enumeracion_de_frases_no_se_separa():
+    textos = [r.texto for r in extraer_requisitos("Requisitos:\n- Experiencia en atención al cliente, ventas y cobranza\n"
+                                                   "- Manejo de Excel", [])]
+    assert textos == ["Experiencia en atención al cliente, ventas y cobranza", "Manejo de Excel"]

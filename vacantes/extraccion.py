@@ -205,10 +205,38 @@ def _candidatos(texto: str) -> list[tuple[str | None, str]]:
                       if any(p in normalizar(oracion) for p in PALABRAS_REQUISITO)]
 
 
+MAX_PALABRAS_ITEM = 3
+ENUMERACION = re.compile(r",\s+|\s+y\s+")
+
+
+def _es_nombre(item: str) -> bool:
+    """Un ítem de enumeración de herramientas: corto y con cada palabra en mayúscula o sigla (Power BI, SQL)."""
+    palabras = item.split()
+    return 0 < len(palabras) <= MAX_PALABRAS_ITEM and all(p[0].isupper() or p[0].isdigit() for p in palabras)
+
+
+def _separar_enumeracion(unidad: str) -> list[str]:
+    """"Manejo de Power BI, Power Apps y Power Automate" → un requisito por herramienta, con el prefijo repetido.
+    Solo se separan enumeraciones con "y" (todas se piden); con "o" son alternativas y quedan juntas. Las frases en
+    minúscula ("atención al cliente, ventas y cobranza") no se tocan."""
+    partes = ENUMERACION.split(unidad)
+    if len(partes) < 3 or " o " in unidad or not all(_es_nombre(p) for p in partes[1:]):
+        return [unidad]
+    palabras = partes[0].split()
+    corte = len(palabras)
+    while corte > 0 and len(palabras) - corte < MAX_PALABRAS_ITEM and _es_nombre(palabras[corte - 1]):
+        corte -= 1
+    if corte == len(palabras):
+        return [unidad]
+    prefijo = " ".join(palabras[:corte])
+    items = [" ".join(palabras[corte:]), *partes[1:]]
+    return [f"{prefijo} {item}".strip() for item in items]
+
+
 def extraer_requisitos(texto: str, etiquetas: list[str]) -> list[RequisitoExtraido]:
     requisitos: list[RequisitoExtraido] = []
     vistos: set[str] = set()
-    for seccion, unidad in _candidatos(texto):
+    for seccion, unidad in ((s, parte) for s, u in _candidatos(texto) for parte in _separar_enumeracion(u.strip(" .;"))):
         unidad = unidad.strip(" .;")
         clave = normalizar(unidad)
         if _es_ruido(unidad) or not clave or clave in vistos:

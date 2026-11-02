@@ -2,8 +2,10 @@ from types import SimpleNamespace as N
 
 import pytest
 
+from cuentas.models import EvidenciaPerfil
 from matching.restricciones import (
     RESTRICCIONES,
+    RestriccionEstudiante,
     RestriccionExperiencia,
     RestriccionModalidad,
     RestriccionSalario,
@@ -20,7 +22,7 @@ def perfil(**kw):
 
 def vacante(**kw):
     base = dict(modalidad="Presencial", modalidad_inferida=False, salario_max=None, ubicacion="Medellín",
-                experiencia_minima=None)
+                experiencia_minima=None, titulo="Analista", descripcion="")
     return N(**{**base, **kw})
 
 
@@ -72,8 +74,40 @@ def test_experiencia(tiene, pide, esperado):
 
 def test_candidato_sin_expectativas_nunca_viola_nada():
     v = vacante(salario_max=1000000, experiencia_minima=5, ubicacion="Bogotá")
-    assert {r.evaluar(perfil(), v, POLITICA).estado for r in RESTRICCIONES} <= {"sin_datos", "cumple"}
+    resultados = [r.evaluar(perfil(), v, POLITICA) for r in RESTRICCIONES]
+    assert {r.estado for r in resultados if r is not None} <= {"sin_datos", "cumple"}
 
 
 def test_orden_y_criterios():
-    assert [r.criterio for r in RESTRICCIONES] == ["modalidad", "salario", "ubicacion", "experiencia"]
+    assert [r.criterio for r in RESTRICCIONES] == ["modalidad", "salario", "ubicacion", "experiencia", "estudiante"]
+
+
+def _estudiante(perfil_db, educacion: list[str], titulo: str, descripcion: str = ""):
+    perfil_db.evidencias.all().delete()
+    for i, t in enumerate(educacion):
+        EvidenciaPerfil.objects.create(perfil=perfil_db, texto=t, seccion="educacion", posicion=i)
+    return RestriccionEstudiante().evaluar(perfil_db, vacante(titulo=titulo, descripcion=descripcion), POLITICA)
+
+
+@pytest.mark.parametrize("titulo,descripcion", [
+    ("Practicante de Diseño Gráfico 2027 - 1", ""), ("Aprendiz Diseño Grafico - Marinilla", ""),
+    ("Práctica profesional en contabilidad", ""), ("Auxiliar de diseño", "Tipo de contrato: contrato de aprendizaje."),
+])
+def test_practica_exige_estudiante(client_con_cv, usuario, titulo, descripcion):
+    r = _estudiante(usuario.perfil, ["Tecnología en Diseño Gráfico, Pascual Bravo"], titulo, descripcion)
+    assert (r.estado, r.motivo) == ("no_cumple", "La vacante es para estudiantes y tu CV no muestra estudios en curso")
+
+
+@pytest.mark.parametrize("educacion", ["Diseño Gráfico, cursando 7.º semestre", "Tecnología en Diseño (en curso)",
+                                       "Contaduría Pública, Universidad de Antioquia (2023 - actualmente)",
+                                       "Técnico en sistemas, SENA, 2025 - a la fecha"])
+def test_estudiante_en_curso_no_se_descarta(client_con_cv, usuario, educacion):
+    assert _estudiante(usuario.perfil, [educacion], "Practicante de Diseño Gráfico").estado == "cumple"
+
+
+@pytest.mark.parametrize("titulo,descripcion", [
+    ("Asistente Administrativo", "Formación: técnico, tecnólogo o estudiante de carreras administrativas."),
+    ("Desarrollador de Software", "Alta capacidad de aprendizaje y trabajo en equipo."),
+])
+def test_vacante_normal_no_aplica(client_con_cv, usuario, titulo, descripcion):
+    assert _estudiante(usuario.perfil, ["Tecnología en Diseño Gráfico"], titulo, descripcion) is None

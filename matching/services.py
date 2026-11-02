@@ -45,7 +45,7 @@ def _decision(perfil, vacante, similitud, evidencias, matriz_evid, politica) -> 
     if len(matriz_req) != len(requisitos) or len(matriz_evid) != len(evidencias):
         return None  # vectores desalineados con el texto: se decide en la próxima corrida, ya re-embebida
     cobertura = cubrir(requisitos, matriz_req, evidencias, matriz_evid, politica.tau_alto, politica.tau_bajo)
-    restricciones = [r.evaluar(perfil, vacante, politica) for r in RESTRICCIONES]
+    restricciones = [res for r in RESTRICCIONES if (res := r.evaluar(perfil, vacante, politica)) is not None]
     contexto = ContextoDecision(cobertura, restricciones, requisitos, politica)
     veredicto = decidir(contexto)
     solidez, motivo_solidez = calcular_solidez(contexto, veredicto)
