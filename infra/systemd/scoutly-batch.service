@@ -1,0 +1,21 @@
+[Unit]
+Description=Scoutly: batch del decisor (decidir --escuchar)
+Requires=scoutly-postgres.service
+After=scoutly-postgres.service
+# Si falla 3 veces en 10 minutos deja de reintentar: un fallo no debe cargar modelos en bucle.
+StartLimitIntervalSec=600
+StartLimitBurst=3
+
+[Service]
+WorkingDirectory=@RUTA@
+Environment=PYTHONUNBUFFERED=1
+# Cada proceso ocupa ~2 GB (medido). 3 rinden lo mismo que 6 en este PC.
+ExecStart="@RUTA@/.venv/bin/python" "@RUTA@/manage.py" decidir --escuchar --procesos 3
+Restart=on-failure
+RestartSec=30
+TimeoutStopSec=30
+# Techo de memoria: si se pasa, systemd mata este servicio y no el resto del PC (incidente del 2026-11-02).
+MemoryMax=8G
+
+[Install]
+WantedBy=default.target

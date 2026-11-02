@@ -63,6 +63,7 @@ infra/postgres/levantar.sh        # Postgres 17 + pgvector en 127.0.0.1:5433
 .venv/bin/python manage.py ingerir_vacantes --fuente magneto     # o --fuente fixture, sin red
 .venv/bin/python manage.py runserver --insecure                   # http://localhost:8000
 .venv/bin/python manage.py decidir --escuchar --procesos 3        # otra terminal: el batch (3 en paralelo)
+infra/systemd/instalar.sh   # o, en vez de lo anterior: Postgres y el batch como servicios que arrancan solos
 ```
 
 Opcional, en el `.env`:

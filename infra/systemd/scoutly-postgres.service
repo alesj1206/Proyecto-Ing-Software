@@ -1,0 +1,12 @@
+[Unit]
+Description=Scoutly: Postgres + pgvector (contenedor de Podman)
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart="@RUTA@/infra/postgres/levantar.sh"
+ExecStop=/usr/bin/podman stop scoutly-postgres
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target
