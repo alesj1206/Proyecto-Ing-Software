@@ -1,299 +1,114 @@
 # Scoutly
 
-Plataforma de vacantes y matching para candidatos, con la identidad visual
-de Magneto. Construida en **Python + Django**.
+Scoutly es un copiloto de búsqueda de empleo sobre las vacantes reales de [magneto365.com](https://www.magneto365.com),
+construido con **Python + Django** y la identidad visual de Magneto.
 
-> La entrega congelada del Sprint 1 vive en [`entregas/sprint-1/`](entregas/sprint-1/)
-> y en el tag de git `sprint-1`. Este README documenta el estado actual
-> (Sprint 2 en curso); no lo sobrescribe, lo continúa.
+Al equipo le correspondió la **Idea 4** del reto de Magneto ("Profile Manager — Reto de Ingeniería"): *"Workflow con
+n8n (vacantes → ranking diario → notificación)"*. n8n orquesta la ingesta, la decisión y la notificación como pasos
+separados.
 
-> **Contexto del reto (Magneto, "Profile Manager — Reto de Ingeniería"):**
-> a este equipo le correspondió la **Idea 4** del documento oficial:
-> *"Workflow con n8n (vacantes -> ranking diario -> notificación)"*, que
-> especifica explícitamente que **n8n debe orquestar ingesta,
-> normalización, scoring y notificación** como pasos separados. Por eso
-> HU-11 (notificaciones) no es un "extra" de Sprint 3 opcional — es parte
-> del enunciado central del reto, y se adelantó a Sprint 2 por esa razón.
+El candidato sube su hoja de vida y, cada día, un decisor local y gratuito le dice qué hacer con cada vacante relevante,
+siempre con sus razones:
 
-## Sprint 2 (en curso)
+| Acción | Qué significa |
+|---|---|
+| **Postular** | Cubres todos los requisitos obligatorios (a veces "con nota": te falta una sola herramienta). |
+| **Ajustar CV** | No te falta nada, pero algo lo tienes "a medias": el Taller de CV te sugiere cómo hacerlo explícito. |
+| **Cerrar brecha** | Te faltan 1 o 2 obligatorios: van a tu plan de aprendizaje. |
+| **Descartar** | Viola una restricción tuya (salario, ciudad, modalidad, experiencia o prácticas) o te faltan 3 o más. Siempre dice el motivo. |
+| **Revísala tú** | La vacante no dice lo suficiente para decidir. |
 
-Punto de partida: todo lo del Sprint 1, sin remover alcance.
+Ningún modelo de pago decide nada. Los embeddings corren en la máquina con fastembed (ONNX, sin torch). Groq solo
+redacta, si el candidato la pide, una explicación en prosa, y nunca recibe el texto del CV.
 
-| HU | Historia | Prioridad | Estado |
-|----|----------|-----------|--------|
-| HU-02 | Completar mis expectativas laborales | Should-have | ✅ Hecho — `/expectativas`, pondera hasta 15% del score de match |
-| HU-06 | Ranking diario vía workflow n8n automático | Must-have | ✅ Hecho — ver [`n8n/README.md`](n8n/README.md) |
-| HU-07 | Entender por qué me recomendaron una vacante | Should-have | ✅ Hecho — sección "¿Por qué te la recomendamos?" en el detalle |
-| HU-08 | Postularme (simulado) a una vacante | Should-have | ✅ Hecho — botón "Postularme" en el detalle |
-| HU-10 | Tablero de estado de cada proceso | Should-have | ✅ Hecho — `/postulaciones`, Kanban de 4 columnas |
-| HU-11 | Notificación cuando hay un match nuevo | Should-have (Sprint 3 → adelantada) | ✅ Hecho — ver [`n8n/README.md`](n8n/README.md) y la sección de abajo |
+**Estado (Sprint 3, v3):**
+- La rama `sprint-3` es una reescritura completa.
+- La evidencia de la Fase 4 está en [`docs/fase4/`](docs/fase4/): la evaluación, el benchmark de 120.000 vacantes, la
+  evaluación ciega y la verificación de punta a punta.
+- El informe del sprint es [`docs/fase4/INFORME.md`](docs/fase4/INFORME.md).
 
-**HU-06 — cómo quedó armado.** El scoring ya no se calcula en cada
-request: `vacantes/scoring.py::recalcular_matches_todos()` recorre todos
-los perfiles con CV cargado y persiste el ranking del día en el modelo
-`MatchDiario`. Lo dispara `POST /api/recalcular-matches` (protegido por el
-header `X-Scoutly-Token`, ver `N8N_SCORING_TOKEN` en `settings.py`), que es
-exactamente lo que llama el workflow de n8n (`Schedule Trigger` diario →
-`HTTP Request`) descrito en [`n8n/README.md`](n8n/README.md) — **ya
-instalado, activo y probado con una ejecución real** (ver ese README para
-el detalle de cómo se armó todo por API, sin tocar el navegador). El
-dashboard lee de `MatchDiario`; si el workflow todavía no
-corrió hoy para alguien, se calcula y persiste al vuelo en ese momento
-(para que nunca se vea vacío), pero la fuente de verdad es el batch diario.
-El ranking también se recalcula de inmediato cuando el candidato actualiza
-su CV o sus expectativas (HU-02), sin esperar al siguiente ciclo del
-workflow — así cumple el tercer criterio de aceptación de la historia.
+## Cómo funciona
 
-*Nota de alcance:* existe una infraestructura de n8n+Postgres más antigua
-en `~/n8n-vacantes/` (fuera de este repo), de cuando el equipo evaluó
-scrapear Magneto directamente con un pipeline HTTP→HTML→Postgres antes de
-pivotar a Django. Se reutilizan sus contenedores de n8n (ya tenían cuenta
-creada), pero el workflow de HU-06 apunta al Django actual, no a ese
-esquema de Postgres viejo — ver la nota en ese README.
-
-**HU-07 — cómo quedó armado.** `vacantes/matching.py::explicar_match()`
-genera las razones con los mismos helpers que usa `compute_match()` para
-calcular el score (`_modalidad_coincide`, `_salario_coincide`,
-`_ubicacion_coincide`, coincidencia de habilidades) — nunca puede mostrar
-una razón que el número no respalde, porque no hay una segunda copia de la
-lógica. Si solo hay una razón calculable, se agrega un resumen del % de
-match para cumplir el mínimo de 2 que pide la historia.
-
-**HU-08 / HU-10 — cómo quedaron armadas.** Un único modelo,
-`vacantes/models.py::Postulacion`, es a la vez la "evidencia con
-timestamp" de HU-08 (`fecha_aplicacion`, `auto_now_add`) y la tarjeta del
-tablero Kanban de HU-10 (campo `estado`, una de las 4 columnas mínimas).
-Postularse es idempotente (`get_or_create`): si ya habías aplicado, el
-botón se reemplaza por un badge con la fecha y el estado actual en vez de
-duplicar la fila. El estado lo mueve el propio candidato desde
-`/postulaciones` — "simulado" significa que no hay bandeja del lado de la
-empresa todavía, eso queda fuera de este sprint.
-
-**HU-11 — cómo quedó armada.** El workflow de n8n (ver
-[`n8n/README.md`](n8n/README.md)) tiene un **tercer nodo HTTP Request**
-al final de la cadena — `POST /api/generar-notificaciones`, separado a
-propósito de los de ingesta y scoring para que "notificación" sea un paso
-propio y auditable en el panel de ejecuciones de n8n, no algo escondido
-dentro del cálculo del score. `vacantes/notificaciones.py::generar_notificaciones_nuevos_matches`
-compara el top-3 de hoy de cada candidato contra el de ayer
-(`MatchDiario`); por cada vacante que entró de nueva, crea una
-`Notificacion` — siempre visible en la campana de la app — y la envía por
-correo al que ya trae el CV (`Perfil.contacto`). Por defecto sale por el
-backend de consola de Django (se ve en la terminal donde corre
-`runserver`, sirve como evidencia sin configurar nada); con
-`DJANGO_EMAIL_BACKEND=...smtp.EmailBackend` + `EMAIL_HOST`/`EMAIL_HOST_USER`/
-`EMAIL_HOST_PASSWORD` llega de verdad a la bandeja de entrada.
-
-Se evaluó también WhatsApp vía Twilio y se descartó a propósito: exige
-que cada candidato haga un opt-in manual (mandar `join <código>` por
-WhatsApp una vez — restricción de Meta para cuentas de prueba de Twilio,
-no algo que Scoutly pueda saltarse) antes de poder recibir nada, mientras
-que el correo no le pide ningún paso extra. Un único canal, tangible y
-sin fricción, es mejor que dos canales donde uno nunca termina de
-configurarse del todo.
-
-Sin correo detectado en el CV, o sin SMTP configurado,
-`Notificacion.enviada` queda en `False` pero la notificación sigue
-creándose y visible en la app — nunca rompe el workflow por falta de
-configuración externa, mismo patrón que `GROQ_API_KEY` en HU-07.
-
-**Identidad visual recalibrada contra Magneto real** (ver sección de abajo)
-— esta fue la corrección explícita de la profesora sobre el Sprint 1: la
-paleta y el chrome no se sentían como una extensión de Magneto. Se ajustó
-`templates/base.html` (barra utilitaria + franja de marca) y
-`static/css/scoutly.css` (tokens de color) en todas las pantallas
-existentes, sin tocar el flujo ni las rutas del Sprint 1.
-
-## Matching: 5 criterios + explicación por IA (rediseño Sprint 2)
-
-El score de compatibilidad ya no es solo habilidades: son 5 criterios
-independientes, cada uno con su propio peso, calculados en
-`vacantes/matching.py::evaluar_criterios()`:
-
-| Criterio | Peso | Cómo se mide |
-|---|---|---|
-| Habilidades | 40% | % de los requisitos de la vacante presentes en el CV |
-| Experiencia | 20% | años declarados ÷ años mínimos que pide la vacante |
-| Salario | 15% | qué tan cerca está el salario ofrecido del mínimo esperado |
-| Modalidad | 15% | afinidad por categoría — exacta 100%, cualquier combinación con Híbrido 50% (es un punto medio real), solo Remoto↔Presencial (únicos opuestos) 0% |
-| Ubicación | 10% | coincidencia de ciudad |
-
-Un criterio sin datos suficientes (el candidato no declaró esa
-expectativa, o la vacante no exige una antigüedad mínima) se excluye y su
-peso se reparte proporcionalmente entre los demás — Habilidades nunca se
-excluye.
-
-Cada criterio que aplica trae una **explicación específica generada por
-IA** (Groq, modelo gratuito `qwen/qwen3.8-27b`, `GROQ_API_KEY` en
-`settings.py`), cacheada en `ExplicacionCriterio` — nunca se llama la API
-en cada vista de página, solo cuando el score de ese criterio cambió
-desde la última vez. Sin `GROQ_API_KEY` configurada, cae a un texto de
-respaldo derivado de los mismos datos reales (nunca genérico). Visible en
-el detalle de cada vacante, bajo "Desglose de compatibilidad".
-
-## Vacantes reales de Magneto
-
-Las 9 vacantes mock del Sprint 1 (`vacantes/fixtures/vacantes_raw.json`)
-siguen ahí, pero el dataset se amplió con vacantes reales importadas en
-vivo de magneto365.com (`vacantes/fixtures/vacantes_magneto.json`, ids
-`mag-<hash>`) — título, empresa, ubicación, modalidad, salario,
-experiencia mínima, descripción y requisitos son datos reales, no
-inventados. Desde el 2026-10-05 esta importación ya no es solo manual:
-es el **paso 0 ("ingesta")** del workflow de n8n, corre automáticamente
-cada día antes del scoring — ver [`n8n/README.md`](n8n/README.md).
-
-El id de cada vacante real es un hash estable de título+empresa
-(`_id_estable()` en `scrape_magneto.py`), no una posición en la corrida —
-necesario justo porque ahora corre sola todos los días: con un id
-posicional ("mag-003"), una corrida que encuentra los resultados en otro
-orden le reasignaría ese id a una vacante real distinta, y una
-`Postulacion` o `MatchDiario` que ya apuntaba a "mag-003" quedaría
-pegada a la vacante equivocada. Con el hash, la misma publicación real
-siempre cae en el mismo id, corra cuando corra.
-
-Cómo se obtuvieron: `vacantes/management/commands/scrape_magneto.py` usa
-Playwright + Chrome (la búsqueda de Magneto es una SPA — el HTML que
-responde el servidor no trae las vacantes, se cargan por JavaScript, así
-que un scraper con `requests` no sirve). El comando busca por término
-("desarrollador", "devops", "QA software", ...), abre el detalle de cada
-resultado y lee el panel renderizado — de ahí salen `Requisitos para
-aplicar a la vacante` (experiencia/educación), `Salario`, `Ubicación`, la
-descripción completa, y la sección `Habilidades` de cada oferta real.
-Esas habilidades reales se cruzan contra `vacantes/skills.py`
-(`HABILIDADES_CONOCIDAS`, ampliado con términos reales encontrados en el
-import: java, spring boot, azure, power bi, machine learning, ci/cd, n8n,
-sap, canva, photoshop, illustrator) para construir `requisitos` — un
-requisito que no esté en ese vocabulario no podría hacer match con
-ningún CV sin importar qué tan real sea el dato.
-
-El `robots.txt` de Magneto permite expresamente crawling (nombra bots de
-IA en su lista de user-agents permitidos) y no bloquea las rutas de
-`/trabajos/`; solo bloquea URLs con query string, que este comando nunca
-usa (toda la navegación es por interacción con la SPA). Aun corriendo
-automáticamente todos los días, sigue siendo una sesión acotada
-(`--por-termino`, 5 términos, ~20 vacantes) — una corrida diaria, no un
-scraper continuo ni agresivo contra el sitio.
-
-```bash
-python manage.py scrape_magneto                                    # usa los términos por defecto
-python manage.py scrape_magneto --terminos "desarrollador,devops" --por-termino 5
-python manage.py seed_vacantes                                     # carga el resultado a la base de datos
+```
+n8n (6 a. m.) ──► /api/importar-vacantes ──► ingesta: texto completo de cada vacante, requisitos y restricciones
+             ──► /api/decidir ────────────► cola ──► manage.py decidir --escuchar (batch con los modelos)
+             ──► /api/generar-notificaciones          │  embebe lo nuevo, preselecciona en Postgres (las 3.000
+                                                      │  más parecidas), mide cobertura, aplica la política,
+                                                      ▼  guarda la Decision y notifica
+Web (Django): Plan de hoy, acciones, detalle con razones, Taller de CV, tablero de postulaciones, historial
 ```
 
-## Sprint 1
+- **Apps:**
+  - `cuentas`: usuario, perfil, CV, expectativas, consentimiento (Ley 1581) e inicio de sesión;
+  - `vacantes`: catálogo, extracción y fuentes;
+  - `matching`: el decisor;
+  - `postulaciones`: tablero y resultados;
+  - `notificaciones`.
+- **Módulo `api`:** los endpoints para n8n.
+- **La web nunca carga modelos:** solo el batch.
+- **Datos:** Postgres 17 + pgvector, en Podman. Cada vacante guarda su vector y la matriz de sus requisitos.
 
-Cubre las siguientes historias de usuario (deben tener, prioridad alta):
+## Levantarlo
 
-| HU | Historia | Prioridad | Talla | Dificultad | Qué se hizo |
-|----|----------|-----------|-------|------------|-------------|
-| HU-13 | Registro e inicio de sesión, con rutas protegidas | Alta | M | Media | Modelo `Usuario` custom (login por email), sesión de 30 días, rutas protegidas con `@login_required`. |
-| HU-01 | Carga de CV (PDF) para crear el perfil del candidato | Alta | XL | Alta | Parser heurístico (`cv_parser.py`) con `pypdf`: nombre, correo, habilidades, experiencia y educación; lo no detectado queda "Pendiente". |
-| HU-04 | Listado de vacantes disponibles | Alta | S | Baja | Listado en el dashboard desde `Vacante`, sembrado con `seed_vacantes` (dedup y validación de datos rotos). |
-| HU-06 | Ranking diario de vacantes recomendadas, "Matches de hoy" | Alta | L | Alta | Scoring por coincidencia de palabras clave (`matching.py`) entre habilidades del perfil y requisitos; top 3 en dashboard. |
-| HU-05 | Detalle de una vacante (`/vacantes/<id>`) | Alta | M | Media | Vista pública con anillo de compatibilidad y checklist de requisitos cumplidos/faltantes cuando hay sesión. |
-
-### Flujo de la aplicación
-
-1. Primera visita → `/login` (registro o inicio de sesión, en la misma página).
-2. Registro exitoso → `/onboarding`, "Carga tu CV para empezar" (HU-01),
-   y de ahí a `/perfil` para ver lo que se extrajo del documento.
-3. Inicio de sesión de un usuario existente → directo a `/dashboard`.
-4. `/dashboard` (protegido) → una sola vista con "Matches de hoy" (HU-06)
-   y el listado general de vacantes (HU-04). Si todavía no hay CV cargado,
-   se muestra un banner para cargarlo, en vez de quedar vacío.
-5. El clic en cualquier vacante, desde matches o desde el listado, lleva
-   siempre al mismo componente de detalle: `/vacantes/<id>` (HU-05). Es una
-   página pública: si hay sesión y perfil, además muestra el anillo de
-   compatibilidad y el checklist de requisitos cumplidos/faltantes.
-6. `/perfil` (protegido) muestra el nombre, contacto, experiencia,
-   educación y habilidades extraídos del CV, con badges "Pendiente" para lo
-   que no se pudo detectar, y permite volver a cargar el PDF en cualquier
-   momento.
-
-Las rutas `/dashboard`, `/onboarding` y `/perfil` están protegidas con
-`@login_required`: sin sesión activa, Django redirige a `/login`.
-
-### Alcance y mocks de este sprint
-
-- **Vacantes**: dataset mock en `vacantes/fixtures/vacantes_raw.json`,
-  simulando lo que hoy entregaría el workflow de n8n (aún no conectado). El
-  dataset incluye a propósito un registro duplicado y uno con datos rotos.
-  El comando `seed_vacantes` los descarta al sembrar la base de datos
-  (validación y deduplicación una sola vez, no en cada consulta).
-- **CV**: `vacantes/cv_parser.py` lee el texto real del PDF (con `pypdf`) y
-  aplica heurísticas simples: el nombre es la primera línea del documento,
-  el correo se detecta con una expresión regular, las habilidades se buscan
-  en el texto completo contra el vocabulario de `skills.py`, y experiencia
-  /educación se extraen ubicando encabezados en mayúsculas ("EXPERIENCIA",
-  "EDUCACIÓN", etc.) y tomando las líneas que siguen. No es OCR: un PDF
-  escaneado sin capa de texto no tiene nada que leer, y en ese caso se cae
-  al respaldo del nombre del archivo (heurística de la primera versión de
-  este sprint). Los campos que no se pueden extraer quedan marcados como
-  pendientes en `/perfil`, sin romper el flujo de carga.
-- **Matches de hoy**: scoring simple por coincidencia de palabras clave
-  entre las habilidades del perfil y los requisitos de cada vacante
-  (`vacantes/matching.py`). Se reemplaza por el motor real del workflow de
-  n8n en el Sprint 2 (no implementado en este sprint).
-- **Cuentas y sesión**: registro con email y contraseña, usando el sistema
-  de autenticación nativo de Django (`accounts.Usuario`, `USERNAME_FIELD =
-  "email"`). Sesión persistente 30 días. Sin recuperación de contraseña ni
-  login social en este sprint.
-- **Persistencia**: SQLite (`db.sqlite3`, ignorado por git). En un sprint
-  futuro se reemplaza por un motor de producción si hace falta.
-
-### Identidad visual
-
-**Recalibrada en Sprint 2.** La retroalimentación del Sprint 1 fue que la
-app no se sentía como una extensión real de Magneto, solo usaba su verde y
-azul sobre fondo blanco plano. Se tomaron capturas de magneto365.com y se
-extrajeron sus colores reales por pixel-sampling; el resultado difiere del
-plan original en tres puntos: Magneto usa una franja de acento **morado**
-muy reconocible (no solo verde+azul), el fondo de página es gris-lavanda
-claro (no blanco puro, las tarjetas sí son blancas), y hay una barra
-utilitaria oscura por encima de la navegación. Tokens actualizados en
-`static/css/scoutly.css`:
-
-- Verde `#0CBB4E` — acción primaria (botones, CTA) y señal positiva
-  (indicador de compatibilidad de match). Es, de hecho, el color real del
-  botón "Crear cuenta" de Magneto.
-- Morado `#9140FE` — acento de marca Magneto: franja utilitaria, estados
-  activos (pestaña/pill de filtro seleccionado), foco de campos. Con
-  moderación, nunca como fondo dominante ni en botones de acción.
-- Azul marino `#1A324C` — autoridad: texto, headers, footer, botones de
-  acción secundaria ("Aplicar" en Magneto usa este mismo tono).
-- Gris-lavanda `#F5F5F9` — fondo de página (antes blanco plano).
-  Blanco `#FFFFFF` — tarjetas, listados, navegación.
-- Carbón `#2D3033` — barra utilitaria superior.
-
-## Desarrollo local
+Requisitos: Python 3.14, Podman y Chrome (para la ingesta de Magneto).
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-cp .env.example .env   # y pon una DJANGO_SECRET_KEY propia (instrucciones dentro)
+python3.14 -m venv .venv && .venv/bin/pip install -r requirements.txt -r requirements-dev.txt
+cp .env.example .env              # y llena DJANGO_SECRET_KEY y la base (ver los comentarios del archivo)
+infra/postgres/levantar.sh        # Postgres 17 + pgvector en 127.0.0.1:5433
 .venv/bin/python manage.py migrate
-.venv/bin/python manage.py seed_vacantes
-.venv/bin/python manage.py runserver --insecure 3000
+.venv/bin/python manage.py ingerir_vacantes --fuente magneto     # o --fuente fixture, sin red
+.venv/bin/python manage.py runserver --insecure                   # http://localhost:8000
+.venv/bin/python manage.py decidir --escuchar                     # otra terminal: el batch
 ```
 
-Abre [http://localhost:3000](http://localhost:3000).
+Opcional, en el `.env`:
+- SMTP (`DJANGO_EMAIL_BACKEND` y `EMAIL_*`) para que los correos de verificación y los avisos lleguen de verdad. Sin
+  SMTP salen por la consola. Los avisos van al correo verificado de la cuenta, no al que aparece en el CV.
+- `N8N_SCORING_TOKEN` para n8n: ver [`n8n/README.md`](n8n/README.md).
+- `GROQ_API_KEY` para "Explícamelo". Sin ella se muestra un texto de respaldo.
+- `SOCIAL_*` para entrar con Google, Microsoft, LinkedIn o Facebook: ver
+  [`docs/cuentas-sociales.md`](docs/cuentas-sociales.md).
+- `SCOUTLY_CONTACTO_DATOS`: el correo del responsable de los datos personales.
 
-### El decisor (v3)
+**B1 (el MCP oficial de candidatos de Magneto) está construido pero apagado** (`SCOUTLY_MAGNETO_MCP`). Se enciende
+solo después de que el equipo revise los términos de uso de Magneto.
 
-Requiere el Postgres de `infra/postgres/levantar.sh` y `.venv/bin/pip install -r requirements-dev.txt`. El modelo
-MiniLM se descarga solo la primera vez, en `~/.cache/scoutly-modelos`.
+## Comandos
+
+| Comando | Para qué |
+|---|---|
+| `manage.py ingerir_vacantes --fuente magneto\|fixture` | Trae vacantes. Solo reprocesa las que cambiaron. |
+| `manage.py decidir --todos\|--pendientes\|--escuchar` | Corre el decisor (el batch). |
+| `manage.py evaluar_decisor --mitad ajuste\|prueba_1\|prueba` | Exactitud contra el set etiquetado. |
+| `manage.py benchmark_escala --salida …` | Benchmark de 120.000 vacantes (solo en una base `*_bench`). |
+| `manage.py evaluacion_ciega preparar\|tabular` | Materiales y resultados de la evaluación con reclutadores. |
+
+## Pruebas
 
 ```bash
-.venv/bin/python manage.py ingerir_vacantes --fuente magneto --terminos "analista de datos" --por-termino 10
-.venv/bin/python manage.py decidir --escuchar      # en otra terminal: atiende a quien carga su CV
-.venv/bin/python manage.py runserver --insecure 3000
+.venv/bin/python -m pytest -q -m "not lento"   # 465 pruebas; los fakes reemplazan modelos, Groq y Magneto
+.venv/bin/python -m pytest -q -m lento         # las que cargan modelos reales o abren magneto365.com
 ```
 
-- `decidir --todos` recalcula las decisiones de todos los perfiles; `--pendientes` atiende la cola una vez.
-- `evaluar_decisor --mitad ajuste [--barrido]` mide el decisor contra el set etiquetado (`docs/fase2/EVALUACION.md`).
-- El reranker es opcional: con GPU, pon `SCOUTLY_RERANKER=bge` en `.env`.
+## Lo que hay que saber antes de usarlo
 
-DEBUG está apagado por defecto, así que el CSS se sirve con `--insecure`. Para depurar en local
-pon `DJANGO_DEBUG=true` en `.env`, pero nunca con el túnel abierto. Tests: `.venv/bin/python manage.py test`.
+Los detalles están en [`docs/fase4/EVALUACION.md`](docs/fase4/EVALUACION.md).
 
-No hay despliegue configurado todavía; eso queda para una etapa posterior.
+- **Como filtro, es confiable:** en 52 pares nunca vistos acertó los 14 DESCARTAR, y en la prueba final no descartó
+  ninguna vacante que valiera la pena.
+- **Distinguir entre Postular, Ajustar CV y Cerrar brecha no lo es:** la exactitud global en vacantes nuevas fue 50%,
+  por debajo del 70% que se fijó como meta. Esas tres acciones son orientativas.
+- **El Taller de CV puede proponer emparejamientos sin sentido.** El candidato debe aceptar solo lo que sea verdad
+  ([`docs/fase4/VERIFICACION.md`](docs/fase4/VERIFICACION.md)).
+- **Las etiquetas del set de evaluación las propuso el equipo de desarrollo** y están pendientes de revisión.
+
+## Historia
+
+- **Sprint 1:** la entrega congelada vive en [`entregas/sprint-1/`](entregas/sprint-1/), en el tag `sprint-1` y en
+  [`ENTREGA_SPRINT1.md`](ENTREGA_SPRINT1.md).
+- **Sprint 2 (v2):** ranking por 5 criterios y una llamada a Groq por vacante. El tag `pre-sprint3-rebuild` marca su
+  final; el README de entonces está en el historial de git.
+- **Sprint 3 (v3):** esta reescritura.
+  - Diseño: [`docs/superpowers/specs/2026-11-01-scoutly-v3-decisor-design.md`](docs/superpowers/specs/2026-11-01-scoutly-v3-decisor-design.md).
+  - Planes por fase: [`docs/superpowers/plans/`](docs/superpowers/plans/).
