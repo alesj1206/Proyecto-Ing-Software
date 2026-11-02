@@ -82,6 +82,11 @@ arreglaron.
 - **Las pruebas de la cadena fijan su propia política** (con banda parcial y sin fusión), porque la vigente nunca
   produce AJUSTAR_CV. *Costo:* ninguno; la política vigente tiene sus propias pruebas.
 
+- **(usuario)** Las decisiones que no cambiaron no se reescriben.
+  - Una huella del contenido decide cuáles escribir.
+  - `fecha_decision` pasa a significar "última escritura".
+  - *Costo:* si se agrega un campo a `Decision`, entra solo en la huella y fuerza una reescritura completa, una vez.
+
 ## Pendientes menores (no se arreglaron)
 
 - **Evaluación ciega:**

@@ -143,3 +143,39 @@ def test_reranker_solo_reordena_la_primera_pagina(usuario, db):
     decidir_para_perfil(perfil, E, OrdenConReranker(ReordenadorFalso()), politica=TODAS)
     con_relevancia = Decision.objects.filter(perfil=perfil, relevancia__isnull=False)
     assert con_relevancia.count() == 20
+
+
+# --- no reescribir lo que no cambió (docs/exploracion/2026-11-02-eficiencia.md, propuesta 1) -------------------------
+
+def _escrituras(perfil):
+    return dict(Decision.objects.filter(perfil=perfil).values_list("vacante_id", "fecha_decision"))
+
+
+def test_redecidir_sin_cambios_no_reescribe_ninguna_decision(usuario, catalogo):
+    perfil = _perfil(usuario)
+    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, E, politica=TODAS)  # deja accion_anterior igual a la acción
+    antes = _escrituras(perfil)
+    decidir_para_perfil(perfil, E, politica=TODAS)
+    assert _escrituras(perfil) == antes
+
+
+def test_solo_se_reescribe_la_decision_que_cambio(usuario, catalogo):
+    perfil = _perfil(usuario)
+    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, E, politica=TODAS)
+    antes = _escrituras(perfil)
+    EvidenciaPerfil.objects.create(perfil=perfil, texto="Docker Kubernetes despliegue", seccion="experiencia", posicion=9)
+    decidir_para_perfil(perfil, E, politica=TODAS)
+    despues = _escrituras(perfil)
+    assert despues["vbrecha"] > antes["vbrecha"]
+    assert Decision.objects.get(perfil=perfil, vacante_id="vbrecha").accion == "POSTULAR"
+
+
+def test_un_cambio_de_contenido_sin_cambio_de_accion_se_reescribe(usuario, catalogo):
+    from dataclasses import replace
+
+    perfil = _perfil(usuario)
+    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, E, politica=replace(TODAS, version="otra"))
+    assert set(Decision.objects.filter(perfil=perfil).values_list("version_politica", flat=True)) == {"otra"}

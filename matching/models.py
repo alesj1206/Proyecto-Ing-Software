@@ -25,7 +25,8 @@ class Decision(models.Model):
     orden = models.FloatField(default=0)
     cobertura = models.JSONField(default=list)  # [{texto, tipo, origen, estado, similitud, evidencia}]
     restricciones = models.JSONField(default=list)  # [{criterio, estado, motivo}]
-    fecha_decision = models.DateTimeField(auto_now=True)
+    fecha_decision = models.DateTimeField(auto_now=True)  # la última vez que se escribió: lo que no cambia no se reescribe
+    huella = models.CharField(max_length=64, blank=True, default="")  # sha256 del contenido (services.huella)
     version_politica = models.CharField(max_length=20)
 
     class Meta:

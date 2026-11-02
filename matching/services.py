@@ -1,12 +1,13 @@
 """Fachada del decisor (spec §7.2): `decidir_para_perfil` es la única puerta que usan el batch y la API."""
 
+import hashlib
+import json
 import time
-
-import numpy as np
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
 
+import numpy as np
 from django.db import transaction
 from django.utils import timezone
 
@@ -91,16 +92,35 @@ def _mercado(decisiones: list[Decision]) -> dict:
             "salario_max": max(maximos, default=None), "empresas": [list(e) for e in empresas]}
 
 
+# Lo que no entra en la huella: claves, la fecha de escritura y lo que se deriva de la decisión anterior.
+FUERA_DE_HUELLA = {"id", "perfil", "vacante", "fecha_decision", "accion_anterior", "cambio_en", "huella"}
+
+
+def huella(decision: Decision) -> str:
+    """sha256 del contenido de la decisión: si es igual a la guardada, no hace falta reescribirla."""
+    valores = [(f.name, getattr(decision, f.attname)) for f in Decision._meta.concrete_fields
+               if f.name not in FUERA_DE_HUELLA]
+    return hashlib.sha256(json.dumps(valores, sort_keys=True, default=str, ensure_ascii=False).encode()).hexdigest()
+
+
 def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date, ocultas: int, inicio) -> None:
-    anteriores = {v: (a, c) for v, a, c in Decision.objects.filter(perfil=perfil)
-                  .values_list("vacante_id", "accion", "cambio_en")}
+    anteriores = {v: (a, c, aa, h) for v, a, c, aa, h in Decision.objects.filter(perfil=perfil)
+                  .values_list("vacante_id", "accion", "cambio_en", "accion_anterior", "huella")}
+    cambiadas = []
     for d in decisiones:
-        accion_previa, cambio_previo = anteriores.get(d.vacante_id, (NUEVA, None))
+        accion_previa, cambio_previo, anterior_guardada, huella_guardada = anteriores.get(d.vacante_id,
+                                                                                         (NUEVA, None, None, None))
         d.accion_anterior = accion_previa
         d.cambio_en = cambio_previo if accion_previa == d.accion and cambio_previo else inicio
+        d.huella = huella(d)
+        # Una corrida diaria repite casi todas las decisiones de ayer: escribir solo las que cambiaron ahorra el upsert
+        # de ~3.000 filas con JSON. Una que acaba de cambiar se escribe una vez más, para que accion_anterior alcance
+        # a la acción (las notificaciones dependen de eso).
+        if (d.huella, d.accion_anterior, d.cambio_en) != (huella_guardada, anterior_guardada, cambio_previo):
+            cambiadas.append(d)
     Decision.objects.filter(perfil=perfil).exclude(vacante_id__in=[d.vacante_id for d in decisiones]).delete()
     campos = [f.name for f in Decision._meta.concrete_fields if f.name not in ("id", "perfil", "vacante")]
-    Decision.objects.bulk_create(decisiones, update_conflicts=True, unique_fields=["perfil", "vacante"],
+    Decision.objects.bulk_create(cambiadas, update_conflicts=True, unique_fields=["perfil", "vacante"],
                                  update_fields=campos)
     top = {}
     for accion in Accion.values:

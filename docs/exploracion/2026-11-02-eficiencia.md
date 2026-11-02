@@ -43,12 +43,7 @@ pero es un número indicativo, sin el hardware descrito.
 
 ## Propuestas que quedan (no implementadas)
 
-1. **No reescribir las decisiones que no cambiaron.**
-   - Guardar las 3.000 decisiones (un upsert con JSON) se lleva ~1,1 s de los ~3,5 s perfilados.
-   - Con una corrida diaria, casi todas son iguales a las de ayer: bastaría escribir solo las que cambiaron.
-   - Hay que decidir qué significa entonces `fecha_decision`.
-   - Las bibliotecas basadas en COPY ([django-bulk-load](https://pypi.org/project/django-bulk-load)) solo ganan con
-     decenas de miles de filas, así que con 3.000 por candidato no valen la pena.
+1. *(Implementada, ver abajo.)*
 2. **Guardar en la vacante si es de prácticas,** calculado en la ingesta, en vez de revisarlo para cada candidato.
 3. **Memoria persistente de embeddings por hash del texto.** Un cambio de reglas de extracción re-embebe todo el
    catálogo, aunque la mayoría de los textos ya se hayan embebido antes.
@@ -65,6 +60,22 @@ pero es un número indicativo, sin el hardware descrito.
    - Sus autores dicen que es hasta 500× más rápido, pero rinde ~91% de LaBSE en MTEB, según sus propios números
      ([model card](https://huggingface.co/minishlab/potion-multilingual-128m)).
    - Podría ser un pre-filtro antes de MiniLM, pero hoy la preselección no es el cuello de botella: no se recomienda.
+
+## No reescribir las decisiones que no cambiaron (implementada después, a pedido del usuario)
+
+- **Huella del contenido.** Cada `Decision` guarda una (`huella`, sha256, migración `matching/0007`). En la siguiente
+  corrida solo se escriben las decisiones cuya huella, `accion_anterior` o `cambio_en` cambiaron.
+- **Una decisión que acaba de cambiar se escribe una vez más,** para que `accion_anterior` alcance a la acción. Así
+  las notificaciones se comportan igual que antes.
+- **`fecha_decision` pasa a ser "la última vez que se escribió".** No lo usa ningún código.
+- **Medido en `scoutly_bench`** (3 candidatos, 3.000 vacantes cada uno, con mpnet):
+
+| Corrida | Segundos por candidato |
+|---|---|
+| Primera, escribe todo | 2,16 / 2,53 / 2,50 |
+| Siguiente, sin cambios | 1,54 / 1,77 / 1,77 |
+
+  Son ~0,7 s menos por candidato, cerca de un 30%.
 
 ## Benchmark de escala con mpnet
 
