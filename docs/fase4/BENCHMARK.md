@@ -43,3 +43,22 @@
   las mediciones son las de la Fase 0 (`spike/fase0/REPORTE.md`).
 - Se reproduce con `DJANGO_DB_NAME=scoutly_bench SCOUTLY_EMBEDDER=fastembed manage.py benchmark_escala --salida …`,
   sobre una base aparte que termina en `_bench`. El comando se niega a correr sobre cualquier otra.
+
+## Con mpnet (política 2026-11-05.1, 2026-11-02)
+
+Se repitió el benchmark después de adoptar mpnet para la cobertura (spec §13.6), con la memoria de `normalizar` y la
+deduplicación por lote (`docs/exploracion/2026-11-02-eficiencia.md`). Es la misma máquina y el mismo comando.
+
+| etapa | MiniLM (Fase 4) | MiniLM + mpnet | umbral §6 | cumple |
+|---|---:|---:|---:|---|
+| Delta diario (min, 3.000 vacantes, medido) | 1,50 | 4,32 | 15 | sí |
+| Carga inicial de 120.000 (h, proyectada) | 1,00 | 2,88 | 8 | sí |
+| Carga masiva de 117.000 (min, embeddings reutilizados) | 13,08 | 18,62 | — | — |
+| Decisión por candidato, mediana (s, 11 CVs) | 2,92 | 2,29 | 5 | sí |
+| Decisión por candidato, peor caso (s) | 4,79 | 3,51 | 5 | sí |
+
+- **Embeber cuesta ~2,9 veces más**, porque cada vacante pasa por dos modelos. La deduplicación compensa una parte;
+  sin ella se esperaba ~4 veces más.
+- **Decidir es más rápido que antes**, aunque mpnet usa matrices de 768 dimensiones: la memoria de `normalizar` pesa
+  más que el costo extra de la multiplicación.
+- El catálogo sintético repite textos más que uno real. La deduplicación podría rendir menos con vacantes reales.
