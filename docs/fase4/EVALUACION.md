@@ -22,6 +22,33 @@ mitad de ajuste. Los números de la prueba son los que valen, y **no se tocó na
 DESCARTAR acierta el 100% (8 de 8). Los errores están en distinguir POSTULAR, AJUSTAR_CV y CERRAR_BRECHA entre sí, y
 en SIN_DATOS (0 de 3).
 
+## Después de las correcciones: prueba nueva (24 vacantes nunca vistas)
+
+Se corrigieron las causas generales del diagnóstico de abajo, se validó solo con lo ya visto y se midió **una vez**
+con una prueba nueva.
+
+| | Prueba 1 (46%, antes de corregir) | **Prueba nueva (después)** |
+|---|---|---|
+| Exactitud del decisor | 46% | **50%** |
+| Línea base: similitud pura | 23% | 23% |
+| Línea base: clase mayoritaria | 31% | 27% |
+| DESCARTAR acertado | 8 de 8 | **6 de 6** |
+| Algo que valía la pena, descartado por error | 3 | **0** |
+
+**El anti-objetivo de 70% sigue sin cumplirse.** Las correcciones subieron la cifra sobre lo visto (73%), pero en
+vacantes nuevas casi no la movieron: eso confirma que la diferencia venía de ajustar mirando los errores.
+
+**Lo que sí funciona, medido en vacantes nunca vistas:** como filtro "vale la pena / no vale la pena", el decisor
+acierta las 14 DESCARTAR de las dos pruebas y, en la prueba nueva, no descarta ninguna vacante que la persona habría
+considerado. Ese es el rol de pre-filtro barato que motivó el proyecto: lo cumple.
+
+**Lo que no funciona:** distinguir entre POSTULAR, AJUSTAR_CV y CERRAR_BRECHA (7 de 17 en la prueba nueva), y
+SIN_DATOS (0 de 6 entre las dos pruebas). Con MiniLM, "parcial" contra "cubierto" contra "faltante" depende de
+diferencias de similitud de pocas centésimas, y eso no generaliza.
+
+Para referencia (no es una cifra para reportar como logro): si POSTULAR y AJUSTAR_CV fueran una sola acción
+("postúlate, y aquí tienes qué resaltar"), la prueba nueva daría 69%.
+
 ## Por qué falla (diagnóstico de los 14 errores, sin cambiar nada)
 
 1. **Pies de página de Magneto tomados como obligatorios (3 errores).** Bloques como "Otras habilidades / Habilidades
@@ -117,4 +144,46 @@ Errores:
 - habilidad_nombrada_distinto × mag-1115173: esperada AJUSTAR_CV, predicha CERRAR_BRECHA (similitud 0.79)
 - experiencia_implicita_y_datos_incompletos × mag-1108121: esperada AJUSTAR_CV, predicha POSTULAR (similitud 0.67)
 - sin_experiencia_practicante × mag-1120958: esperada SIN_DATOS, predicha DESCARTAR (similitud 0.25)
+
+
+## Después de las correcciones (política 2026-11-04.2, congelada en ca8ba60; etiquetas de la prueba nueva en 67db712)
+
+### Mitad de prueba — política 2026-11-04.2
+
+- pares: 26
+- exactitud del decisor: 50%
+- línea base (similitud pura): 23%
+- clase mayoritaria: 27%
+- distribución predicha: POSTULAR 7, AJUSTAR_CV 8, CERRAR_BRECHA 5, DESCARTAR 6
+
+| acción esperada | acierto |
+|---|---:|
+| POSTULAR | 33% |
+| AJUSTAR_CV | 50% |
+| CERRAR_BRECHA | 43% |
+| DESCARTAR | 100% |
+| SIN_DATOS | 0% |
+
+| esperada \ predicha | POSTULAR | AJUSTAR_CV | CERRAR_BRECHA | DESCARTAR |
+|---|---:|---:|---:|---:|
+| POSTULAR | 2 | 3 | 1 | 0 |
+| AJUSTAR_CV | 2 | 2 | 0 | 0 |
+| CERRAR_BRECHA | 3 | 1 | 3 | 0 |
+| DESCARTAR | 0 | 0 | 0 | 6 |
+| SIN_DATOS | 0 | 2 | 1 | 0 |
+
+Errores:
+- asesora_comercial × mag-1121530: esperada POSTULAR, predicha CERRAR_BRECHA (similitud 0.60)
+- auxiliar_enfermeria × mag-1118625: esperada POSTULAR, predicha AJUSTAR_CV (similitud 0.76)
+- auxiliar_enfermeria × mag-1101647: esperada POSTULAR, predicha AJUSTAR_CV (similitud 0.76)
+- operario_produccion × mag-1119278: esperada POSTULAR, predicha AJUSTAR_CV (similitud 0.65)
+- datos_junior × mag-1105803: esperada AJUSTAR_CV, predicha POSTULAR (similitud 0.75)
+- habilidad_nombrada_distinto × mag-929661: esperada AJUSTAR_CV, predicha POSTULAR (similitud 0.82)
+- sin_experiencia_practicante × mag-1121305: esperada CERRAR_BRECHA, predicha POSTULAR (similitud 0.52)
+- operario_produccion × mag-1121512: esperada CERRAR_BRECHA, predicha POSTULAR (similitud 0.75)
+- auxiliar_enfermeria × mag-1120506: esperada CERRAR_BRECHA, predicha AJUSTAR_CV (similitud 0.53)
+- datos_junior × mag-1120022: esperada CERRAR_BRECHA, predicha POSTULAR (similitud 0.71)
+- sin_experiencia_practicante × mag-1008663: esperada SIN_DATOS, predicha AJUSTAR_CV (similitud 0.44)
+- experiencia_implicita_y_datos_incompletos × mag-1072923: esperada SIN_DATOS, predicha CERRAR_BRECHA (similitud 0.46)
+- disenadora_junior × mag-1051473: esperada SIN_DATOS, predicha AJUSTAR_CV (similitud 0.57)
 
