@@ -62,6 +62,20 @@ Aun con la fusión, 48% en vacantes nuevas sigue lejos del 70%.
   que solo se probó sobre lo visto: sin fusión gana 4 puntos, con fusión no cambia nada. No compensa gastar otra prueba
   nueva en ella.
 
+## ¿Le gana un clasificador aprendido a las reglas?
+
+`mejoras/exp_aprendido.py` entrena una regresión logística multinomial (numpy) sobre las mismas señales que usa el
+decisor: cobertura, similitud, restricciones y legibilidad. Se hizo validación cruzada por set: entrena con tres sets y
+evalúa en el que no vio. Son 101 pares.
+
+| | Reglas (5 acciones) | Aprendido (5) | Reglas con fusión | Aprendido con fusión |
+|---|---|---|---|---|
+| Total (101 pares) | 56% | 54% | 69% | 67% |
+| `prueba_2` | 36% | 40% | 48% | 48% |
+
+**Empatan.** El cuello de botella no es la lógica de decisión (reglas o modelo), sino la señal de cobertura que da
+MiniLM. Aprender umbrales o pesos de estos datos no la mejora. Por eso la recomendación 4 se matiza más abajo.
+
 ## Por qué falla, en el fondo (de los errores de `prueba_2`)
 
 1. **MiniLM mide parecido de tema, no si la persona sabe hacer algo.**
@@ -130,9 +144,14 @@ escrito. Así el Taller conserva su valor (recordar qué hacer explícito) sin e
    - una orientación ("te falta X"), pero no una clasificación fina confiable.
 
    Ningún ajuste de reglas o umbrales probado esta noche cambia eso.
-4. **Calibrar con datos reales:** `ResultadoDecision` ya guarda los insumos de cada decisión cuando una postulación
-   pasa a Entrevista o Descartado. Con unos cientos de casos se puede ajustar una regresión logística sobre esas
-   señales. Es el camino con más chances de pasar el 70%, y no requiere LLM.
+4. **Mejorar la señal antes que la lógica:** un clasificador aprendido sobre las señales actuales empata con las
+   reglas, así que calibrar con resultados reales (`ResultadoDecision`) solo ayudará si cambia la señal.
+   - **Modelos:** lo más prometedor es un modelo de embeddings más fuerte para pares requisito/evidencia (por ejemplo,
+     multilingual-e5 o bge-m3 con la GPU funcionando).
+   - **Reconocimiento de herramientas:** detectar las herramientas y títulos que pide la vacante y comprobar si
+     aparecen en el CV.
+   - **Dónde sí sirven los datos reales:** para saber qué acciones llevan de verdad a entrevistas, no para afinar
+     umbrales.
 5. **Filtros de ruido** (hashtags, frases de cultura, "no se requiere"): mejoras pequeñas. Conviene hacerlas junto con
    el punto 4, para medirlas con datos reales.
 

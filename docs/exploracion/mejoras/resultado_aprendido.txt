@@ -1,0 +1,14 @@
+
+5 acciones:  set (n) | reglas | aprendido
+  ajuste    (26) |   69% |   65%
+  prueba_1  (26) |   73% |   69%
+  prueba    (24) |   46% |   42%
+  prueba_2  (25) |   36% |   40%
+  total     (101) |   56% |   54%
+
+fusión:  set (n) | reglas | aprendido
+  ajuste    (26) |   81% |   81%
+  prueba_1  (26) |   81% |   77%
+  prueba    (24) |   67% |   62%
+  prueba_2  (25) |   48% |   48%
+  total     (101) |   69% |   67%
