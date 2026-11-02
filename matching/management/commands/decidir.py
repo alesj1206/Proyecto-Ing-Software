@@ -1,14 +1,17 @@
 import logging
+import subprocess
+import sys
 import time
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from cuentas.models import Perfil
 from matching.ia import obtener_embedder, obtener_embedder_cobertura, obtener_reordenador
 from matching.models import SolicitudDecision
 from matching.orden import OrdenConReranker, OrdenSimilitudCobertura
 from matching.services import decidir_para_perfil
-from matching.vectores import embeber_vacantes
+from matching.vectores import embeber_vacantes, embeber_vacantes_si_libre
 
 PAUSA_ESCUCHA_S = 5
 MAX_INTENTOS = 3  # tras 3 fallos el perfil sale de la cola (queda en el log) para no bloquear a nadie
@@ -23,8 +26,17 @@ class Command(BaseCommand):
         modo.add_argument("--todos", action="store_true", help="todos los perfiles con hoja de vida")
         modo.add_argument("--pendientes", action="store_true", help="solo los perfiles en cola")
         modo.add_argument("--escuchar", action="store_true", help="atender la cola cada 5 s hasta Ctrl+C")
+        parser.add_argument("--procesos", type=int, default=1,
+                            help="con --escuchar: cuántos procesos atienden la cola en paralelo (cada uno carga los "
+                                 "modelos, ~2 GB de RAM)")
 
-    def handle(self, *args, todos, pendientes, escuchar, **options):
+    def handle(self, *args, todos, pendientes, escuchar, procesos=1, **options):
+        if procesos < 1:
+            raise CommandError("--procesos debe ser al menos 1.")
+        if procesos > 1:
+            if not escuchar:
+                raise CommandError("--procesos solo sirve con --escuchar.")
+            return self._lanzar(procesos)
         self.embedder, self.cobertura = obtener_embedder(), obtener_embedder_cobertura()
         reordenador = obtener_reordenador()
         self.ordenador = OrdenConReranker(reordenador) if reordenador else OrdenSimilitudCobertura()
@@ -44,9 +56,34 @@ class Command(BaseCommand):
             except KeyboardInterrupt:
                 self.stdout.write("Listo.")
 
+    def _lanzar(self, procesos: int):
+        """N procesos `decidir --escuchar` independientes: se reparten la cola sin pisarse (ver `_atender_cola`)."""
+        hijos = [subprocess.Popen([sys.executable, "-m", "django", "decidir", "--escuchar"]) for _ in range(procesos)]
+        self.stdout.write(f"{procesos} procesos escuchando la cola (Ctrl+C para salir)…")
+        try:
+            for hijo in hijos:
+                hijo.wait()
+        except KeyboardInterrupt:  # Ctrl+C llega a todo el grupo; se espera a que cada hijo termine
+            for hijo in hijos:
+                hijo.wait()
+            self.stdout.write("Listo.")
+
     def _atender_cola(self):
-        ids = SolicitudDecision.objects.values_list("perfil_id", flat=True)
-        self._decidir(Perfil.objects.filter(id__in=list(ids)))
+        """Toma los perfiles de la cola de a uno, con `SELECT … FOR UPDATE SKIP LOCKED`: otro proceso que escucha no ve
+        los que este ya tomó, y si este muere, Postgres suelta el candado y el perfil vuelve a la cola."""
+        embebidas = embeber_vacantes_si_libre(self.embedder, cobertura=self.cobertura)
+        if embebidas:
+            self.stdout.write(f"vacantes embebidas: {embebidas}")
+        vistos, decididos = [], 0
+        while True:
+            with transaction.atomic():
+                solicitud = (SolicitudDecision.objects.select_for_update(skip_locked=True).select_related("perfil")
+                             .exclude(perfil_id__in=vistos).order_by("creada_en").first())
+                if solicitud is None:
+                    break
+                vistos.append(solicitud.perfil_id)  # uno que falla no se reintenta en esta misma vuelta
+                decididos += self._decidir_uno(solicitud.perfil)
+        self._notificar(decididos)
 
     def _decidir(self, perfiles):
         perfiles = list(perfiles)
@@ -55,16 +92,20 @@ class Command(BaseCommand):
         embebidas = embeber_vacantes(self.embedder, cobertura=self.cobertura)
         if embebidas:
             self.stdout.write(f"vacantes embebidas: {embebidas}")
-        decididos = 0
-        for perfil in perfiles:
-            try:
+        self._notificar(sum(self._decidir_uno(perfil) for perfil in perfiles))
+
+    def _decidir_uno(self, perfil) -> bool:
+        try:
+            with transaction.atomic():  # si falla, se deshace solo lo de este perfil
                 r = decidir_para_perfil(perfil, self.embedder, self.ordenador, cobertura=self.cobertura)
-            except Exception:  # un perfil que falla no detiene a los demás (revisión de seguridad, Fase 2)
-                log.exception("No se pudo decidir para el perfil %s", perfil.pk)
-                self._contar_fallo(perfil)
-                continue
-            decididos += 1
-            self.stdout.write(f"perfil {perfil.pk}: {r.relevantes} relevantes {r.por_accion} en {r.segundos:.2f} s")
+        except Exception:  # un perfil que falla no detiene a los demás (revisión de seguridad, Fase 2)
+            log.exception("No se pudo decidir para el perfil %s", perfil.pk)
+            self._contar_fallo(perfil)
+            return False
+        self.stdout.write(f"perfil {perfil.pk}: {r.relevantes} relevantes {r.por_accion} en {r.segundos:.2f} s")
+        return True
+
+    def _notificar(self, decididos: int):
         if decididos:  # n8n no espera al batch: las notificaciones salen en cuanto hay decisiones nuevas
             from notificaciones.services import generar_notificaciones
 

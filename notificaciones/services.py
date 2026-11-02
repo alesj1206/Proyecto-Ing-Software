@@ -14,6 +14,7 @@ from datetime import date, timedelta
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db import connection
 from django.db.models import Exists, OuterRef
 from django.utils import timezone
 
@@ -88,7 +89,21 @@ def _enviar_pendientes(perfil: Perfil, hoy: date, ahora) -> int:
     return correos
 
 
+CANDADO_NOTIFICACIONES = 731_002  # candado de aviso de Postgres
+
+
 def generar_notificaciones(hoy: date | None = None) -> ResumenNotificaciones:
+    """De a un proceso a la vez (los `decidir --escuchar` en paralelo y la API de n8n): dos corridas simultáneas verían
+    las mismas pendientes y enviarían el mismo correo dos veces. La segunda espera y luego no encuentra nada nuevo."""
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT pg_advisory_lock(%s)", [CANDADO_NOTIFICACIONES])
+        try:
+            return _generar(hoy)
+        finally:
+            cursor.execute("SELECT pg_advisory_unlock(%s)", [CANDADO_NOTIFICACIONES])
+
+
+def _generar(hoy: date | None) -> ResumenNotificaciones:
     ahora, hoy = timezone.now(), hoy or timezone.localdate()
     resumen = ResumenNotificaciones()
     perfiles = {}

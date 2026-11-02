@@ -77,6 +77,29 @@ pero es un número indicativo, sin el hardware descrito.
 
   Son ~0,7 s menos por candidato, cerca de un 30%.
 
+## Varios procesos atendiendo la cola (implementado a pedido del usuario)
+
+`decidir --escuchar --procesos N` lanza N procesos.
+
+- **Cada proceso toma un perfil a la vez** con `SELECT … FOR UPDATE SKIP LOCKED`, así que dos procesos nunca deciden el
+  mismo. Si uno muere, Postgres suelta el candado y el perfil vuelve a la cola.
+- **Un solo proceso embebe vacantes a la vez** (candado de aviso): los demás no repiten ese trabajo.
+- **`generar_notificaciones` también va de a un proceso** (candado de aviso), para no enviar dos veces el mismo
+  correo. El riesgo ya existía entre el batch y la API de n8n.
+- **Mientras un perfil se está decidiendo,** si la persona vuelve a subir el CV, la página espera a que termine
+  (~2 s), porque la fila de su solicitud está tomada.
+
+**Medido en `scoutly_bench`:** una cola de 11 candidatos con 3.000 vacantes cada uno, incluida la carga de modelos.
+
+| Procesos | Tiempo para vaciar la cola |
+|---|---|
+| 1 | 32,0 s |
+| 3 | 10,7 s |
+| 6 | 11,8 s |
+
+Con 6 no mejora: los modelos se cargan a la vez y los procesos compiten por la CPU y por la base. En este PC (20
+hilos, 31 GB) se recomiendan 3.
+
 ## Benchmark de escala con mpnet
 
 El detalle está en `docs/fase4/BENCHMARK.md` (sección "Con mpnet"). Se corrió con los tres cambios aplicados y todo

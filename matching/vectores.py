@@ -4,7 +4,7 @@ en la misma transacción que el vector (spec §13.1, P3 y P4)."""
 import hashlib
 
 import numpy as np
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import F, Q
 
 from cuentas.models import Perfil
@@ -85,6 +85,22 @@ def embeber_vacantes(embedder: Embedder, lote: int = 256, cobertura: Embedder | 
             Vacante.objects.bulk_update(vacantes, ["vector", "matriz_requisitos", "hash_embebido", "modelos_embebido"])
         total += len(vacantes)
     return total
+
+
+CANDADO_EMBEBIDO = 731_001  # candado de aviso de Postgres: un solo proceso embebe vacantes a la vez
+
+
+def embeber_vacantes_si_libre(embedder: Embedder, cobertura: Embedder | None = None) -> int | None:
+    """Como `embeber_vacantes`, salvo que otro proceso ya esté embebiendo: entonces devuelve None sin hacer nada (las
+    vacantes a medio embeber no entran a la preselección, y se deciden en la próxima corrida)."""
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT pg_try_advisory_lock(%s)", [CANDADO_EMBEBIDO])
+        if not cursor.fetchone()[0]:
+            return None
+        try:
+            return embeber_vacantes(embedder, cobertura=cobertura)
+        finally:
+            cursor.execute("SELECT pg_advisory_unlock(%s)", [CANDADO_EMBEBIDO])
 
 
 def embeber_perfil(perfil: Perfil, embedder: Embedder, textos: list[str] | None = None,

@@ -62,7 +62,7 @@ infra/postgres/levantar.sh        # Postgres 17 + pgvector en 127.0.0.1:5433
 .venv/bin/python manage.py migrate
 .venv/bin/python manage.py ingerir_vacantes --fuente magneto     # o --fuente fixture, sin red
 .venv/bin/python manage.py runserver --insecure                   # http://localhost:8000
-.venv/bin/python manage.py decidir --escuchar                     # otra terminal: el batch
+.venv/bin/python manage.py decidir --escuchar --procesos 3        # otra terminal: el batch (3 en paralelo)
 ```
 
 Opcional, en el `.env`:
@@ -82,7 +82,7 @@ solo después de que el equipo revise los términos de uso de Magneto.
 | Comando | Para qué |
 |---|---|
 | `manage.py ingerir_vacantes --fuente magneto\|fixture` | Trae vacantes. Solo reprocesa las que cambiaron. |
-| `manage.py decidir --todos\|--pendientes\|--escuchar` | Corre el decisor (el batch). |
+| `manage.py decidir --todos\|--pendientes\|--escuchar [--procesos N]` | Corre el decisor (el batch). Con `--procesos N`, N procesos se reparten la cola. Cada uno ocupa ~2 GB de RAM; en este PC, 3 rinden lo mismo que 6. |
 | `manage.py evaluar_decisor --mitad ajuste\|prueba_1\|prueba` | Exactitud contra el set etiquetado. |
 | `manage.py benchmark_escala --salida …` | Benchmark de 120.000 vacantes (solo en una base `*_bench`). |
 | `manage.py evaluacion_ciega preparar\|tabular` | Materiales y resultados de la evaluación con reclutadores. |
