@@ -58,14 +58,6 @@ pares:
      justificacion: "Analista de datos comerciales sin requisitos legibles"}
 
   # --- prueba (Fase 4) ----------------------------------------------------------------------------------
-  - {cv: bi_senior, vacante: mag-1115173, accion_esperada: DESCARTAR, mitad: prueba,
-     justificacion: "Ofrece $ 2.800.000 y su mínimo es $ 7.000.000"}
-  - {cv: bi_senior, vacante: mag-1113439, accion_esperada: DESCARTAR, mitad: prueba,
-     justificacion: "Le faltan Google Sheets/BigQuery, inglés e IA"}
-  - {cv: desarrollador_backend, vacante: mag-1111293, accion_esperada: DESCARTAR, mitad: prueba,
-     justificacion: "Deep learning y visión por computador: no es su perfil"}
-  - {cv: desarrollador_backend, vacante: mag-1090491, accion_esperada: DESCARTAR, mitad: prueba,
-     justificacion: "Power Platform, Python y analítica: le faltan tres obligatorios"}
   - {cv: auxiliar_contable, vacante: mag-1120818, accion_esperada: DESCARTAR, mitad: prueba,
      justificacion: "Cali, fuera de Bogotá"}
   - {cv: auxiliar_contable, vacante: mag-1120586, accion_esperada: DESCARTAR, mitad: prueba,
@@ -76,27 +68,47 @@ pares:
      justificacion: "Madrid (Cundinamarca), fuera de sus ciudades"}
   - {cv: asesora_comercial, vacante: mag-1121631, accion_esperada: DESCARTAR, mitad: prueba,
      justificacion: "Yopal, fuera de sus ciudades"}
-  - {cv: auxiliar_enfermeria, vacante: mag-1121594, accion_esperada: CERRAR_BRECHA, mitad: prueba,
-     justificacion: "Le falta experiencia en el sector educativo"}
-  - {cv: auxiliar_enfermeria, vacante: mag-1121542, accion_esperada: DESCARTAR, mitad: prueba,
-     justificacion: "Contabilidad: otra área"}
   - {cv: disenadora_junior, vacante: mag-1115168, accion_esperada: DESCARTAR, mitad: prueba,
      justificacion: "Marinilla, fuera de Medellín"}
-  - {cv: operario_produccion, vacante: mag-1120958, accion_esperada: DESCARTAR, mitad: prueba,
-     justificacion: "Medellín, fuera de Bogotá y Funza"}
-  - {cv: operario_produccion, vacante: mag-1121628, accion_esperada: DESCARTAR, mitad: prueba,
-     justificacion: "Ventas de cosmética: otra área"}
-  - {cv: habilidad_nombrada_distinto, vacante: mag-1082501, accion_esperada: CERRAR_BRECHA, mitad: prueba,
-     justificacion: "No tiene SQL ni MySQL"}
-  - {cv: habilidad_nombrada_distinto, vacante: mag-1090558, accion_esperada: AJUSTAR_CV, mitad: prueba,
-     justificacion: "Maneja hojas de cálculo y bases de datos: debe decir Excel avanzado y tablas dinámicas"}
-  - {cv: habilidad_nombrada_distinto, vacante: mag-1121594, accion_esperada: DESCARTAR, mitad: prueba,
-     justificacion: "Enfermería: otra área"}
   - {cv: experiencia_implicita_y_datos_incompletos, vacante: mag-1098812, accion_esperada: CERRAR_BRECHA, mitad: prueba,
      justificacion: "Le falta dominio de Excel avanzado"}
   - {cv: sin_experiencia_practicante, vacante: mag-1120768, accion_esperada: CERRAR_BRECHA, mitad: prueba,
      justificacion: "Envigado está en el área metropolitana de Medellín; le falta atención al usuario"}
   - {cv: datos_junior, vacante: mag-1120768, accion_esperada: DESCARTAR, mitad: prueba,
      justificacion: "Ofrece $ 1.810.000 y su mínimo es $ 2.500.000"}
-  - {cv: sin_experiencia_practicante, vacante: mag-1105646, accion_esperada: SIN_DATOS, mitad: prueba,
-     justificacion: "Sin requisitos legibles, en su ciudad"}
+  # --- prueba (Fase 4): rebalanceada con vacantes nuevas, etiquetada ANTES de correr el decisor -------
+  # PENDIENTE: el equipo debe revisarlas. Se quitaron los 12 pares de prueba cuya vacante también estaba en ajuste.
+  - {cv: datos_junior, vacante: mag-1073362, accion_esperada: POSTULAR, mitad: prueba,
+     justificacion: "Excel avanzado, Power BI, SQL y 2 años en análisis de datos en Bogotá: lo cubre todo (ETL es deseable)"}
+  - {cv: auxiliar_contable, vacante: mag-1119027, accion_esperada: POSTULAR, mitad: prueba,
+     justificacion: "Conciliaciones, Excel y tecnología en contabilidad en Bogotá; Odoo es deseable"}
+  - {cv: sin_experiencia_practicante, vacante: mag-1093888, accion_esperada: POSTULAR, mitad: prueba,
+     justificacion: "Práctica administrativa sin experiencia, pide Excel y Word; es estudiante y La Estrella es del área metropolitana de Medellín"}
+  - {cv: operario_produccion, vacante: mag-1121278, accion_esperada: POSTULAR, mitad: prueba,
+     justificacion: "Operación de maquinaria, manipulación de materiales y control visual de calidad en Bogotá: lo tiene todo"}
+  - {cv: auxiliar_enfermeria, vacante: mag-1053999, accion_esperada: POSTULAR, mitad: prueba,
+     justificacion: "Urgencias y hospitalización, RETHUS vigente, en Bogotá"}
+  - {cv: datos_junior, vacante: mag-1086437, accion_esperada: AJUSTAR_CV, mitad: prueba,
+     justificacion: "Tiene Power BI, Excel y reportes de ventas; debe hacer explícitos la estadística, la segmentación y el análisis comercial"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1117407, accion_esperada: AJUSTAR_CV, mitad: prueba,
+     justificacion: "Hace tableros e informes con hojas de cálculo: debe nombrar Power BI y Excel avanzado"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1086437, accion_esperada: AJUSTAR_CV, mitad: prueba,
+     justificacion: "Indicadores y tableros de ventas los tiene; debe decir Power BI y Excel avanzado y el análisis comercial"}
+  - {cv: operario_produccion, vacante: mag-1120888, accion_esperada: AJUSTAR_CV, mitad: prueba,
+     justificacion: "Planta de alimentos, BPM y maquinaria: debe hacer explícito el pesaje/dosificación y el manejo de equipos"}
+  - {cv: desarrollador_backend, vacante: mag-1009047, accion_esperada: CERRAR_BRECHA, mitad: prueba,
+     justificacion: "Java, MySQL y Git los tiene; le faltan RPG/ILE y DB2 (Barranquilla le sirve)"}
+  - {cv: auxiliar_enfermeria, vacante: mag-1121637, accion_esperada: CERRAR_BRECHA, mitad: prueba,
+     justificacion: "Es auxiliar de enfermería en Bogotá, pero le falta experiencia en autorizaciones y referencia/contrarreferencia"}
+  - {cv: habilidad_nombrada_distinto, vacante: mag-1073362, accion_esperada: CERRAR_BRECHA, mitad: prueba,
+     justificacion: "Le falta SQL; Excel y Power BI los tiene con otro nombre"}
+  - {cv: datos_junior, vacante: mag-1080652, accion_esperada: DESCARTAR, mitad: prueba,
+     justificacion: "Ofrece $ 2.331.000 y su mínimo es $ 2.500.000"}
+  - {cv: desarrollador_backend, vacante: mag-1109663, accion_esperada: DESCARTAR, mitad: prueba,
+     justificacion: "Le faltan ASO/APX, Control-M, OSGi, Spring Batch y Spark: más de tres obligatorios"}
+  - {cv: asesora_comercial, vacante: mag-1119927, accion_esperada: SIN_DATOS, mitad: prueba,
+     justificacion: "Ventas en Neiva/Ibagué, pero la vacante no dice qué pide: que la revise ella"}
+  - {cv: sin_experiencia_practicante, vacante: mag-1106225, accion_esperada: SIN_DATOS, mitad: prueba,
+     justificacion: "Administrativo en Medellín sin requisitos concretos: que la revise ella"}
+  - {cv: experiencia_implicita_y_datos_incompletos, vacante: mag-1106225, accion_esperada: SIN_DATOS, mitad: prueba,
+     justificacion: "Trabajo administrativo, pero la vacante no dice qué pide: que la revise él"}
