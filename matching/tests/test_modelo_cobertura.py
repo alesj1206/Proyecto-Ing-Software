@@ -44,7 +44,7 @@ def test_cambiar_el_modelo_de_cobertura_vuelve_a_embeber_el_perfil(usuario):
 
 def test_matrices_de_modelos_distintos_no_se_cruzan(usuario):
     """Una vacante embebida con el modelo viejo (384) y un perfil con el nuevo (768) no rompen la decisión: la
-    vacante se salta hasta la próxima ingesta, igual que una matriz desalineada."""
+    vacante no se decide hasta que se re-embeba (test_decidir: su decisión anterior se conserva)."""
     ingerir(FuenteEnMemoria([cruda("v1", "Requisitos:\n- SQL\n- Excel")]))
     embeber_vacantes(BUSQUEDA)
     perfil = guardar_perfil_desde_cv(usuario, pdf_cv())

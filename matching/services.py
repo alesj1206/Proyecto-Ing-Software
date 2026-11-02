@@ -9,6 +9,7 @@ from datetime import date
 
 import numpy as np
 from django.db import transaction
+from django.db.models import F, Q
 from django.utils import timezone
 
 from cuentas.models import Perfil
@@ -22,7 +23,7 @@ from .preseleccion import preseleccionar
 from .puertos import Embedder
 from .restricciones import RESTRICCIONES
 from .solidez import calcular_solidez
-from .vectores import de_bytes, embeber_perfil
+from .vectores import de_bytes, embeber_perfil, firma_modelos
 
 TOP_POR_ACCION_EN_FOTO = 10
 NUEVA = "NUEVA"  # accion_anterior de una vacante que recién entra al conjunto relevante (spec §5.7)
@@ -46,7 +47,7 @@ def _decision(perfil, vacante, similitud, evidencias, matriz_evid, politica) -> 
     requisitos = sorted(vacante.requisito_set.all(), key=lambda r: r.posicion)
     matriz_req = de_bytes(vacante.matriz_requisitos, len(requisitos))
     if matriz_req is None or matriz_evid is None:
-        return None  # vectores desalineados con el texto: se decide en la próxima corrida, ya re-embebida
+        return None  # vectores desalineados con el texto: se conserva la decisión anterior (_guardar)
     if len(matriz_req) and len(matriz_evid) and matriz_req.shape[1] != matriz_evid.shape[1]:
         return None  # embebidas con modelos distintos (por ejemplo, a mitad de un cambio de modelo)
     if not len(matriz_req):
@@ -103,7 +104,10 @@ def huella(decision: Decision) -> str:
     return hashlib.sha256(json.dumps(valores, sort_keys=True, default=str, ensure_ascii=False).encode()).hexdigest()
 
 
-def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date, ocultas: int, inicio) -> None:
+def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date, ocultas: int, inicio,
+            conservar: set[str] = frozenset()) -> None:
+    """`conservar`: vacantes que no se pudieron decidir por tener los vectores desactualizados; su decisión anterior
+    se deja tal cual (sin volver a "NUEVA", que las notificaría otra vez)."""
     anteriores = {v: (a, c, aa, h) for v, a, c, aa, h in Decision.objects.filter(perfil=perfil)
                   .values_list("vacante_id", "accion", "cambio_en", "accion_anterior", "huella")}
     cambiadas = []
@@ -118,7 +122,8 @@ def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date, ocultas: int
         # a la acción (las notificaciones dependen de eso).
         if (d.huella, d.accion_anterior, d.cambio_en) != (huella_guardada, anterior_guardada, cambio_previo):
             cambiadas.append(d)
-    Decision.objects.filter(perfil=perfil).exclude(vacante_id__in=[d.vacante_id for d in decisiones]).delete()
+    (Decision.objects.filter(perfil=perfil).exclude(vacante_id__in=[d.vacante_id for d in decisiones])
+     .exclude(vacante_id__in=conservar).delete())
     campos = [f.name for f in Decision._meta.concrete_fields if f.name not in ("id", "perfil", "vacante")]
     Decision.objects.bulk_create(cambiadas, update_conflicts=True, unique_fields=["perfil", "vacante"],
                                  update_fields=campos)
@@ -133,6 +138,14 @@ def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date, ocultas: int
     SolicitudDecision.objects.filter(perfil=perfil, creada_en__lte=inicio).delete()  # las nuevas se quedan
 
 
+def _con_vectores_viejos(perfil: Perfil, modelos: str) -> set[str]:
+    """Vacantes activas con decisión de este perfil cuyos vectores todavía no están al día (contenido o modelos): otro
+    proceso las está re-embebiendo. No entran a la preselección, pero tampoco se borra lo que ya se había decidido."""
+    al_dia = Q(vacante__hash_embebido=F("vacante__hash_contenido")) & Q(vacante__modelos_embebido=modelos)
+    return set(Decision.objects.filter(perfil=perfil, vacante__activa=True).exclude(al_dia)
+               .values_list("vacante_id", flat=True))
+
+
 def decidir_para_perfil(perfil: Perfil, embedder: Embedder, ordenador: Ordenador | None = None,
                         politica: Politica = POLITICA, hoy: date | None = None,
                         cobertura: Embedder | None = None) -> ResumenDecision:
@@ -140,14 +153,20 @@ def decidir_para_perfil(perfil: Perfil, embedder: Embedder, ordenador: Ordenador
     inicio, reloj = timezone.now(), time.perf_counter()
     evidencias = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))  # se leen una vez
     embeber_perfil(perfil, embedder, evidencias, cobertura)
-    preseleccion = preseleccionar(perfil, politica.tau_relevancia)
+    modelos = firma_modelos(embedder, cobertura)
+    preseleccion = preseleccionar(perfil, politica.tau_relevancia, modelos=modelos)
     similitudes = dict(preseleccion.relevantes)
     vacantes = Vacante.objects.filter(id__in=similitudes).prefetch_related("requisito_set")
     matriz_evid = de_bytes(perfil.matriz_evidencia, len(evidencias))
-    decisiones = [d for v in vacantes if (d := _decision(perfil, v, similitudes[v.id], evidencias, matriz_evid,
-                                                         politica))]
+    decisiones, saltadas = [], set()
+    for v in vacantes:
+        if d := _decision(perfil, v, similitudes[v.id], evidencias, matriz_evid, politica):
+            decisiones.append(d)
+        else:
+            saltadas.add(v.id)
     (ordenador or OrdenSimilitudCobertura()).ordenar(perfil, decisiones)
     with transaction.atomic():
-        _guardar(perfil, decisiones, hoy or timezone.localdate(), preseleccion.ocultas_por_modalidad, inicio)
+        _guardar(perfil, decisiones, hoy or timezone.localdate(), preseleccion.ocultas_por_modalidad, inicio,
+                 conservar=saltadas | _con_vectores_viejos(perfil, modelos))
     return ResumenDecision(len(decisiones), dict(Counter(d.accion for d in decisiones)),
                            preseleccion.ocultas_por_modalidad, time.perf_counter() - reloj)

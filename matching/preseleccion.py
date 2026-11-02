@@ -24,11 +24,14 @@ class Preseleccion:
     tope_alcanzado: bool = False
 
 
-def preseleccionar(perfil: Perfil, tau: float, tope: int = TOPE_TECNICO) -> Preseleccion:
+def preseleccionar(perfil: Perfil, tau: float, tope: int = TOPE_TECNICO, modelos: str | None = None) -> Preseleccion:
+    """`modelos` (vectores.firma_modelos): si se da, solo entran vacantes embebidas con esos modelos."""
     if perfil.vector is None:
         return Preseleccion()
-    # Solo vacantes con vectores al día: una re-ingesta posterior al embebido dejaría una matriz desalineada.
-    candidatas = (Vacante.objects.filter(activa=True, vector__isnull=False, hash_embebido=F("hash_contenido"))
+    # Solo vacantes con vectores al día: una re-ingesta posterior al embebido dejaría una matriz desalineada, y una
+    # vacante todavía embebida con otro modelo mezclaría espacios distintos.
+    al_dia = Vacante.objects.filter(activa=True, vector__isnull=False, hash_embebido=F("hash_contenido"))
+    candidatas = ((al_dia.filter(modelos_embebido=modelos) if modelos is not None else al_dia)
                   .annotate(distancia=CosineDistance("vector", perfil.vector))
                   .filter(distancia__lte=1 - tau))
     ocultas = 0

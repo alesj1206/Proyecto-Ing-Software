@@ -82,6 +82,13 @@ arreglaron.
 - **Las pruebas de la cadena fijan su propia política** (con banda parcial y sin fusión), porque la vigente nunca
   produce AJUSTAR_CV. *Costo:* ninguno; la política vigente tiene sus propias pruebas.
 
+- **Revisión independiente, hallazgo crítico (arreglado):**
+  - Una vacante con vectores desactualizados se saltaba y su decisión se borraba. Pasaba mientras otro proceso
+    re-embebía el catálogo, por ejemplo en el primer arranque con mpnet, y después volvía como "nueva" y se notificaba
+    otra vez.
+  - Ahora la decisión anterior se conserva tal cual.
+  - La preselección exige además que la vacante esté embebida con los modelos actuales.
+  - *Costo:* mientras dura el re-embebido, el candidato ve la decisión vieja de esas vacantes.
 - **(usuario)** Las decisiones que no cambiaron no se reescriben.
   - Una huella del contenido decide cuáles escribir.
   - `fecha_decision` pasa a significar "última escritura".

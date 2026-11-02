@@ -179,3 +179,26 @@ def test_un_cambio_de_contenido_sin_cambio_de_accion_se_reescribe(usuario, catal
     decidir_para_perfil(perfil, E, politica=TODAS)
     decidir_para_perfil(perfil, E, politica=replace(TODAS, version="otra"))
     assert set(Decision.objects.filter(perfil=perfil).values_list("version_politica", flat=True)) == {"otra"}
+
+
+# --- revisión independiente, hallazgo crítico: vacantes a medio re-embeber -------------------------------------------
+
+def test_vacantes_sin_reembeber_conservan_su_decision_y_no_se_notifican_otra_vez(usuario, catalogo):
+    """Un proceso decide mientras otro todavía re-embebe el catálogo con el modelo nuevo: las decisiones de esas
+    vacantes no se borran, y cuando vuelven no se notifican como nuevas."""
+    from django.utils import timezone
+
+    from notificaciones.services import _por_notificar, generar_notificaciones
+
+    nuevo = EmbedderFalso(768)
+    perfil = _perfil(usuario)
+    decidir_para_perfil(perfil, E, politica=TODAS)
+    generar_notificaciones()
+    antes = {v: (a, c) for v, a, c in Decision.objects.filter(perfil=perfil).values_list("vacante_id", "accion", "cambio_en")}
+    decidir_para_perfil(perfil, E, politica=TODAS, cobertura=nuevo)  # las vacantes siguen con el modelo viejo
+    durante = {v: (a, c) for v, a, c in Decision.objects.filter(perfil=perfil).values_list("vacante_id", "accion", "cambio_en")}
+    assert durante == antes
+    embeber_vacantes(E, cobertura=nuevo)
+    decidir_para_perfil(perfil, E, politica=TODAS, cobertura=nuevo)
+    assert not Decision.objects.filter(perfil=perfil, accion_anterior="NUEVA").exists()
+    assert not _por_notificar(timezone.now()).filter(perfil=perfil).exists()
