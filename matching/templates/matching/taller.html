@@ -8,38 +8,36 @@
   <p style="margin-top:0.5rem;color:var(--muted-foreground);">{{ vacante.empresa }}</p>
 
   <div class="form-error-box toast-info" style="margin-top:1.5rem;">
-    Solo acepta lo que sea verdad: estas sugerencias reformulan tu propia experiencia para que el reclutador vea en
-    segundos que cumples con esta vacante. Tu hoja de vida es tuya y debe ser verdadera.
+    Escribe solo lo que sea verdad: esta vacante pide cosas que tu hoja de vida no dice con claridad. Si las has hecho,
+    cuéntalo con tus palabras para que el reclutador lo vea en segundos. Tu hoja de vida es tuya y debe ser verdadera.
   </div>
 
   {% for s in sugerencias %}
   <div class="card" style="margin-top:1rem;">
-    {% if s.tipo == "requisito" %}
-      <p class="decision-insignia decision-ajustar_cv" style="margin-top:0;">Haz explícito: {{ s.requisito }}</p>
-      <p class="decision-evidencia" style="margin-top:0.6rem;">tu evidencia: «{{ s.evidencia }}»</p>
-    {% else %}
-      <p class="decision-insignia" style="margin-top:0;">Resumen para esta postulación</p>
-    {% endif %}
+    <p class="decision-insignia decision-ajustar_cv" style="margin-top:0;">Esta vacante pide: {{ s.requisito }}</p>
+    <p class="decision-evidencia" style="margin-top:0.6rem;">Pista: en tu hoja de vida dice «{{ s.evidencia }}»</p>
     <p style="margin-top:0.6rem;font-size:0.95rem;color:var(--navy);">{{ s.propuesta }}</p>
     {% if s.estado == "pendiente" %}
-    <div style="display:flex;gap:0.6rem;margin-top:0.9rem;">
-      <form method="post" action="{% url 'taller_responder' vacante.id s.id %}">{% csrf_token %}
-        <input type="hidden" name="acepta" value="1" /><button type="submit" class="btn btn-brand">Aceptar</button></form>
-      <form method="post" action="{% url 'taller_responder' vacante.id s.id %}">{% csrf_token %}
-        <input type="hidden" name="acepta" value="0" /><button type="submit" class="btn btn-outline">Rechazar</button></form>
-    </div>
+    <form method="post" action="{% url 'taller_responder' vacante.id s.id %}" style="margin-top:0.9rem;">{% csrf_token %}
+      <textarea name="respuesta" rows="3" maxlength="500" placeholder="Por ejemplo: en qué proyecto, con qué herramienta, qué lograste" style="width:100%;padding:0.75rem;border:1px solid var(--input);border-radius:var(--radius);font-family:var(--font-sans);"></textarea>
+      <div style="display:flex;gap:0.6rem;margin-top:0.6rem;">
+        <button type="submit" name="acepta" value="1" class="btn btn-brand">Agregar a mi postulación</button>
+        <button type="submit" name="acepta" value="0" class="btn btn-outline">No lo he hecho</button>
+      </div>
+    </form>
     {% else %}
-    <p class="decision-cubres">{{ s.get_estado_display }}{% if not s.vigente %} · ya no está respaldada por tu CV actual: no la uses{% endif %}</p>
+    {% if s.respuesta %}<p style="margin-top:0.6rem;font-size:0.95rem;">«{{ s.respuesta }}»</p>{% endif %}
+    <p class="decision-cubres">{{ s.get_estado_display }}{% if not s.vigente %} · esta vacante ya no lo pide así: revísalo antes de usarlo{% endif %}</p>
     {% endif %}
   </div>
   {% empty %}
-  <p style="margin-top:1.5rem;color:var(--muted-foreground);">No hay sugerencias: tu hoja de vida ya dice lo que esta vacante pide, o lo que falta no aparece en tu experiencia (míralo en tu plan de aprendizaje).</p>
+  <p style="margin-top:1.5rem;color:var(--muted-foreground);">No hay nada que preguntarte: tu hoja de vida ya dice lo que esta vacante pide, o lo que falta no aparece en tu experiencia (míralo en tu plan de aprendizaje).</p>
   {% endfor %}
 
   {% if texto %}
   <div class="card" style="margin-top:1.5rem;">
     <h3 style="font-size:0.95rem;color:var(--navy);">Texto para tu postulación</h3>
-    <p class="decision-evidencia">Cópialo en tu hoja de vida antes de postularte a esta vacante.</p>
+    <p class="decision-evidencia">Son tus propias palabras: cópialas en tu hoja de vida antes de postularte a esta vacante.</p>
     <textarea readonly rows="5" style="width:100%;margin-top:0.75rem;padding:0.75rem;border:1px solid var(--input);border-radius:var(--radius);font-family:var(--font-sans);">{{ texto }}</textarea>
   </div>
   {% endif %}

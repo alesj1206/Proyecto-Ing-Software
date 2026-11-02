@@ -2,6 +2,7 @@
 
 from datetime import date
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -81,7 +82,11 @@ def taller_view(request, vacante_id):
 def taller_responder_view(request, vacante_id, sugerencia_id):
     sugerencia = get_object_or_404(SugerenciaCV, id=sugerencia_id, vacante_id=vacante_id,
                                    perfil=perfil_con_cv(request.user))
-    taller_cv.responder(sugerencia, acepta=request.POST.get("acepta") == "1")
+    try:
+        taller_cv.responder(sugerencia, acepta=request.POST.get("acepta") == "1",
+                            respuesta=request.POST.get("respuesta", ""))
+    except ValueError as error:
+        messages.error(request, str(error))
     return redirect("taller", vacante_id=vacante_id)
 
 

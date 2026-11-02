@@ -52,3 +52,24 @@ def test_csv_mal_formado_da_error_claro(tmp_path, monkeypatch):
     clave.write_text(json.dumps({}), encoding="utf-8")
     with pytest.raises(CommandError, match="pregunta"):
         call_command("evaluacion_ciega", "tabular", respuestas=respuestas, clave=clave)
+
+
+def test_con_el_taller_guiado_no_hay_pregunta_de_cv(db, monkeypatch):
+    """El Taller guiado no genera texto: la pregunta 2 (CV con sugerencias) no se puede armar sola y se omite."""
+    import matching.evaluacion.ciega as ciega
+    from matching.models import Decision
+    from vacantes.models import Vacante
+    fuente = FuenteEnMemoria([cruda(f"v{i}", "Requisitos:\n- Reportes de ventas en Excel\n- Atención de clientes")
+                              for i in range(4)])
+    escenario = preparar(CVS, fuente, EmbedderFalso())
+    evidencia = escenario.perfiles["ana"].evidencias.first().texto
+
+    def decidir_con_un_ajustar(perfil, embedder):
+        Decision.objects.create(perfil=perfil, vacante=Vacante.objects.get(id="v0"), accion="AJUSTAR_CV",
+                                solidez="media", motivo_solidez="ok", motivos=[], similitud=0.8, cobertura_pct=50,
+                                version_politica="t", restricciones=[],
+                                cobertura=[{"texto": "Power BI", "tipo": "obligatorio", "origen": "texto",
+                                            "estado": "parcial", "similitud": 0.4, "evidencia": evidencia}])
+    monkeypatch.setattr(ciega, "decidir_para_perfil", decidir_con_un_ajustar)
+    paquetes, clave = preparar_ciega(escenario, CVS, ["ana"], EmbedderFalso(), semilla=1)
+    assert not paquetes[0].cvs and clave["1"]["tiene_cv"] is False

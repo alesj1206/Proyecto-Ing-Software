@@ -9,12 +9,10 @@ from dataclasses import dataclass, field
 
 from django.utils import timezone
 
-from matching.models import Decision
-from matching.politica import POLITICA, Accion
+from matching.politica import POLITICA
 from matching.preseleccion import preseleccionar
 from matching.selectors import plan_de_hoy
 from matching.services import decidir_para_perfil
-from matching.taller import responder, taller, texto_adaptado
 from vacantes.models import Vacante
 
 TAMANO_LISTA = 5
@@ -86,16 +84,8 @@ def preparar(escenario, cvs: dict[str, dict], claves: list[str], embedder,
         asignacion = sorteo[nombre]
         paquete = Paquete(numero, texto_cv(cvs[nombre]),
                           {letra: por_origen[origen] for letra, origen in asignacion["listas"].items()})
-        objetivo = (Decision.objects.filter(perfil=perfil, accion=Accion.AJUSTAR_CV).select_related("vacante")
-                    .order_by("-orden").first())
-        if objetivo:
-            for sugerencia in taller(perfil, objetivo.vacante):
-                responder(sugerencia, True)
-            original = paquete.cv
-            adaptado = f"{original}\nPerfil para esta vacante:\n{texto_adaptado(perfil, objetivo.vacante)}"
-            textos = {"original": original, "adaptado": adaptado}
-            paquete.vacante_objetivo = _rotulo(objetivo.vacante)
-            paquete.cvs = {n: textos[origen] for n, origen in asignacion["cvs"].items()}
+        # Con el Taller guiado (preguntas, sin texto propuesto) no hay un "CV con sugerencias" que el sistema pueda
+        # escribir solo: la pregunta 2 queda para cuando haya respuestas reales de candidatos.
         paquetes.append(paquete)
         clave[str(numero)] = {"cv": nombre, "tiene_cv": bool(paquete.cvs), **asignacion}
     return paquetes, clave
