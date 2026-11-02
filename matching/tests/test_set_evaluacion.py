@@ -60,7 +60,8 @@ def test_la_prueba_no_tiene_clones_de_lo_ya_visto():
     from difflib import SequenceMatcher
     textos = {v["id"]: " ".join(v["descripcion"].lower().split())[:1500]
               for v in json.loads((DATOS / "vacantes.json").read_text(encoding="utf-8"))}
-    anteriores = {"prueba": ("ajuste", "prueba_1"), "prueba_2": ("ajuste", "prueba_1", "prueba", "excluida")}
+    anteriores = {"prueba": ("ajuste", "prueba_1"), "prueba_2": ("ajuste", "prueba_1", "prueba", "excluida"),
+                  "prueba_3": ("ajuste", "prueba_1", "prueba", "excluida", "prueba_2")}
     clones = []
     for mitad, previas in anteriores.items():
         vistas = {p["vacante"] for p in PARES if p["mitad"] in previas}
@@ -77,3 +78,12 @@ def test_la_prueba_2_esta_balanceada():
     conteo = Counter(p["accion_esperada"] for p in prueba)
     assert 22 <= len(prueba) <= 30 and all(conteo[a] >= 4 for a in ("POSTULAR", "AJUSTAR_CV", "CERRAR_BRECHA", "DESCARTAR"))
     assert conteo["SIN_DATOS"] >= 3 and conteo["DESCARTAR"] / len(prueba) <= 0.35
+
+
+def test_la_prueba_3_esta_balanceada():
+    """Preregistrada (docs/exploracion/mejoras/PREREGISTRO_prueba_3.md); SIN_DATOS quedó en 2 por falta de vacantes
+    escuetas, y se reporta como desvío."""
+    prueba = _mitad("prueba_3")
+    conteo = Counter(p["accion_esperada"] for p in prueba)
+    assert 22 <= len(prueba) <= 30 and all(conteo[a] >= 4 for a in ("POSTULAR", "AJUSTAR_CV", "CERRAR_BRECHA", "DESCARTAR"))
+    assert conteo["SIN_DATOS"] >= 2 and conteo["DESCARTAR"] / len(prueba) <= 0.35
