@@ -72,3 +72,12 @@ def test_embeber_perfil_no_repite_si_no_cambio(usuario):
 def test_modalidad_por_defecto_queda_marcada_como_inferida(db):
     _ingerir(cruda("v1", "Requisitos:\n- SQL\n- Excel", modalidad=""), cruda("v2", "Requisitos:\n- SQL\n- Excel"))
     assert Vacante.objects.get(id="v1").modalidad_inferida and not Vacante.objects.get(id="v2").modalidad_inferida
+
+
+def test_experiencia_con_area_se_embebe_por_su_nucleo(db):
+    _ingerir(cruda("v1", "Requisitos:\n- Experiencia mínima de 2 años en análisis de datos\n- Manejo de Excel"))
+    embeber_vacantes(E)
+    reqs = sorted(Vacante.objects.get(id="v1").requisito_set.all(), key=lambda r: r.posicion)
+    matriz = de_bytes(Vacante.objects.get(id="v1").matriz_requisitos, E.embeber(["x"]).shape[1])
+    assert reqs[0].texto.startswith("Experiencia mínima")  # el texto que se muestra no cambia
+    assert np.allclose(matriz[0], E.embeber(["análisis de datos"])[0], atol=1e-2)

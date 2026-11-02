@@ -29,9 +29,10 @@ def test_evaluar_calcula_exactitud_y_linea_base(db):
 
 
 def test_linea_base_por_similitud_pura():
-    assert linea_base(0.55, POLITICA) == "POSTULAR"
-    assert linea_base(0.45, POLITICA) == "CERRAR_BRECHA"
-    assert linea_base(0.20, POLITICA) == "DESCARTAR"
+    politica = Politica(tau_relevancia=0.40)  # independiente de los valores calibrados
+    assert linea_base(0.55, politica) == "POSTULAR"
+    assert linea_base(0.45, politica) == "CERRAR_BRECHA"
+    assert linea_base(0.20, politica) == "DESCARTAR"
 
 
 def test_la_mitad_de_prueba_no_se_usa_sin_confirmar(db):

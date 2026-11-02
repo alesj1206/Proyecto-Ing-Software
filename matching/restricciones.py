@@ -64,6 +64,21 @@ class RestriccionSalario:
         return ResultadoRestriccion(self.criterio, "cumple", f"Ofrece hasta {pesos(vacante.salario_max)}")
 
 
+# Municipios conurbados con la ciudad núcleo (áreas metropolitanas formales). Quien busca la ciudad núcleo acepta
+# su área; no al revés (quien busca Envigado no necesariamente quiere ir a Bello).
+AREAS_METROPOLITANAS = {
+    "medellin": ("bello", "itagui", "envigado", "sabaneta", "la estrella", "caldas", "copacabana", "girardota", "barbosa"),
+    "bogota": ("soacha",),
+    "barranquilla": ("soledad", "malambo", "puerto colombia", "galapa"),
+    "bucaramanga": ("floridablanca", "giron", "piedecuesta"),
+    "cali": ("jamundi", "yumbo"),
+}
+
+
+def _con_area(ciudad: str) -> tuple[str, ...]:
+    return (ciudad, *AREAS_METROPOLITANAS.get(ciudad, ()))
+
+
 class RestriccionUbicacion:
     criterio = "ubicacion"
 
@@ -78,6 +93,10 @@ class RestriccionUbicacion:
         ciudades = [normalizar(c) for c in perfil.exp_ubicacion.split(",") if normalizar(c)]
         if any(c in lugar for c in ciudades):
             return ResultadoRestriccion(self.criterio, "cumple", f"Queda en {vacante.ubicacion}")
+        nombres = [c.strip() for c in perfil.exp_ubicacion.split(",") if normalizar(c)]
+        if area := next((n for n in nombres if any(m in lugar for m in _con_area(normalizar(n)))), None):
+            return ResultadoRestriccion(self.criterio, "cumple", f"Queda en {vacante.ubicacion}, en el área "
+                                                                 f"metropolitana de {area}")
         return ResultadoRestriccion(self.criterio, "no_cumple",
                                     f"Queda en {vacante.ubicacion}, fuera de {perfil.exp_ubicacion}")
 

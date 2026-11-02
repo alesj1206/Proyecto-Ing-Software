@@ -14,10 +14,10 @@ from .restricciones import ResultadoRestriccion
 
 @dataclass(frozen=True)
 class Politica:
-    version: str = "2026-11-04.1"  # .2: τ_alto 0,45 (docs/fase2/EVALUACION.md); 11-04.1: prácticas y enumeraciones
+    version: str = "2026-11-04.2"  # 11-04.1: prácticas y enumeraciones; .2: correcciones tras la prueba 1 (docs/fase4)
     tau_alto: float = 0.45
-    tau_bajo: float = 0.40
-    tau_relevancia: float = 0.40
+    tau_bajo: float = 0.35  # 0,40 → 0,35 y τ_relevancia 0,40 → 0,25: barrido sobre ajuste + prueba_1 (docs/fase4)
+    tau_relevancia: float = 0.25
     max_faltantes_descartar: int = 3
     cobertura_nota: float = 0.70
     factor_experiencia: float = 0.5

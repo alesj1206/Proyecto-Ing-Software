@@ -239,3 +239,38 @@ def test_enumeracion_de_frases_no_se_separa():
     textos = [r.texto for r in extraer_requisitos("Requisitos:\n- Experiencia en atención al cliente, ventas y cobranza\n"
                                                    "- Manejo de Excel", [])]
     assert textos == ["Experiencia en atención al cliente, ventas y cobranza", "Manejo de Excel"]
+
+
+def _textos(texto):
+    return [r.texto for r in extraer_requisitos(texto, [])]
+
+
+def test_pie_de_habilidades_de_magneto_no_es_requisito():
+    texto = ("Requerimientos:\n- Manejo de Excel\n- Experiencia en conciliaciones\nNivel de educación:\nTécnico\n"
+             "Otras habilidades:\nHabilidades técnicas:\nExcel\nOdoo\nHabilidades interpersonales:\nProaktividad\n")
+    assert _textos(texto) == ["Manejo de Excel", "Experiencia en conciliaciones", "Técnico"]  # el nivel educativo sí
+
+
+def test_lista_entre_parentesis_se_separa():
+    texto = "Requisitos:\n- Experiencia de más de 2 años con las herramientas del cargo (RPG/ILE, Java, DB2 y Git)"
+    assert _textos(texto) == ["RPG/ILE", "Java", "DB2", "Git"]
+
+
+def test_lista_con_calificador_de_nivel_se_separa():
+    assert _textos("Conocimientos clave:\nPower BI avanzado, Excel avanzado.") == ["Power BI avanzado", "Excel avanzado"]
+
+
+def test_frases_de_presentacion_no_son_requisitos():
+    texto = ("Auxiliar administrativo\nSi tienes formación técnica en áreas administrativas, esta vacante es para ti.\n"
+             "Serás responsable de garantizar un manejo oportuno y de calidad en los procesos asignados.")
+    assert _textos(texto) == []
+
+
+def test_nucleo_de_experiencia_con_area():
+    from vacantes.extraccion import nucleo
+    assert nucleo("Experiencia mínima de 2 años en análisis de datos, inteligencia de negocios o áreas similares") == \
+        "análisis de datos, inteligencia de negocios o áreas similares"
+    assert nucleo("Experiencia: Mínimo 2 años en análisis de datos y análisis comercial") == \
+        "análisis de datos y análisis comercial"
+    assert nucleo("Experiencia mínima de 1 año como Operario de Producción") == "Operario de Producción"
+    assert nucleo("Manejo de Excel avanzado") == "Manejo de Excel avanzado"

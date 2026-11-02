@@ -111,3 +111,17 @@ def test_estudiante_en_curso_no_se_descarta(client_con_cv, usuario, educacion):
 ])
 def test_vacante_normal_no_aplica(client_con_cv, usuario, titulo, descripcion):
     assert _estudiante(usuario.perfil, ["Tecnología en Diseño Gráfico"], titulo, descripcion) is None
+
+
+def test_area_metropolitana_dice_la_ciudad_como_la_escribio():
+    r = RestriccionUbicacion().evaluar(perfil(exp_ubicacion="Medellín, Bogotá"), vacante(ubicacion="La Estrella"), POLITICA)
+    assert r.motivo == "Queda en La Estrella, en el área metropolitana de Medellín"
+
+
+@pytest.mark.parametrize("lugar,busca,esperado", [
+    ("La Estrella", "Medellín", "cumple"), ("Bello - Envigado - Itagui", "Medellín", "cumple"),
+    ("Soacha", "Bogotá", "cumple"), ("Soledad", "Barranquilla", "cumple"), ("Rionegro", "Medellín", "no_cumple"),
+    ("Medellín", "Envigado", "no_cumple"),
+])
+def test_area_metropolitana(lugar, busca, esperado):
+    assert estado(RestriccionUbicacion(), perfil(exp_ubicacion=busca), vacante(ubicacion=lugar)) == esperado

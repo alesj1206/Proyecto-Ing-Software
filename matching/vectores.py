@@ -9,6 +9,7 @@ from django.db import transaction
 from django.db.models import F
 
 from cuentas.models import Perfil
+from vacantes.extraccion import nucleo
 from vacantes.models import Vacante
 
 from .puertos import Embedder
@@ -44,7 +45,7 @@ def embeber_vacantes(embedder: Embedder, lote: int = 256) -> int:
         for v in vacantes:
             requisitos = sorted(v.requisito_set.all(), key=lambda r: r.posicion)
             tramos.append((len(textos), [r.origen == "texto" for r in requisitos]))
-            textos += [v.titulo] + [r.texto for r in requisitos]
+            textos += [v.titulo] + [nucleo(r.texto) for r in requisitos]  # la experiencia, por su área
         matriz = embedder.embeber(textos)
         for v, (desde, de_texto) in zip(vacantes, tramos):
             titulo, reqs = matriz[desde], matriz[desde + 1: desde + 1 + len(de_texto)]

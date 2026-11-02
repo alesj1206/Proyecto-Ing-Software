@@ -31,6 +31,8 @@ PALABRAS_ENCABEZADO_OTRAS = (
     "encontraras", "proceso de seleccion", "tu rol", "sectores laborales", "enamorara",
 )
 ENCABEZADOS_EXACTOS_OTROS = {"cargo"}
+# El pie que Magneto agrega a cada vacante repite las etiquetas como palabras sueltas: son señales, no obligatorios.
+PIE_HABILIDADES = ("otras habilidades", "habilidades tecnicas", "habilidades interpersonales")
 PALABRAS_DESEABLE = ("deseable", "plus", "valorable", "ideal", "preferible", "preferiblemente", "opcional",
                      "se valora", "valoramos", "no indispensable")
 PALABRAS_INICIO_DESEABLE = 4  # "Deseable conocimiento…", "Experiencia deseable en…", "Valoramos: …"
@@ -47,7 +49,8 @@ RUIDO = re.compile(
     r"horario\s*:|jornada|somos una|nuestra empresa|te invitamos|te invita|auxilio de|bonificaci|lugar de trabajo|"
     r"modalidad\s*:|ubicaci[oó]n\s*:|^ciudad\s*:|cupos|fecha de publicaci|buen ambiente|crecimiento profesional|"
     r"palabras clave|pagos? quincenal|parte de (?:este|nuestro) equipo|listo para|contratación inmediata|"
-    r"vinculaci[oó]n inmediata|remuneraci",
+    r"vinculaci[oó]n inmediata|remuneraci|^ser[aá]s\b|^tendr[aá]s\b|^si (?:tienes|eres|cuentas)\b|^buscamos personas|"
+    r"^haz parte|esta vacante es para ti",
     re.IGNORECASE,
 )
 VINETA = re.compile(r"^\s*(?:[-*•▪●◦‣·–✓✔➢►o]\s+|\d+[.)]\s*|[-*•▪●◦‣·–✓✔➢►])\s*")
@@ -120,7 +123,7 @@ def _tipo_encabezado(linea: str) -> str | None:
         return None
     if normal.startswith(RESUMEN_MAGNETO):
         return "resumen"
-    if limpio == "Habilidades":  # bloque final de etiquetas de Magneto
+    if limpio == "Habilidades" or normal.startswith(PIE_HABILIDADES):  # bloque final de etiquetas de Magneto
         return "etiquetas"
     if normal in ENCABEZADOS_EXACTOS_OTROS and limpio.endswith(":"):
         return "otra"
@@ -209,16 +212,36 @@ MAX_PALABRAS_ITEM = 3
 ENUMERACION = re.compile(r",\s+|\s+y\s+")
 
 
+NIVELES = {"avanzado", "intermedio", "basico", "básico"}
+LISTA_ENTRE_PARENTESIS = re.compile(r"\(([^()]+)\)")
+
+
 def _es_nombre(item: str) -> bool:
-    """Un ítem de enumeración de herramientas: corto y con cada palabra en mayúscula o sigla (Power BI, SQL)."""
+    """Un ítem de enumeración de herramientas: corto, con cada palabra en mayúscula o sigla (Power BI, SQL) salvo un
+    calificador de nivel al final ("Excel avanzado")."""
     palabras = item.split()
+    if len(palabras) > 1 and palabras[-1].lower() in NIVELES:
+        palabras = palabras[:-1]
     return 0 < len(palabras) <= MAX_PALABRAS_ITEM and all(p[0].isupper() or p[0].isdigit() for p in palabras)
+
+
+def _lista(texto: str) -> list[str] | None:
+    """Los ítems si `texto` es una enumeración con "y" o comas de nombres (Java, DB2 y Git); None si no lo es."""
+    partes = [p.strip(" .;") for p in ENUMERACION.split(texto)]
+    if len(partes) >= 2 and " o " not in f" {texto} " and all(_es_nombre(p) for p in partes):
+        return partes
+    return None
 
 
 def _separar_enumeracion(unidad: str) -> list[str]:
     """"Manejo de Power BI, Power Apps y Power Automate" → un requisito por herramienta, con el prefijo repetido.
     Solo se separan enumeraciones con "y" (todas se piden); con "o" son alternativas y quedan juntas. Las frases en
     minúscula ("atención al cliente, ventas y cobranza") no se tocan."""
+    entre_parentesis = LISTA_ENTRE_PARENTESIS.search(unidad)
+    if entre_parentesis and (items := _lista(entre_parentesis.group(1))):
+        return items  # "…con las herramientas del cargo (RPG/ILE, Java, DB2 y Git)": lo concreto son los ítems
+    if (items := _lista(unidad)) and len(items) >= 2:
+        return items  # "Power BI avanzado, Excel avanzado"
     partes = ENUMERACION.split(unidad)
     if len(partes) < 3 or " o " in unidad or not all(_es_nombre(p) for p in partes[1:]):
         return [unidad]
@@ -251,6 +274,20 @@ def extraer_requisitos(texto: str, etiquetas: list[str]) -> list[RequisitoExtrai
             vistos.add(clave)
             requisitos.append(RequisitoExtraido(etiqueta.strip(), "deseable", "etiqueta"))
     return requisitos
+
+
+EXPERIENCIA_CON_AREA = re.compile(
+    r"^experiencia\s*:?\s*(?:(?:m[ií]nim[ao]|de\s+m[aá]s\s+de|superior\s+a|al\s+menos)\s+)*(?:de\s+)?"
+    r"(?:m[ií]nim[ao]\s+)?(?:\(?\d+\)?|un|una|dos|tres|cuatro|cinco)\s+(?:años?|meses)\s*(?:de\s+experiencia\s*)?"
+    r"(?:certificad[ao]\s+)?(?:en|como|trabajando\s+(?:con|en)|desempeñando|en\s+el\s+cargo\s+de)\s+",
+    re.IGNORECASE)
+
+
+def nucleo(texto: str) -> str:
+    """Lo que se compara por similitud de un requisito de experiencia con área: "Experiencia mínima de 2 años en
+    análisis de datos" → "análisis de datos". Los años ya los evalúa la restricción de experiencia."""
+    resto = EXPERIENCIA_CON_AREA.sub("", texto, count=1).strip()
+    return resto if resto and resto != texto.strip() else texto
 
 
 def requisitos_insuficientes(requisitos: list[RequisitoExtraido]) -> bool:

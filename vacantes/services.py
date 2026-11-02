@@ -15,6 +15,8 @@ from .fuentes import FuenteVacantes, VacanteCruda
 from .models import EstadoIngesta, Requisito, Vacante
 
 log = logging.getLogger(__name__)
+# Va dentro del hash: al cambiar las reglas de extracción o lo que se embebe, la próxima ingesta reprocesa todo.
+VERSION_EXTRACCION = "2026-11-04.2"
 MODALIDAD_POR_DEFECTO = Vacante.Modalidad.PRESENCIAL  # como en v2, si ni la fuente ni el texto la dicen
 
 
@@ -34,7 +36,7 @@ class ResumenIngesta:
 def hash_contenido(cruda: VacanteCruda) -> str:
     """Todo lo que se guarda: una vacante republicada (fecha nueva) o marcada urgente también se actualiza."""
     contenido = "\n".join(str(v) for v in (
-        cruda.titulo, cruda.empresa, cruda.ubicacion, cruda.modalidad, cruda.texto_completo, "|".join(cruda.etiquetas),
+        VERSION_EXTRACCION, cruda.titulo, cruda.empresa, cruda.ubicacion, cruda.modalidad, cruda.texto_completo, "|".join(cruda.etiquetas),
         cruda.url, cruda.fecha_publicacion, cruda.salario_min, cruda.salario_max, cruda.urgente,
         "|".join(cruda.prefiltro)))
     return hashlib.sha256(contenido.encode("utf-8")).hexdigest()

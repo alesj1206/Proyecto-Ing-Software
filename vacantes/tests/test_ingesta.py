@@ -225,3 +225,11 @@ def test_palabras_clave_al_principio_no_cortan_el_texto():
                             "Auxiliar Contable\nPalabras clave:\nAuxiliar contable\nNIIF\n\nSe requiere auxiliar.\n")
     v = parsear_detalle(pagina, "https://www.magneto365.com/co/empleos/auxiliar-contable-1121542")
     assert "Dominio de Excel intermedio." in v.texto_completo
+
+
+def test_cambiar_las_reglas_de_extraccion_reprocesa_las_vacantes(db, monkeypatch):
+    fuente = FuenteEnMemoria([cruda("v1", "Requisitos:\n- SQL\n- Excel")])
+    ingerir(fuente)
+    assert ingerir(fuente).sin_cambios == 1
+    monkeypatch.setattr(services, "VERSION_EXTRACCION", "otra")
+    assert ingerir(fuente).actualizadas == 1
