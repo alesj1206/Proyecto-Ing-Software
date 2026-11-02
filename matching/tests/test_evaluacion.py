@@ -28,6 +28,17 @@ def test_evaluar_calcula_exactitud_y_linea_base(db):
     assert 0.0 <= informe.exactitud_linea_base <= 1.0
 
 
+def test_con_fusion_una_etiqueta_ajustar_cv_se_compara_como_postular(db):
+    """Con la fusión, Ajustar CV y Postular son una sola acción: así se preregistró y midió prueba_3."""
+    escenario = preparar(CVS, FuenteEnMemoria([cruda("ok", "Requisitos:\n- Reportes de ventas en Excel\n- Atención de "
+                                                            "clientes en tienda")]), EmbedderFalso())
+    pares = [Par("ana", "ok", "AJUSTAR_CV", "lo tiene a medias", "ajuste")]
+    con_fusion = evaluar(escenario, pares, Politica(tau_relevancia=0.0, fusionar_ajustar=True))
+    sin_fusion = evaluar(escenario, pares, Politica(tau_relevancia=0.0, fusionar_ajustar=False))
+    assert con_fusion.exactitud == 1.0 and con_fusion.confusion == {("POSTULAR", "POSTULAR"): 1}
+    assert sin_fusion.exactitud == 0.0
+
+
 def test_linea_base_por_similitud_pura():
     politica = Politica(tau_relevancia=0.40)  # independiente de los valores calibrados
     assert linea_base(0.55, politica) == "POSTULAR"

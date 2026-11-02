@@ -11,7 +11,7 @@ from django.db import transaction
 
 from matching.evaluacion.ciega import COLUMNAS, preparar as preparar_ciega, tabular
 from matching.evaluacion.evaluar import preparar
-from matching.ia import obtener_embedder
+from matching.ia import obtener_embedder, obtener_embedder_cobertura
 from vacantes.fuentes.fixture import FuenteFixture
 
 DATOS = Path(__file__).resolve().parents[2] / "evaluacion"
@@ -23,10 +23,10 @@ CVS_POR_DEFECTO = ["datos_junior", "auxiliar_contable", "auxiliar_enfermeria", "
 
 def _sortear(cvs: list[str], semilla: int | None):
     datos = yaml.safe_load((DATOS / "cvs.yaml").read_text(encoding="utf-8"))
-    embedder = obtener_embedder()
+    embedder, cobertura = obtener_embedder(), obtener_embedder_cobertura()
     with transaction.atomic():  # como la evaluación: no deja datos en la base
-        escenario = preparar({c: datos[c] for c in cvs}, FuenteFixture(DATOS / "vacantes.json"), embedder)
-        resultado = preparar_ciega(escenario, datos, cvs, embedder, semilla)
+        escenario = preparar({c: datos[c] for c in cvs}, FuenteFixture(DATOS / "vacantes.json"), embedder, cobertura)
+        resultado = preparar_ciega(escenario, datos, cvs, embedder, semilla, cobertura)
         transaction.set_rollback(True)
     return resultado
 

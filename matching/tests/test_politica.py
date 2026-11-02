@@ -1,3 +1,4 @@
+from dataclasses import replace
 from types import SimpleNamespace as N
 
 from matching.cobertura import Cobertura, RequisitoEvaluado
@@ -13,9 +14,12 @@ def ok(criterio="salario"):
     return ResultadoRestriccion(criterio, "cumple", "bien")
 
 
+SIN_FUSION = replace(POLITICA, fusionar_ajustar=False)  # cada regla por separado, incluida AjustarCV
+
+
 def ctx(requisitos, restricciones=None):
     extraidos = [N(origen=x.origen) for x in requisitos]
-    return ContextoDecision(Cobertura(requisitos), restricciones or [ok()], extraidos, POLITICA)
+    return ContextoDecision(Cobertura(requisitos), restricciones or [ok()], extraidos, SIN_FUSION)
 
 
 CUBIERTOS = [r("SQL", "cubierto"), r("Excel", "cubierto"), r("Power BI", "cubierto")]

@@ -19,6 +19,7 @@ class EmbedderFalso:
 
     def __init__(self, dimension: int = DIMENSION_FALSA):
         self.dimension = dimension
+        self.modelo = f"falso-{dimension}"
 
     def _vector(self, texto: str) -> np.ndarray:
         v = np.zeros(self.dimension, dtype=np.float32)

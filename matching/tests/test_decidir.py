@@ -17,7 +17,9 @@ from vacantes.services import ingerir
 from vacantes.tests.test_ingesta import FuenteEnMemoria, cruda
 
 E = EmbedderFalso()
-TODAS = Politica(tau_relevancia=0.0)  # estos tests miden la cadena, no la relevancia
+# Estos tests miden la cadena completa, no la relevancia: con banda parcial y sin fusión, para que existan las cinco
+# acciones (la política vigente, sin banda parcial, nunca produce AJUSTAR_CV).
+TODAS = Politica(tau_relevancia=0.0, tau_alto=0.45, tau_bajo=0.35, fusionar_ajustar=False)
 EVIDENCIA = ["Reportes de ventas en Excel", "Atención de clientes en tienda", "Excel tablas compartidas equipo"]
 VACANTES = {
     "vpost": "Requisitos:\n- Reportes de ventas en Excel\n- Atención de clientes en tienda",

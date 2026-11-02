@@ -64,7 +64,7 @@ def test_con_el_taller_guiado_no_hay_pregunta_de_cv(db, monkeypatch):
     escenario = preparar(CVS, fuente, EmbedderFalso())
     evidencia = escenario.perfiles["ana"].evidencias.first().texto
 
-    def decidir_con_un_ajustar(perfil, embedder):
+    def decidir_con_un_ajustar(perfil, embedder, **_):
         Decision.objects.create(perfil=perfil, vacante=Vacante.objects.get(id="v0"), accion="AJUSTAR_CV",
                                 solidez="media", motivo_solidez="ok", motivos=[], similitud=0.8, cobertura_pct=50,
                                 version_politica="t", restricciones=[],

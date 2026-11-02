@@ -12,13 +12,16 @@ siempre con sus razones:
 
 | Acción | Qué significa |
 |---|---|
-| **Postular** | Cubres todos los requisitos obligatorios (a veces "con nota": te falta una sola herramienta). |
-| **Ajustar CV** | No te falta nada, pero algo lo tienes "a medias": el Taller de CV te sugiere cómo hacerlo explícito. |
+| **Postular** | Cubres los requisitos obligatorios (a veces "con nota": te falta una sola herramienta, o hay algo que conviene resaltar). |
 | **Cerrar brecha** | Te faltan 1 o 2 obligatorios: van a tu plan de aprendizaje. |
 | **Descartar** | Viola una restricción tuya (salario, ciudad, modalidad, experiencia o prácticas) o te faltan 3 o más. Siempre dice el motivo. |
 | **Revísala tú** | La vacante no dice lo suficiente para decidir. |
 
-Ningún modelo de pago decide nada. Los embeddings corren en la máquina con fastembed (ONNX, sin torch). Groq solo
+En cualquier vacante con algo que tu hoja de vida no dice, el Taller de CV te pregunta si lo has hecho y te deja
+contarlo con tus palabras; nunca redacta por ti.
+
+Ningún modelo de pago decide nada. Los embeddings corren en la máquina con fastembed (ONNX, sin torch): MiniLM para
+encontrar las vacantes relevantes y mpnet para comparar cada requisito con tu experiencia (spec §13.6). Groq solo
 redacta, si el candidato la pide, una explicación en prosa, y nunca recibe el texto del CV.
 
 **Estado (Sprint 3, v3):**
@@ -97,10 +100,13 @@ Los detalles están en [`docs/fase4/EVALUACION.md`](docs/fase4/EVALUACION.md).
 
 - **Como filtro da una buena señal:** en la prueba final limpia, con vacantes nunca vistas, acertó las 5 DESCARTAR y no
   descartó ninguna vacante que valiera la pena. Son pocos casos.
-- **Distinguir entre Postular, Ajustar CV y Cerrar brecha no funciona bien:** la exactitud global en vacantes nuevas
-  fue 46%, por debajo del 70% que se fijó como meta. Esas tres acciones son orientativas.
-- **El Taller de CV puede proponer emparejamientos sin sentido.** El candidato debe aceptar solo lo que sea verdad
-  ([`docs/fase4/VERIFICACION.md`](docs/fase4/VERIFICACION.md)).
+- **Las acciones finas eran poco confiables:** en la Fase 4 la exactitud global en vacantes nuevas fue 46%, por
+  debajo de la meta de 70%.
+- **Después de la exploración** (mpnet para la cobertura y fusión de Postular con Ajustar CV) dio **69%** en una prueba
+  nueva y preregistrada de 26 pares, contra 54% de la política anterior. Sigue apenas por debajo de la meta, y son
+  pocos pares ([`docs/exploracion/2026-11-02-mejoras-decisor.md`](docs/exploracion/2026-11-02-mejoras-decisor.md)).
+- **El Taller de CV ya no propone texto:** de 29 reescrituras automáticas, solo 4 tenían sentido. Ahora pregunta, y
+  lo único que se copia es lo que escribe el candidato.
 - **Las etiquetas del set de evaluación las propuso el equipo de desarrollo** y están pendientes de revisión.
 
 ## Historia

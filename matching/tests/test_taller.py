@@ -11,7 +11,7 @@ def _req(texto, estado, evidencia=None, tipo="obligatorio"):
 
 
 COBERTURA = [_req("SQL", "cubierto", "Usé SQL en reportes"), _req("Excel", "cubierto", "Reportes en Excel"),
-             _req("Power BI", "parcial", "Hice tableros en Excel."), _req("Docker", "faltante")]
+             _req("Power BI", "parcial", "Hice tableros en Excel."), _req("Docker", "faltante", tipo="deseable")]
 
 
 @pytest.fixture
@@ -31,8 +31,23 @@ def test_la_sugerencia_es_una_pregunta_con_la_evidencia_como_pista(decision):
     assert s.propuesta == "¿Has trabajado con «Power BI»? Si es así, cuéntalo con tus palabras."
 
 
-def test_sin_evidencia_no_hay_sugerencia(decision):
+def test_un_deseable_faltante_no_se_pregunta(decision):
     assert not any(s.requisito == "Docker" for s in generar_sugerencias(decision, ["Hice tableros en Excel."]))
+
+
+def test_un_obligatorio_faltante_se_pregunta_sin_pista(decision):
+    """Con mpnet y τ_alto = τ_bajo no hay parciales: el Taller pregunta por lo que falta, que a veces es algo que la
+    persona hizo y no escribió (decisión del usuario, 2026-11-02)."""
+    decision.cobertura = [_req("SQL", "cubierto", "Usé SQL en reportes"), _req("Tableau", "faltante")]
+    [s] = generar_sugerencias(decision, ["Usé SQL en reportes"])
+    assert (s.requisito, s.evidencia) == ("Tableau", "")
+    assert s.propuesta == "¿Has trabajado con «Tableau»? Si es así, cuéntalo con tus palabras."
+
+
+def test_formacion_y_anios_faltantes_no_se_preguntan(decision):
+    decision.cobertura = [_req("Profesional en contaduría", "formacion"), _req("2 años de experiencia", "experiencia"),
+                          _req("Trabajo en equipo", "blando")]
+    assert generar_sugerencias(decision, []) == []
 
 
 def test_evidencia_que_ya_no_esta_en_el_cv_no_se_sugiere(decision):
@@ -83,11 +98,21 @@ def test_aceptar_sin_texto_desde_la_pagina_avisa(client_con_cv, decision, usuari
     assert "Escribe con tus palabras" in r.content.decode() and SugerenciaCV.objects.get(id=s.id).estado == "pendiente"
 
 
-def test_el_detalle_ofrece_el_taller_solo_en_ajustar_cv(client_con_cv, decision):
+def test_el_detalle_ofrece_el_taller_si_hay_algo_que_preguntar(client_con_cv, decision):
     url = reverse("taller", args=["v1"])
-    assert url in client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
-    Decision.objects.filter(id=decision.id).update(accion="POSTULAR")
+    for accion in ("AJUSTAR_CV", "POSTULAR", "CERRAR_BRECHA"):
+        Decision.objects.filter(id=decision.id).update(accion=accion)
+        assert url in client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode(), accion
+    Decision.objects.filter(id=decision.id).update(accion="DESCARTAR")
     assert url not in client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
+    Decision.objects.filter(id=decision.id).update(accion="POSTULAR", cobertura=COBERTURA[:2])  # todo cubierto
+    assert url not in client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
+
+
+def test_la_pregunta_por_un_faltante_no_muestra_pista(client_con_cv, decision):
+    Decision.objects.filter(id=decision.id).update(cobertura=[_req("Tableau", "faltante")])
+    html = client_con_cv.get(reverse("taller", args=["v1"])).content.decode()
+    assert "Esta vacante pide: Tableau" in html and "Pista:" not in html
 
 
 def test_sin_decision_el_taller_es_404(client_con_cv, vacante_v1):

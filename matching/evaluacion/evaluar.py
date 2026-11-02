@@ -92,10 +92,11 @@ def cargar_pares(ruta: Path, mitad: str) -> list[Par]:
     return [Par(**p) for p in datos["pares"] if p["mitad"] == mitad]
 
 
-def preparar(cvs: dict[str, dict], fuente: FuenteVacantes, embedder: Embedder) -> Escenario:
-    """Carga las vacantes y crea un perfil por CV pasando el PDF por el parser real, con su vector."""
+def preparar(cvs: dict[str, dict], fuente: FuenteVacantes, embedder: Embedder,
+             cobertura: Embedder | None = None) -> Escenario:
+    """Carga las vacantes y crea un perfil por CV pasando el PDF por el parser real, con sus vectores."""
     ingerir(fuente)
-    embeber_vacantes(embedder)
+    embeber_vacantes(embedder, cobertura=cobertura)
     perfiles = {}
     for clave, cv in cvs.items():
         usuario = crear_usuario_con_autorizacion(f"eval-{clave}@correo-ficticio.co", None)
@@ -105,7 +106,7 @@ def preparar(cvs: dict[str, dict], fuente: FuenteVacantes, embedder: Embedder) -
         for campo, valor in cv.get("expectativas", {}).items():
             setattr(perfil, campo, valor)
         perfil.save()
-        embeber_perfil(perfil, embedder)
+        embeber_perfil(perfil, embedder, cobertura=cobertura)
         perfiles[clave] = perfil
     return Escenario(perfiles)
 
@@ -128,17 +129,26 @@ def predecir(escenario: Escenario, par: Par, politica: Politica) -> tuple[str, f
     return str(decidir_par(perfil, vacante, similitud, politica).accion), similitud
 
 
+def esperada(par: Par, politica: Politica) -> str:
+    """La etiqueta en las acciones que la política puede dar: con la fusión, Ajustar CV es Postular (así se
+    preregistró y midió prueba_3, docs/exploracion/mejoras/PREREGISTRO_prueba_3.md)."""
+    if politica.fusionar_ajustar and par.accion_esperada == "AJUSTAR_CV":
+        return "POSTULAR"
+    return par.accion_esperada
+
+
 def evaluar(escenario: Escenario, pares: list[Par], politica: Politica) -> Informe:
     informe = Informe()
     for par in pares:
         predicha, similitud = predecir(escenario, par, politica)
+        etiqueta = esperada(par, politica)
         informe.total += 1
-        informe.aciertos += predicha == par.accion_esperada
-        informe.aciertos_linea_base += linea_base(similitud, politica) == par.accion_esperada
+        informe.aciertos += predicha == etiqueta
+        informe.aciertos_linea_base += linea_base(similitud, politica) == etiqueta
         informe.distribucion[predicha] += 1
-        informe.confusion[(par.accion_esperada, predicha)] += 1
-        if predicha != par.accion_esperada:
-            informe.errores.append(f"{par.cv} × {par.vacante}: esperada {par.accion_esperada}, "
+        informe.confusion[(etiqueta, predicha)] += 1
+        if predicha != etiqueta:
+            informe.errores.append(f"{par.cv} × {par.vacante}: esperada {etiqueta}, "
                                    f"predicha {predicha} (similitud {similitud:.2f})")
     return informe
 

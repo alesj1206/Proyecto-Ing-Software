@@ -44,6 +44,9 @@ class Vacante(models.Model):
     # en orden de posicion (float16). hash_embebido == hash_contenido cuando están al día.
     vector = HalfVectorField(dimensions=settings.SCOUTLY_DIMENSION, null=True, blank=True)
     matriz_requisitos = models.BinaryField(null=True, blank=True)
+    # Con qué modelos se calcularon vector y matriz (búsqueda|cobertura): si cambia el modelo, se re-embebe sin
+    # esperar a la próxima ingesta.
+    modelos_embebido = models.CharField(max_length=200, blank=True, default="")
     hash_embebido = models.CharField(max_length=64, blank=True, default="")
 
     class Meta:

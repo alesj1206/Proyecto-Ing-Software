@@ -8,6 +8,7 @@ import numpy as np
 
 class Embedder(Protocol):
     dimension: int
+    modelo: str  # nombre del modelo; entra en las firmas para re-embeber si cambia
 
     def embeber(self, textos: list[str]) -> np.ndarray:
         """Matriz float32 de forma (len(textos), dimension) con filas normalizadas (norma L2 = 1)."""

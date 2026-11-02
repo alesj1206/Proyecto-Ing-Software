@@ -4,7 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
-MODELO_EMBEDDINGS = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+MODELO_EMBEDDINGS = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"  # preselección (búsqueda)
+MODELO_COBERTURA = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"  # requisito × evidencia
 MODELO_RERANKER = "BAAI/bge-reranker-v2-m3"
 CACHE_MODELOS = Path.home() / ".cache" / "scoutly-modelos"
 LOTE = 64
@@ -18,6 +19,7 @@ class EmbedderFastembed:
     def __init__(self, modelo: str = MODELO_EMBEDDINGS, proveedor: str = "cpu"):
         from fastembed import TextEmbedding
 
+        self.modelo = modelo  # entra en la firma del perfil: cambiar de modelo obliga a re-embeber
         self._modelo = TextEmbedding(modelo, cache_dir=str(CACHE_MODELOS), providers=_proveedores(proveedor))
         self.dimension = int(self.embeber(["dimension"]).shape[1])
 

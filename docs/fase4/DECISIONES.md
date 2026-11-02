@@ -69,6 +69,19 @@ arreglaron.
 - **Grafo:** graphify se actualizó solo con el código (sin LLM), y `graphify-out/` sigue sin estar en git.
 - **Formato del informe:** es Markdown; si el curso pide docx o pdf, se convierte.
 
+## Después de la Fase 4: adopción de la exploración (2026-11-02)
+
+- **(usuario)** Se adopta la variante V4 (mpnet para la cobertura + fusión) y se une la rama
+  `exploracion/mejoras-decisor`. Queda escrito en la spec §13.6.
+- **(usuario)** Como no hay banda "parcial", el Taller pregunta por los obligatorios faltantes.
+- **Mpnet recibe el texto completo del requisito, sin `nucleo`.** Así se midió en `prueba_3`; `nucleo` fue un
+  ajuste para MiniLM. *Costo:* "Experiencia de 2 años en X" se compara entera y no solo por su área.
+- **Cada vacante guarda con qué modelos se embebió** (`modelos_embebido`). Antes, un cambio de modelo solo llegaba con
+  la siguiente ingesta, y mientras tanto el decisor se saltaba todas las vacantes. Las matrices de dimensión distinta
+  también se saltan. *Costo:* la primera corrida después del cambio re-embebe todo el catálogo.
+- **Las pruebas de la cadena fijan su propia política** (con banda parcial y sin fusión), porque la vigente nunca
+  produce AJUSTAR_CV. *Costo:* ninguno; la política vigente tiene sus propias pruebas.
+
 ## Pendientes menores (no se arreglaron)
 
 - **Evaluación ciega:**

@@ -1,6 +1,8 @@
 """Fachada del decisor (spec §7.2): `decidir_para_perfil` es la única puerta que usan el batch y la API."""
 
 import time
+
+import numpy as np
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
@@ -41,9 +43,13 @@ def solicitar_decision(perfil: Perfil) -> None:
 
 def _decision(perfil, vacante, similitud, evidencias, matriz_evid, politica) -> Decision | None:
     requisitos = sorted(vacante.requisito_set.all(), key=lambda r: r.posicion)
-    matriz_req = de_bytes(vacante.matriz_requisitos)
-    if len(matriz_req) != len(requisitos) or len(matriz_evid) != len(evidencias):
+    matriz_req = de_bytes(vacante.matriz_requisitos, len(requisitos))
+    if matriz_req is None or matriz_evid is None:
         return None  # vectores desalineados con el texto: se decide en la próxima corrida, ya re-embebida
+    if len(matriz_req) and len(matriz_evid) and matriz_req.shape[1] != matriz_evid.shape[1]:
+        return None  # embebidas con modelos distintos (por ejemplo, a mitad de un cambio de modelo)
+    if not len(matriz_req):
+        matriz_req = np.zeros((0, matriz_evid.shape[1]), dtype=np.float32)
     cobertura = cubrir(requisitos, matriz_req, evidencias, matriz_evid, politica.tau_alto, politica.tau_bajo)
     restricciones = [res for r in RESTRICCIONES if (res := r.evaluar(perfil, vacante, politica)) is not None]
     contexto = ContextoDecision(cobertura, restricciones, requisitos, politica)
@@ -62,7 +68,8 @@ def _decision(perfil, vacante, similitud, evidencias, matriz_evid, politica) -> 
 def decidir_par(perfil: Perfil, vacante: Vacante, similitud: float, politica: Politica = POLITICA) -> Decision:
     """La decisión para un solo par, sin guardarla (la usa la evaluación)."""
     evidencias = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))
-    return _decision(perfil, vacante, similitud, evidencias, de_bytes(perfil.matriz_evidencia), politica)
+    return _decision(perfil, vacante, similitud, evidencias, de_bytes(perfil.matriz_evidencia, len(evidencias)),
+                     politica)
 
 
 TOP_EMPRESAS = 3
@@ -107,14 +114,16 @@ def _guardar(perfil: Perfil, decisiones: list[Decision], hoy: date, ocultas: int
 
 
 def decidir_para_perfil(perfil: Perfil, embedder: Embedder, ordenador: Ordenador | None = None,
-                        politica: Politica = POLITICA, hoy: date | None = None) -> ResumenDecision:
+                        politica: Politica = POLITICA, hoy: date | None = None,
+                        cobertura: Embedder | None = None) -> ResumenDecision:
+    """`embedder` da el vector de la preselección y `cobertura` (mpnet en producción) la matriz de la evidencia."""
     inicio, reloj = timezone.now(), time.perf_counter()
     evidencias = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))  # se leen una vez
-    embeber_perfil(perfil, embedder, evidencias)
+    embeber_perfil(perfil, embedder, evidencias, cobertura)
     preseleccion = preseleccionar(perfil, politica.tau_relevancia)
     similitudes = dict(preseleccion.relevantes)
     vacantes = Vacante.objects.filter(id__in=similitudes).prefetch_related("requisito_set")
-    matriz_evid = de_bytes(perfil.matriz_evidencia)
+    matriz_evid = de_bytes(perfil.matriz_evidencia, len(evidencias))
     decisiones = [d for v in vacantes if (d := _decision(perfil, v, similitudes[v.id], evidencias, matriz_evid,
                                                          politica))]
     (ordenador or OrdenSimilitudCobertura()).ordenar(perfil, decisiones)

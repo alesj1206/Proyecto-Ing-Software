@@ -4,7 +4,7 @@ import time
 from django.core.management.base import BaseCommand
 
 from cuentas.models import Perfil
-from matching.ia import obtener_embedder, obtener_reordenador
+from matching.ia import obtener_embedder, obtener_embedder_cobertura, obtener_reordenador
 from matching.models import SolicitudDecision
 from matching.orden import OrdenConReranker, OrdenSimilitudCobertura
 from matching.services import decidir_para_perfil
@@ -25,7 +25,7 @@ class Command(BaseCommand):
         modo.add_argument("--escuchar", action="store_true", help="atender la cola cada 5 s hasta Ctrl+C")
 
     def handle(self, *args, todos, pendientes, escuchar, **options):
-        self.embedder = obtener_embedder()
+        self.embedder, self.cobertura = obtener_embedder(), obtener_embedder_cobertura()
         reordenador = obtener_reordenador()
         self.ordenador = OrdenConReranker(reordenador) if reordenador else OrdenSimilitudCobertura()
         if todos:
@@ -52,13 +52,13 @@ class Command(BaseCommand):
         perfiles = list(perfiles)
         if not perfiles:
             return
-        embebidas = embeber_vacantes(self.embedder)
+        embebidas = embeber_vacantes(self.embedder, cobertura=self.cobertura)
         if embebidas:
             self.stdout.write(f"vacantes embebidas: {embebidas}")
         decididos = 0
         for perfil in perfiles:
             try:
-                r = decidir_para_perfil(perfil, self.embedder, self.ordenador)
+                r = decidir_para_perfil(perfil, self.embedder, self.ordenador, cobertura=self.cobertura)
             except Exception:  # un perfil que falla no detiene a los demás (revisión de seguridad, Fase 2)
                 log.exception("No se pudo decidir para el perfil %s", perfil.pk)
                 self._contar_fallo(perfil)

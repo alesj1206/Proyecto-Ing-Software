@@ -15,7 +15,7 @@
   {% for s in sugerencias %}
   <div class="card" style="margin-top:1rem;">
     <p class="decision-insignia decision-ajustar_cv" style="margin-top:0;">Esta vacante pide: {{ s.requisito }}</p>
-    <p class="decision-evidencia" style="margin-top:0.6rem;">Pista: en tu hoja de vida dice «{{ s.evidencia }}»</p>
+    {% if s.evidencia %}<p class="decision-evidencia" style="margin-top:0.6rem;">Pista: en tu hoja de vida dice «{{ s.evidencia }}»</p>{% endif %}
     <p style="margin-top:0.6rem;font-size:0.95rem;color:var(--navy);">{{ s.propuesta }}</p>
     {% if s.estado == "pendiente" %}
     <form method="post" action="{% url 'taller_responder' vacante.id s.id %}" style="margin-top:0.9rem;">{% csrf_token %}
@@ -31,7 +31,7 @@
     {% endif %}
   </div>
   {% empty %}
-  <p style="margin-top:1.5rem;color:var(--muted-foreground);">No hay nada que preguntarte: tu hoja de vida ya dice lo que esta vacante pide, o lo que falta no aparece en tu experiencia (míralo en tu plan de aprendizaje).</p>
+  <p style="margin-top:1.5rem;color:var(--muted-foreground);">No hay nada que preguntarte: tu hoja de vida ya dice lo que esta vacante pide.</p>
   {% endfor %}
 
   {% if texto %}

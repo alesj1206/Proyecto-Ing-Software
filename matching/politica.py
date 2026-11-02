@@ -14,17 +14,19 @@ from .restricciones import ResultadoRestriccion
 
 @dataclass(frozen=True)
 class Politica:
-    version: str = "2026-11-04.3"  # .1 prácticas y enumeraciones; .2 tras la prueba 1; .3 revisión final (docs/fase4)
-    tau_alto: float = 0.45
-    tau_bajo: float = 0.35  # 0,40 → 0,35 y τ_relevancia 0,40 → 0,25: barrido sobre ajuste + prueba_1 (docs/fase4)
-    tau_relevancia: float = 0.25
+    # 2026-11-04.x: MiniLM (docs/fase4). 2026-11-05.1: cobertura con mpnet + fusión, la variante V4 preregistrada que dio
+    # 69% en prueba_3 (docs/exploracion/mejoras/PREREGISTRO_prueba_3.md). Con τ_alto = τ_bajo no hay banda "parcial".
+    version: str = "2026-11-05.1"
+    tau_alto: float = 0.425
+    tau_bajo: float = 0.425
+    tau_relevancia: float = 0.25  # la preselección sigue con MiniLM
     max_faltantes_descartar: int = 3
     cobertura_nota: float = 0.70
     factor_experiencia: float = 0.5
     max_palabras_herramienta: int = 4
-    # Exploración (docs/exploracion/2026-11-02-mejoras-decisor.md): AJUSTAR_CV se vuelve POSTULAR con lo que hay que
-    # resaltar. Subió la exactitud 8–21 puntos en todos los sets, incluida una prueba nueva. Apagada por defecto.
-    fusionar_ajustar: bool = False
+    # AJUSTAR_CV se vuelve POSTULAR con lo que hay que resaltar: subió la exactitud 8–21 puntos en todos los sets,
+    # incluida la prueba preregistrada (docs/exploracion/2026-11-02-mejoras-decisor.md).
+    fusionar_ajustar: bool = True
 
 
 POLITICA = Politica()

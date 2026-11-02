@@ -27,7 +27,7 @@ with transaction.atomic():
             sim = float(np.dot(np.asarray(perfil.vector, np.float32), np.asarray(vac.vector, np.float32)))
             evid = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))
             reqs = sorted(vac.requisito_set.all(), key=lambda r: r.posicion)
-            mr, me = de_bytes(vac.matriz_requisitos), de_bytes(perfil.matriz_evidencia)
+            mr, me = de_bytes(vac.matriz_requisitos, len(reqs)), de_bytes(perfil.matriz_evidencia, len(evid))
             cos = (mr @ me.T).tolist() if len(reqs) and len(evid) else [[0.0] * len(evid) for _ in reqs]
             base = ["formacion" if es_formacion(r.texto) else "experiencia" if es_solo_anios(r.texto)
                     else "blando" if es_blando(r.texto) else "comparable" for r in reqs]

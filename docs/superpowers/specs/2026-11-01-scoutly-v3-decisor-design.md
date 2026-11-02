@@ -438,3 +438,18 @@ Origen: `spike/fase0/HALLAZGOS.md` (P1–P8), `docs/exploracion/prototipo-deciso
   vacante sigue accesible.
 - Se mantienen los arreglos de v2 (secretos y DEBUG desde el entorno, límites a la subida de PDF y validadores de
   contraseña).
+
+### 13.6 Enmienda tras la exploración (2026-11-02, aprobada por el usuario)
+Reemplaza §13.1 (modelo de cobertura), §13.2 (AJUSTAR_CV) y §13.3 C (Taller) donde choquen. La evidencia está en
+`docs/exploracion/2026-11-02-mejoras-decisor.md`: la variante V4 preregistrada dio 69% en `prueba_3`, contra 54% de
+la política anterior.
+- **Dos modelos de embeddings.** La preselección sigue con MiniLM-L12 (384, columna `halfvec`, τ_relevancia 0,25).
+  La cobertura (matrices requisito × evidencia) usa `paraphrase-multilingual-mpnet-base-v2` (768, bytea). Cada
+  vacante guarda con qué modelos se embebió, así que un cambio de modelo se re-embebe en la siguiente corrida sin
+  esperar a la ingesta.
+- **Política 2026-11-05.1:** τ_alto = τ_bajo = 0,425, así que no hay banda "parcial".
+- **Fusión de Postular y Ajustar CV.** Lo que era AJUSTAR_CV sale como POSTULAR con la nota "Resalta en tu hoja de
+  vida: …". AJUSTAR_CV sigue en el modelo de datos, pero la política vigente no lo produce.
+- **El Taller pregunta, no redacta.** Por cada obligatorio faltante (o parcial con evidencia) pregunta "¿Has trabajado
+  con X?" y copia solo lo que la persona escribe. Se ofrece en Postular, Ajustar CV y Cerrar brecha cuando hay algo que
+  preguntar.
