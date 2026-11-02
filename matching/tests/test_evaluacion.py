@@ -54,3 +54,33 @@ def test_ningun_cv_del_set_tiene_datos_de_personas_reales():
         assert correo is None or correo.endswith("@correo-ficticio.co"), clave
         sin_expectativas = {k: v for k, v in cv.items() if k != "expectativas"}  # los salarios sí tienen 7 dígitos
         assert not re.search(r"\b\d{7,}\b", yaml.safe_dump(sin_expectativas)), clave
+
+
+def _informe(filas):
+    from collections import Counter
+    from matching.evaluacion.evaluar import Informe
+    informe = Informe(total=len(filas), aciertos=sum(e == p for e, p in filas))
+    informe.confusion = Counter(filas)
+    informe.distribucion = Counter(p for _, p in filas)
+    return informe
+
+
+def test_exactitud_por_accion():
+    informe = _informe([("POSTULAR", "POSTULAR"), ("POSTULAR", "DESCARTAR"), ("DESCARTAR", "DESCARTAR")])
+    assert informe.exactitud_por_accion() == {"POSTULAR": 0.5, "DESCARTAR": 1.0}
+
+
+def test_tabla_confusion_markdown():
+    tabla = _informe([("DESCARTAR", "POSTULAR"), ("DESCARTAR", "POSTULAR"), ("POSTULAR", "POSTULAR")]).tabla_confusion()
+    filas = {f.split("|")[1].strip(): f for f in tabla.splitlines()[2:]}
+    assert set(filas) == {"DESCARTAR", "POSTULAR"}
+    encabezado = [c.strip() for c in tabla.splitlines()[0].split("|")]
+    columna = encabezado.index("POSTULAR")
+    assert filas["DESCARTAR"].split("|")[columna].strip() == "2"
+
+
+def test_informe_markdown_lleva_todo_lo_que_se_reporta():
+    from matching.evaluacion.evaluar import informe_markdown
+    texto = informe_markdown(_informe([("POSTULAR", "POSTULAR"), ("DESCARTAR", "POSTULAR")]), "prueba", POLITICA)
+    for esperado in ("prueba", POLITICA.version, "exactitud", "línea base", "clase mayoritaria", "| POSTULAR |", "50%"):
+        assert esperado in texto

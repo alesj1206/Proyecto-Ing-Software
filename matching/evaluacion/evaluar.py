@@ -22,6 +22,7 @@ from ..services import decidir_par
 from ..vectores import embeber_perfil, embeber_vacantes
 
 MARGEN_LINEA_BASE = 0.10
+ORDEN_ACCIONES = ("POSTULAR", "AJUSTAR_CV", "CERRAR_BRECHA", "DESCARTAR", "SIN_DATOS")
 NO_RELEVANTE = "DESCARTAR"  # una vacante bajo τ_relevancia no se le muestra al candidato: equivale a descartarla
 
 
@@ -63,6 +64,27 @@ class Informe:
     @property
     def exactitud_linea_base(self) -> float:
         return self.aciertos_linea_base / self.total if self.total else 0.0
+
+    def _esperadas(self) -> list[str]:
+        return [a for a in ORDEN_ACCIONES if any(e == a for e, _ in self.confusion)]
+
+    def exactitud_por_accion(self) -> dict[str, float]:
+        """Qué parte de los pares de cada acción esperada acertó el decisor (lo que oculta la exactitud global)."""
+        resultado = {}
+        for accion in self._esperadas():
+            total = sum(n for (e, _), n in self.confusion.items() if e == accion)
+            resultado[accion] = self.confusion[(accion, accion)] / total
+        return resultado
+
+    def tabla_confusion(self) -> str:
+        """Matriz de confusión en Markdown: filas = acción esperada, columnas = acción predicha."""
+        columnas = [a for a in ORDEN_ACCIONES if any(p == a for _, p in self.confusion)]
+        lineas = ["| esperada \\ predicha | " + " | ".join(columnas) + " |",
+                  "|---|" + "---:|" * len(columnas)]
+        for esperada in self._esperadas():
+            celdas = " | ".join(str(self.confusion[(esperada, p)]) for p in columnas)
+            lineas.append(f"| {esperada} | {celdas} |")
+        return "\n".join(lineas)
 
 
 def cargar_pares(ruta: Path, mitad: str) -> list[Par]:
@@ -133,3 +155,16 @@ def barrido(escenario: Escenario, pares: list[Par], base: Politica) -> list[tupl
         politica = replace(base, tau_alto=alto, tau_bajo=bajo, tau_relevancia=relevancia)
         resultados.append((politica, evaluar(escenario, pares, politica)))
     return sorted(resultados, key=lambda r: (-r[1].exactitud, abs(r[0].tau_alto - base.tau_alto)))
+
+
+def informe_markdown(informe: Informe, mitad: str, politica: Politica) -> str:
+    """La salida cruda de una corrida, tal cual, para pegarla en el informe (no se edita a mano)."""
+    por_accion = "\n".join(f"| {a} | {v:.0%} |" for a, v in informe.exactitud_por_accion().items())
+    distribucion = ", ".join(f"{a} {informe.distribucion[a]}" for a in ORDEN_ACCIONES if informe.distribucion[a])
+    errores = "\n".join(f"- {e}" for e in informe.errores) or "- (ninguno)"
+    return (f"### Mitad de {mitad} — política {politica.version}\n\n"
+            f"- pares: {informe.total}\n- exactitud del decisor: {informe.exactitud:.0%}\n"
+            f"- línea base (similitud pura): {informe.exactitud_linea_base:.0%}\n"
+            f"- clase mayoritaria: {informe.exactitud_mayoritaria:.0%}\n- distribución predicha: {distribucion}\n\n"
+            f"| acción esperada | acierto |\n|---|---:|\n{por_accion}\n\n{informe.tabla_confusion()}\n\n"
+            f"Errores:\n{errores}\n")
