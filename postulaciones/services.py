@@ -34,6 +34,8 @@ def registrar_resultado(postulacion: Postulacion, resultado: str) -> ResultadoDe
     if decision:
         datos = {"accion": decision.accion, "solidez": decision.solidez, "cobertura_pct": decision.cobertura_pct,
                  "version_politica": decision.version_politica,
-                 "insumos": {"cobertura": decision.cobertura, "restricciones": decision.restricciones}}
+                 "insumos": {"cobertura": decision.cobertura, "restricciones": decision.restricciones,
+                            "similitud": decision.similitud, "con_nota": decision.con_nota,
+                            "motivos": decision.motivos}}
     registro, _ = ResultadoDecision.objects.get_or_create(postulacion=postulacion, resultado=resultado, defaults=datos)
     return registro

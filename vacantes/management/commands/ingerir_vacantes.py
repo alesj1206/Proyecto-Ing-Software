@@ -6,12 +6,10 @@ from django.core.management.base import BaseCommand, CommandError
 
 from vacantes.fuentes import FuenteVacantes
 from vacantes.fuentes.fixture import FuenteFixture
-from vacantes.fuentes.magneto_detalle import FuenteMagnetoDetalle
+from vacantes.fuentes.magneto_detalle import TERMINOS_POR_DEFECTO, FuenteMagnetoDetalle
 from vacantes.services import ingerir
 
 RUTA_FIXTURE = Path(__file__).resolve().parents[2] / "fixtures" / "vacantes_magneto.json"
-TERMINOS_POR_DEFECTO = ["analista de datos", "desarrollador", "auxiliar contable", "asesor comercial",
-                        "auxiliar administrativo", "diseñador grafico"]
 
 # Registro de estrategias: agregar una fuente nueva (p. ej. el MCP de Magneto en la Fase 3) es agregar una línea.
 def _fuente_mcp(opciones: dict) -> FuenteVacantes:

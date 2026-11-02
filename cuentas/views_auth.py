@@ -9,11 +9,11 @@ from django.views.decorators.http import require_POST
 
 from .forms import ClaveLoginForm, CorreoForm, RegistroClaveForm, RegistroDatosForm
 from .legal import VERSION_POLITICA, VERSION_TERMINOS
-from .selectors import perfil_con_cv
 from .models import Usuario
+from .selectors import perfil_con_cv
 from .services import crear_usuario_con_autorizacion
-from .verificacion import EnlaceInvalido, EnlaceUsado, EnlaceVencido, registrar_pendiente, reenviar, verificar
 from .sociales import proveedores_activos
+from .verificacion import EnlaceInvalido, EnlaceUsado, EnlaceVencido, registrar_pendiente, reenviar, verificar
 
 MAX_INTENTOS_LOGIN = 5
 BLOQUEO_LOGIN_S = 15 * 60

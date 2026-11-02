@@ -96,3 +96,11 @@ def test_el_texto_para_copiar_no_lleva_evidencia_que_ya_no_esta(decision, usuari
     responder(s, acepta=True)
     usuario.perfil.evidencias.filter(texto="Hice tableros en Excel.").delete()
     assert texto_adaptado(usuario.perfil, vacante_v1) == ""
+
+
+def test_taller_get_concurrente_no_da_500(decision, usuario, vacante_v1):
+    """Otro GET simultáneo ya creó la sugerencia: este no debe chocar con la restricción única."""
+    evidencias = list(usuario.perfil.evidencias.values_list("texto", flat=True))
+    for s in generar_sugerencias(decision, evidencias):
+        s.save()
+    assert len(taller(usuario.perfil, vacante_v1)) == SugerenciaCV.objects.count() > 0

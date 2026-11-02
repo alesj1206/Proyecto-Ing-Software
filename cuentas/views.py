@@ -16,6 +16,7 @@ from .models import ConexionMagneto, Perfil
 from .selectors import perfil_con_cv
 from .services import eliminar_cuenta, guardar_perfil_desde_cv
 
+
 def _cargar_cv(request):
     """Procesa el POST de la hoja de vida; devuelve (form, guardado)."""
     form = CVUploadForm(request.POST, request.FILES)

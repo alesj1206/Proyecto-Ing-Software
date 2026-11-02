@@ -11,6 +11,7 @@ from django.utils import timezone
 from vacantes.extraccion import normalizar
 from vacantes.models import Vacante
 
+from .formato import pesos
 from .models import Decision, FotoDiaria, SolicitudDecision
 from .politica import Accion
 from .preseleccion import OPUESTA as MODALIDAD_OPUESTA
@@ -195,15 +196,11 @@ def pendiente_de_decision(perfil) -> bool:
     return SolicitudDecision.objects.filter(perfil=perfil).exists()
 
 
-def _pesos(valor: int) -> str:
-    return f"$ {valor:,.0f}".replace(",", ".")
-
-
 def mercado(perfil) -> dict | None:
     """La tarjeta "Tu mercado" (D, §13.3), calculada por el batch en la última FotoDiaria."""
     datos = FotoDiaria.objects.filter(perfil=perfil).values_list("mercado", flat=True).first()
     if not datos or not datos.get("relevantes"):
         return None
-    rango = (f"{_pesos(datos['salario_min'])} a {_pesos(datos['salario_max'])}"
+    rango = (f"{pesos(datos['salario_min'])} a {pesos(datos['salario_max'])}"
              if datos.get("salario_min") and datos.get("salario_max") else "")
     return {"relevantes": datos["relevantes"], "rango": rango, "empresas": [e[0] for e in datos["empresas"]]}

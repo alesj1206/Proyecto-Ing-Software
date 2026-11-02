@@ -47,3 +47,10 @@ def test_volver_a_entrevista_no_duplica(postulacion, usuario, vacante_v1):
     cambiar_estado(postulacion, "entrevista")
     cambiar_estado(postulacion, "entrevista")
     assert ResultadoDecision.objects.count() == 1
+
+
+def test_resultado_guarda_insumos_para_calibrar(postulacion, usuario, vacante_v1):
+    _decision(usuario, vacante_v1)
+    cambiar_estado(postulacion, "entrevista")
+    insumos = ResultadoDecision.objects.get().insumos
+    assert (insumos["similitud"], insumos["con_nota"], insumos["motivos"]) == (0.8, "", ["Cubres 1/1"])

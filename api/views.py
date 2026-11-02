@@ -12,7 +12,7 @@ from cuentas.models import Perfil
 from matching.services import solicitar_decision
 from notificaciones.services import generar_notificaciones
 from vacantes.fuentes.magneto_detalle import FuenteMagnetoDetalle
-from vacantes.management.commands.ingerir_vacantes import TERMINOS_POR_DEFECTO
+from vacantes.fuentes.magneto_detalle import TERMINOS_POR_DEFECTO
 from vacantes.services import ingerir_en_segundo_plano
 
 from .autenticacion import token_invalido

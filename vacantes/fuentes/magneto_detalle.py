@@ -15,6 +15,8 @@ from . import VacanteCruda
 
 URL_BUSQUEDA = "https://www.magneto365.com/co/trabajos/buscar"
 HOST_MAGNETO = "www.magneto365.com"
+TERMINOS_POR_DEFECTO = ["analista de datos", "desarrollador", "auxiliar contable", "asesor comercial",
+                        "auxiliar administrativo", "diseñador grafico"]
 CHROME = os.environ.get("SCOUTLY_CHROME") or None  # None = el Chromium que instala Playwright
 PAUSA_ENTRE_PAGINAS_S = 1.5  # no saturar el sitio
 LINEA_EMPRESA = re.compile(r"^(?P<empresa>.+?) \| .+, \d+ cupos?$")
