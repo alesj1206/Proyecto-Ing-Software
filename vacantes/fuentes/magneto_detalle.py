@@ -19,6 +19,8 @@ TERMINOS_POR_DEFECTO = ["analista de datos", "desarrollador", "auxiliar contable
                         "auxiliar administrativo", "diseñador grafico"]
 CHROME = os.environ.get("SCOUTLY_CHROME") or None  # None = el Chromium que instala Playwright
 PAUSA_ENTRE_PAGINAS_S = 1.5  # no saturar el sitio
+ESPERA_LISTADO_MS = 3500
+MAX_PAGINAS_POR_TERMINO = 50
 LINEA_EMPRESA = re.compile(r"^(?P<empresa>.+?) \| .+, \d+ cupos?$")
 FECHA = re.compile(r"Fecha de publicación (\d{4}-\d{2}-\d{2})")
 INICIO_TEXTO = "Requisitos para aplicar a la vacante:"
@@ -89,28 +91,31 @@ def parsear_detalle(cuerpo: str, url: str) -> VacanteCruda | None:
 class FuenteMagnetoDetalle:
     nombre = "magneto"
 
-    def __init__(self, terminos: list[str], por_termino: int, chrome: str = CHROME):
-        self.terminos, self.por_termino, self.chrome = terminos, por_termino, chrome
+    def __init__(self, terminos: list[str], por_termino: int, chrome: str = CHROME, omitir: frozenset[str] = frozenset()):
+        """`omitir`: ids numéricos de Magneto que no hace falta abrir (la carga de un catálogo grande se puede retomar)."""
+        self.terminos, self.por_termino, self.chrome, self.omitir = terminos, por_termino, chrome, omitir
 
     def obtener(self) -> Iterator[VacanteCruda]:
         # Playwright sync mantiene un event loop activo mientras el navegador está abierto, y Django no permite
-        # escribir en la base desde ahí: se juntan todas las vacantes, se cierra el navegador y luego se entregan.
-        return iter(self._descargar())
+        # escribir en la base desde ahí: se juntan las vacantes de un término, se cierra el navegador y se entregan.
+        # Así, una carga de horas que se corta no pierde los términos ya terminados.
+        for termino in self.terminos:
+            yield from self._descargar(termino)
 
-    def _descargar(self) -> list[VacanteCruda]:
+    def _descargar(self, termino: str) -> list[VacanteCruda]:
         from playwright.sync_api import sync_playwright  # solo se importa si se usa esta fuente
 
         with sync_playwright() as p:
             navegador = p.chromium.launch(executable_path=self.chrome, headless=True)
             try:
-                return self._recorrer(navegador.new_page(viewport={"width": 1440, "height": 1400}))
+                return self._recorrer(navegador.new_page(viewport={"width": 1440, "height": 1400}), [termino])
             finally:
                 navegador.close()
 
-    def _recorrer(self, pagina) -> list[VacanteCruda]:
+    def _recorrer(self, pagina, terminos: list[str] | None = None) -> list[VacanteCruda]:
         """Una búsqueda o una página que falla se registra y se salta: no se pierde lo ya descargado."""
         vacantes = []
-        for termino in self.terminos:
+        for termino in self.terminos if terminos is None else terminos:
             try:
                 urls = self._enlaces(pagina, termino)
             except Exception:  # timeouts de Playwright, cambios en la página de búsqueda
@@ -132,6 +137,26 @@ class FuenteMagnetoDetalle:
         return vacantes
 
     def _enlaces(self, pagina, termino: str) -> list[str]:
+        """Hasta `por_termino` vacantes por abrir, siguiendo las páginas de resultados (20 cada una) si hace falta."""
+        self._buscar(pagina, termino)
+        base = pagina.url.split("?")[0]
+        vistos, urls = set(), []
+        for numero in range(1, MAX_PAGINAS_POR_TERMINO + 1):
+            if numero > 1:
+                pagina.goto(f"{base}?paginator[page]={numero}", timeout=30000)
+                pagina.wait_for_timeout(ESPERA_LISTADO_MS)
+            nuevos = [u for u in enlaces_validos(pagina.eval_on_selector_all("a[href*='/co/empleos/']",
+                                                                             "els => els.map(e => e.href)"))
+                      if u not in vistos]
+            if not nuevos:  # se acabaron los resultados
+                break
+            vistos.update(nuevos)
+            urls += [u for u in nuevos if u.rstrip("/").rsplit("-", 1)[-1] not in self.omitir]
+            if len(urls) >= self.por_termino:
+                break
+        return urls[: self.por_termino]
+
+    def _buscar(self, pagina, termino: str) -> None:
         pagina.goto(URL_BUSQUEDA, timeout=30000)
         pagina.wait_for_timeout(3000)
         caja = pagina.get_by_text("Buscar por cargo o profesión").first.bounding_box()
@@ -140,6 +165,4 @@ class FuenteMagnetoDetalle:
         pagina.mouse.click(caja["x"] + 10, caja["y"] + 10)
         pagina.keyboard.type(termino)
         pagina.keyboard.press("Enter")
-        pagina.wait_for_timeout(3500)
-        hrefs = pagina.eval_on_selector_all("a[href*='/co/empleos/']", "els => els.map(e => e.href)")
-        return enlaces_validos(hrefs)[: self.por_termino]
+        pagina.wait_for_timeout(ESPERA_LISTADO_MS)
