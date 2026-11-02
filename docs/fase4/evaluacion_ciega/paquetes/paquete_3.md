@@ -17,17 +17,17 @@ Habilidades: atención al paciente, toma de signos vitales, RETHUS vigente, trab
 
 1. Auxiliar De Enfermería Call Center Autorizaciones Y Referencia Servicios Salud — Américas BPS (Bogotá, D.C.)
 2. Auxiliar de enfermeria Bogota — LISTOS S.A.S (Bogotá, D.C.)
-3. Auxiliar De Enfermería _ UCI — Grupo Icor (Medellín)
-4. Auxiliar administrativo/a para Envigado 360215-137317 — Servicio de Empleo Comfama (Envigado)
-5. Auxiliar de Enfermería - Bogotá — Fundación Santa Fe de Bogotá (Bogotá, D.C.)
+3. Auxiliar de Enfermería - Bogotá — Fundación Santa Fe de Bogotá (Bogotá, D.C.)
+4. Auxiliar De Enfermería _ UCI — Grupo Icor (Medellín)
+5. Auxiliar administrativo/a para Envigado 360215-137317 — Servicio de Empleo Comfama (Envigado)
 
 **Lista B**
 
-1. Auxiliar De Enfermería _ UCI — Grupo Icor (Medellín)
-2. Auxiliar de enfermeria Medellin — LISTOS S.A.S (Medellín)
-3. Banco de Talentos Auxiliar de Enfermería – Medellín — Magneto (Medellín - Sabaneta - Itagui - Envigado - Copacabana - Girardota - Bello)
-4. AUXILIAR DE ENFERMERIA - BOGOTA - VACANTE TEMPORAL — Confidencial (Bogotá, D.C.)
-5. Auxiliar de Enfermería - Bogotá — Fundación Santa Fe de Bogotá (Bogotá, D.C.)
+1. Auxiliar de Enfermería - Bogotá — Fundación Santa Fe de Bogotá (Bogotá, D.C.)
+2. AUXILIAR DE ENFERMERIA - BOGOTA - VACANTE TEMPORAL — Confidencial (Bogotá, D.C.)
+3. Auxiliar De Enfermería _ UCI — Grupo Icor (Medellín)
+4. Auxiliar de enfermeria Medellin — LISTOS S.A.S (Medellín)
+5. Banco de Talentos Auxiliar de Enfermería – Medellín — Magneto (Medellín - Sabaneta - Itagui - Envigado - Copacabana - Girardota - Bello)
 
 ## Pregunta 2: ¿cuál CV pasaría tu primer filtro para esta vacante?
 

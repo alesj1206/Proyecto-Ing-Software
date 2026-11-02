@@ -1,3 +1,4 @@
+import pytest
 from django.urls import reverse
 
 from matching.models import FotoDiaria
@@ -7,7 +8,13 @@ from vacantes.models import Vacante
 from .test_decidir import E, TODAS, _perfil, catalogo  # noqa: F401 (fixture)
 
 
-def test_mercado_excluye_descartar(usuario, catalogo):
+
+@pytest.fixture
+def sin_corte_de_cercania(monkeypatch):
+    """El embedder falso da similitudes bajas; estas pruebas miran otra cosa que el corte (test_revision_fase4)."""
+    monkeypatch.setattr("matching.services.SIMILITUD_CERCANA", 0.0)
+
+def test_mercado_excluye_descartar(usuario, catalogo, sin_corte_de_cercania):
     Vacante.objects.filter(id="vpost").update(salario_min=2000000, salario_max=3000000, empresa="Andina")
     Vacante.objects.filter(id="vdesc").update(salario_min=9000000, salario_max=9900000)  # DESCARTAR: no cuenta
     perfil = _perfil(usuario)
@@ -24,7 +31,7 @@ def test_mercado_sin_salarios(usuario, catalogo):
     assert (m["salario_min"], m["salario_max"]) == (None, None)
 
 
-def test_la_tarjeta_aparece_en_el_dashboard(client, usuario, catalogo):
+def test_la_tarjeta_aparece_en_el_dashboard(client, usuario, catalogo, sin_corte_de_cercania):
     Vacante.objects.filter(id="vpost").update(salario_min=2000000, salario_max=3000000)
     perfil = _perfil(usuario)
     decidir_para_perfil(perfil, E, politica=TODAS)

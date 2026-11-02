@@ -2,6 +2,8 @@
 nunca descarta: solo baja la solidez (un candidato que no declaró algo no puede violarlo)."""
 
 import re
+
+from django.utils import timezone
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -126,17 +128,27 @@ class RestriccionEstudiante:
     tecnólogo o estudiante de…" no la activa: ahí ser estudiante es una alternativa, no una exigencia."""
 
     criterio = "estudiante"
-    TITULO = re.compile(r"\b(practicante|practica|practicas|aprendiz|pasante|pasantia)\b")
+    # Palabras de rol, no "práctica" suelta ("Buenas Prácticas de Manufactura", "Líder de práctica SAP").
+    TITULO = re.compile(r"\b(practicante|aprendiz|pasante|pasantia)\b|^practicas? (profesional|academica)")
     DESCRIPCION = re.compile(r"\bcontrato de aprendizaje\b")
-    EN_CURSO = re.compile(r"\b(en curso|cursando|actualmente|actual|a la fecha|presente|semestre)\b")
+    EN_CURSO = re.compile(r"\b(en curso|cursando|actualmente|actualidad|actual|a la fecha|presente|hoy|semestre|"
+                          r"estudiante|en progreso|en formacion)\b")
+    RANGO_DE_ANIOS = re.compile(r"\b(?:19|20)\d{2}\s+(?:a\s+)?((?:19|20)\d{2})\b")
     MOTIVO_NO = "La vacante es para estudiantes y tu CV no muestra estudios en curso"
+
+    def _en_curso(self, texto: str) -> bool:
+        normal = normalizar(texto)
+        anio = timezone.localdate().year
+        return bool(self.EN_CURSO.search(normal)) or any(int(fin) > anio for fin in self.RANGO_DE_ANIOS.findall(normal))
 
     def evaluar(self, perfil, vacante, politica) -> ResultadoRestriccion | None:
         if not (self.TITULO.search(normalizar(vacante.titulo))
                 or self.DESCRIPCION.search(normalizar(vacante.descripcion or ""))):
             return None
-        educacion = perfil.evidencias.filter(seccion="educacion").values_list("texto", flat=True)
-        if any(self.EN_CURSO.search(normalizar(t)) for t in educacion):
+        educacion = list(perfil.evidencias.filter(seccion="educacion").values_list("texto", flat=True))
+        if not educacion:
+            return ResultadoRestriccion(self.criterio, "sin_datos", "Tu CV no dice qué estudias")
+        if any(self._en_curso(t) for t in educacion):
             return ResultadoRestriccion(self.criterio, "cumple", "Tu CV muestra estudios en curso")
         return ResultadoRestriccion(self.criterio, "no_cumple", self.MOTIVO_NO)
 

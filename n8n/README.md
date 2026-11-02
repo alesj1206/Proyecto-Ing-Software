@@ -53,6 +53,11 @@ pero Django tiene que escuchar en todas las interfaces:
 
 Con `127.0.0.1:8000` el contenedor no lo alcanza.
 
+> **Cuidado:** `0.0.0.0` expone el servidor de desarrollo a toda la red (Wi-Fi compartida incluida). Úsalo solo en
+> una red de confianza, y **nunca con `DJANGO_DEBUG=true`**: una página de error mostraría datos del CV. Es más seguro
+> escuchar solo en la puerta de enlace de Podman (`podman network inspect podman` da la IP, por ejemplo
+> `runserver --insecure 10.88.0.1:8000`).
+
 ## Importar el workflow
 
 En n8n: Menú (⋮) → **Import from File** → `workflow-matches-diarios.json`. Luego se pone el token en el header de los

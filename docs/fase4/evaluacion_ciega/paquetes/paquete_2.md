@@ -15,19 +15,19 @@ Habilidades: Excel intermedio, facturación electrónica, conciliaciones bancari
 
 **Lista A**
 
-1. Auxiliar Contable (NIIF y Excel) — CM GLOBAL CONSULTING SAS (Bogotá, D.C.)
-2. AUXILIAR CONTABLE MEDELLIN — ML CONSULTORIA S.A.S. (Medellín)
-3. Gtr Analista Junior De Workforce , Manejo Base De Datos, Mallas Horarias Bogotá — Confidencial (Bogotá, D.C.)
-4. Auxiliar Contable (Siigo Nube) - Bogotá D. C. — ATCOM OUTSORCING SA (Bogotá, D.C.)
-5. Analista Contable (Conciliaciones) [Híbrido] - Bogotá — LISTOS S.A.S (Bogotá, D.C.)
+1. Auxiliar Contable — IMPOCOSER S.A.S. (Bogotá, D.C.)
+2. Analista Contable (Conciliaciones) [Híbrido] - Bogotá — LISTOS S.A.S (Bogotá, D.C.)
+3. Auxiliar Contable (Siigo Nube) - Bogotá D. C. — ATCOM OUTSORCING SA (Bogotá, D.C.)
+4. ASISTENTE ADMINISTRATIVO — Grupo Vardí (Bogotá, D.C.)
+5. AUXILIAR ADMINISTRATIVO EN COMPRAS — Confidencial (Bogotá, D.C.)
 
 **Lista B**
 
-1. Auxiliar Contable — IMPOCOSER S.A.S. (Bogotá, D.C.)
-2. Auxiliar Contable (Siigo Nube) - Bogotá D. C. — ATCOM OUTSORCING SA (Bogotá, D.C.)
+1. Auxiliar Contable (Siigo Nube) - Bogotá D. C. — ATCOM OUTSORCING SA (Bogotá, D.C.)
+2. Auxiliar Contable (NIIF y Excel) — CM GLOBAL CONSULTING SAS (Bogotá, D.C.)
 3. Analista Contable (Conciliaciones) [Híbrido] - Bogotá — LISTOS S.A.S (Bogotá, D.C.)
-4. Gtr Analista Junior De Workforce , Manejo Base De Datos, Mallas Horarias Bogotá — Confidencial (Bogotá, D.C.)
-5. ASISTENTE ADMINISTRATIVO — Grupo Vardí (Bogotá, D.C.)
+4. AUXILIAR CONTABLE MEDELLIN — ML CONSULTORIA S.A.S. (Medellín)
+5. Gtr Analista Junior De Workforce , Manejo Base De Datos, Mallas Horarias Bogotá — Confidencial (Bogotá, D.C.)
 
 ## Pregunta 2: ¿cuál CV pasaría tu primer filtro para esta vacante?
 

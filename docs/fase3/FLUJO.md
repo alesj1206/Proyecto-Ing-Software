@@ -35,6 +35,11 @@ infra/postgres/levantar.sh                               # Postgres 17 + pgvecto
 # n8n: importar n8n/workflow-matches-diarios.json y poner N8N_SCORING_TOKEN (ver n8n/README.md)
 ```
 
+> **Cuidado:** `0.0.0.0` expone el servidor de desarrollo a toda la red (Wi-Fi compartida incluida). Úsalo solo en
+> una red de confianza, y **nunca con `DJANGO_DEBUG=true`**: una página de error mostraría datos del CV. Es más seguro
+> escuchar solo en la puerta de enlace de Podman (`podman network inspect podman` da la IP, por ejemplo
+> `runserver --insecure 10.88.0.1:8000`).
+
 Variables útiles en `.env`:
 - `GROQ_API_KEY` para "Explícamelo"; sin ella se usa un texto de respaldo.
 - SMTP (`DJANGO_EMAIL_BACKEND` y `EMAIL_*`) para que los correos salgan; si no, se imprimen en la terminal.

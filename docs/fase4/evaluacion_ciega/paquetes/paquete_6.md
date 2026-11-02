@@ -14,11 +14,7 @@ Habilidades: ventas, servicio al cliente, exhibición comercial, maquillaje
 
 **Lista A**
 
-1. Asesora Comercial (cosmética) - Ibague — Staffing (Ibagué)
-2. Asesora Comercial (cosmética) - Madrid — Staffing (Madrid)
-3. Asesora Comercial (cosmética) - Neiva — Staffing (Neiva)
-4. Asesora Comercial (cosmética) - Sopo — STAFFING DE COLOMBIA (Sopó)
-5. Asesora Comercial (cosmética) - Yopal — STAFFING DE COLOMBIA (Yopal)
+1. Asesora Comercial (cosmética) - Neiva — Staffing (Neiva)
 
 **Lista B**
 

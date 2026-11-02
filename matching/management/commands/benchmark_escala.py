@@ -27,6 +27,14 @@ VACANTES_120K = 120_000
 DELTA_DIARIO = 3_000
 
 
+def _base_conectada() -> str:
+    """El nombre de la base a la que de verdad está conectado, no el configurado (un servicio de pg o un alias podrían
+    diferir)."""
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT current_database()")
+        return cursor.fetchone()[0]
+
+
 def _cpu() -> str:
     try:
         for linea in Path("/proc/cpuinfo").read_text().splitlines():
@@ -66,11 +74,14 @@ class Command(BaseCommand):
         parser.add_argument("--muestra", type=int, default=DELTA_DIARIO, help="se embebe de verdad (= delta diario)")
         parser.add_argument("--candidatos", type=int, default=11, help="CVs ficticios del set de evaluación")
         parser.add_argument("--salida", type=Path)
+        parser.add_argument("--confirmar", action="store_true", help="borra TODAS las vacantes de la base *_bench")
 
-    def handle(self, *args, vacantes, muestra, candidatos, salida=None, **options):
-        base = connection.settings_dict["NAME"]
+    def handle(self, *args, vacantes, muestra, candidatos, salida=None, confirmar=False, **options):
+        base = _base_conectada()
         if not base.endswith("_bench"):
             raise CommandError(f"El benchmark borra y llena la base: solo corre en una base *_bench (esta es {base}).")
+        if not confirmar:
+            raise CommandError(f"Esto borra TODAS las vacantes de {base}. Repite con --confirmar.")
         plantillas = json.loads((DATOS / "vacantes.json").read_text(encoding="utf-8"))
         embedder, mediciones = obtener_embedder(), []
         Vacante.objects.all().delete()

@@ -42,8 +42,10 @@ class Paquete:
         return "\n".join(partes)
 
 
-def asignar(claves: list[str], semilla: int) -> dict[str, dict]:
-    azar = random.Random(semilla)
+def asignar(claves: list[str], semilla: int | None) -> dict[str, dict]:
+    """Sin semilla (lo normal) el sorteo usa el azar del sistema: la clave no se puede recalcular desde el repositorio.
+    La semilla solo existe para las pruebas."""
+    azar = random.Random(semilla) if semilla is not None else random.SystemRandom()
     resultado = {}
     for clave in claves:
         a_decisor, uno_original = azar.random() < 0.5, azar.random() < 0.5
@@ -68,16 +70,19 @@ def _rotulo(vacante: Vacante) -> str:
     return f"{vacante.titulo} — {vacante.empresa} ({vacante.ubicacion})"
 
 
-def preparar(escenario, cvs: dict[str, dict], claves: list[str], embedder, semilla: int) -> tuple[list[Paquete], dict]:
+def preparar(escenario, cvs: dict[str, dict], claves: list[str], embedder,
+             semilla: int | None) -> tuple[list[Paquete], dict]:
     sorteo, paquetes, clave = asignar(claves, semilla), [], {}
     hoy = timezone.localdate()
     for numero, nombre in enumerate(claves, 1):
         perfil = escenario.perfiles[nombre]
         decidir_para_perfil(perfil, embedder)
-        por_origen = {
-            "decisor": [_rotulo(item.vacante) for item in plan_de_hoy(perfil, TAMANO_LISTA, hoy)],
-            "similitud": [_rotulo(v) for v in Vacante.objects.filter(id__in=[i for i, _ in preseleccionar(
-                perfil, POLITICA.tau_relevancia).relevantes[:TAMANO_LISTA]])]}
+        decisor = [_rotulo(item.vacante) for item in plan_de_hoy(perfil, TAMANO_LISTA, hoy)]
+        ids = [i for i, _ in preseleccionar(perfil, POLITICA.tau_relevancia).relevantes[:TAMANO_LISTA]]
+        por_id = Vacante.objects.in_bulk(ids)
+        similitud = [_rotulo(por_id[i]) for i in ids]  # en orden de similitud, no en el orden por defecto del modelo
+        largo = min(len(decisor), len(similitud))  # mismo largo: el tamaño de la lista no delata su origen
+        por_origen = {"decisor": decisor[:largo], "similitud": similitud[:largo]}
         asignacion = sorteo[nombre]
         paquete = Paquete(numero, texto_cv(cvs[nombre]),
                           {letra: por_origen[origen] for letra, origen in asignacion["listas"].items()})
@@ -92,19 +97,30 @@ def preparar(escenario, cvs: dict[str, dict], claves: list[str], embedder, semil
             paquete.vacante_objetivo = _rotulo(objetivo.vacante)
             paquete.cvs = {n: textos[origen] for n, origen in asignacion["cvs"].items()}
         paquetes.append(paquete)
-        clave[str(numero)] = {"cv": nombre, **asignacion}
+        clave[str(numero)] = {"cv": nombre, "tiene_cv": bool(paquete.cvs), **asignacion}
     return paquetes, clave
 
 
 def tabular(filas: list[dict], clave: dict) -> dict:
-    """% de veces que se eligió la opción del decisor (pregunta "lista") y el CV con sugerencias (pregunta "cv")."""
+    """% de veces que se eligió la opción del decisor (pregunta "lista") y el CV con sugerencias (pregunta "cv").
+    Las filas inválidas o repetidas no cuentan: se devuelven sus números de línea en el CSV (la 1 es la cabecera)."""
     favorable = {"lista": "decisor", "cv": "adaptado"}
+    validas = {"lista": {"A", "B"}, "cv": {"1", "2"}}
     conteo = {p: defaultdict(lambda: [0, 0]) for p in favorable}
-    for fila in filas:
-        pregunta = fila["pregunta"].strip()
-        campo = "listas" if pregunta == "lista" else "cvs"
-        origen = clave[fila["paquete"].strip()][campo][fila["eleccion"].strip()]
-        for quien in ("total", fila["reclutador"].strip()):
+    vistos, errores = set(), []
+    for numero, fila in enumerate(filas, 2):
+        reclutador, paquete, pregunta, eleccion = ((fila.get(c) or "").strip() for c in COLUMNAS)
+        eleccion = eleccion.upper()
+        invalida = (not reclutador or reclutador == "total" or paquete not in clave
+                    or eleccion not in validas.get(pregunta, ())
+                    or (pregunta == "cv" and not clave[paquete].get("tiene_cv"))
+                    or (reclutador, paquete, pregunta) in vistos)
+        if invalida:
+            errores.append(numero)
+            continue
+        vistos.add((reclutador, paquete, pregunta))
+        origen = clave[paquete]["listas" if pregunta == "lista" else "cvs"][eleccion]
+        for quien in ("total", reclutador):
             conteo[pregunta][quien][0] += origen == favorable[pregunta]
             conteo[pregunta][quien][1] += 1
     resultado = {}
@@ -112,4 +128,5 @@ def tabular(filas: list[dict], clave: dict) -> dict:
         total = por_quien.get("total", [0, 0])
         resultado[pregunta] = {favorable[pregunta]: total[0] / total[1] if total[1] else 0.0, "n": total[1],
                                "por_reclutador": {q: a / n for q, (a, n) in por_quien.items() if q != "total"}}
+    resultado["errores"] = errores
     return resultado

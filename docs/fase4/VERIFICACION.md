@@ -5,7 +5,7 @@ Fecha: 2026-11-01. Política `2026-11-04.2`, en esta máquina, con Postgres en P
 ## 1. El flujo diario con n8n real
 
 Se usó el workflow `n8n/workflow-matches-diarios.json` de v3, cargado en la instancia local de n8n, y se lanzó una
-ejecución manual (la ejecución 6). Django corría con `runserver --insecure 0.0.0.0:8000` y el batch con
+ejecución manual (la ejecución 6). Django corría con `runserver --insecure 0.0.0.0:8000` (en una red de confianza y sin DEBUG; ver `n8n/README.md`) y el batch con
 `manage.py decidir --escuchar`.
 
 Log de Django (los tres nodos en cadena):
@@ -68,3 +68,16 @@ decide con diferencias de similitud de pocas centésimas. Aquí el riesgo es may
 "parcial" en una frase que el candidato podría copiar. El aviso "Solo acepta lo que sea verdad" y el botón Rechazar
 son la salvaguarda actual. Hay un arreglo posible que no se hizo: exigir una similitud mínima más alta entre evidencia y
 requisito para sugerir (por ejemplo, la de "cubierto") o mostrar solo sugerencias de requisitos de herramienta.
+
+## 4. Efecto del umbral de relevancia en la interfaz (revisión final)
+
+Con τ_relevancia en 0,25, casi todo el catálogo cuenta como "relevante": en esta verificación, 60 de unas 60 vacantes.
+La revisión final encontró tres efectos en la interfaz:
+- **"Tu mercado":** inflaba el número y el rango de salarios.
+- **El plan de aprendizaje:** se llenaba de brechas de áreas ajenas.
+- **El Plan de hoy y el Taller:** pueden trabajar sobre vacantes poco relacionadas. Así se explica el ejemplo de
+  "Asesor Comercial Retail" de arriba.
+
+Arreglo parcial (política .3): "Tu mercado" y el plan de aprendizaje solo cuentan vacantes con similitud ≥ 0,40
+(`SIMILITUD_CERCANA` en `matching/services.py`). El Plan de hoy y el Taller siguen usando el conjunto amplio. Es una
+de las dos mejoras que se exploran aparte.

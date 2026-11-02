@@ -113,7 +113,8 @@ pares:
   - {cv: experiencia_implicita_y_datos_incompletos, vacante: mag-1106225, accion_esperada: SIN_DATOS, mitad: prueba_1,
      justificacion: "Trabajo administrativo, pero la vacante no dice qué pide: que la revise él"}
   # --- prueba (Fase 4, tras las correcciones): vacantes que ninguna otra mitad usa, etiquetada ANTES de correr --
-  # PENDIENTE: el equipo debe revisarlas.
+  # PENDIENTE: el equipo debe revisarlas. Ojo: mag-1118625 (POSTULAR) es casi igual a mag-1121592 del ajuste
+  # (AJUSTAR_CV) con el mismo CV: las dos etiquetas no pueden ser correctas a la vez.
   - {cv: auxiliar_enfermeria, vacante: mag-1084935, accion_esperada: POSTULAR, mitad: prueba,
      justificacion: "RETHUS, signos vitales, bioseguridad e historias clínicas en Bogotá: lo tiene todo"}
   - {cv: asesora_comercial, vacante: mag-1121530, accion_esperada: POSTULAR, mitad: prueba,
@@ -124,8 +125,8 @@ pares:
      justificacion: "Banco de talentos para técnicas auxiliares de enfermería en Medellín: cumple"}
   - {cv: operario_produccion, vacante: mag-1119278, accion_esperada: POSTULAR, mitad: prueba,
      justificacion: "Empaque, sellado y manejo de máquinas en Funza"}
-  - {cv: operario_produccion, vacante: mag-1117923, accion_esperada: POSTULAR, mitad: prueba,
-     justificacion: "Maquinaria, empaque y sellado, BPM y manipulación de alimentos en Funza"}
+  - {cv: operario_produccion, vacante: mag-1117923, accion_esperada: POSTULAR, mitad: excluida,
+     justificacion: "EXCLUIDA (revisión final): clon del aviso mag-1121576 del ajuste. Maquinaria, empaque y sellado, BPM y manipulación de alimentos en Funza"}
   - {cv: datos_junior, vacante: mag-1105803, accion_esperada: AJUSTAR_CV, mitad: prueba,
      justificacion: "Excel avanzado, Power BI y SQL los tiene; debe hacer explícitas la automatización de informes y los indicadores"}
   - {cv: datos_junior, vacante: mag-961531, accion_esperada: AJUSTAR_CV, mitad: prueba,
@@ -158,8 +159,8 @@ pares:
      justificacion: "Le faltan legalización de tarjetas, facturación de contratistas y seguimiento presupuestal"}
   - {cv: desarrollador_backend, vacante: mag-1109685, accion_esperada: DESCARTAR, mitad: prueba,
      justificacion: "Frontend con Cells, GLOMO, Polymer y E2E: le faltan más de tres obligatorios"}
-  - {cv: disenadora_junior, vacante: mag-1116047, accion_esperada: DESCARTAR, mitad: prueba,
-     justificacion: "Pide 3 años de experiencia y tiene 1"}
+  - {cv: disenadora_junior, vacante: mag-1116047, accion_esperada: DESCARTAR, mitad: excluida,
+     justificacion: "EXCLUIDA (revisión final): clon del aviso mag-1116167 del ajuste. Pide 3 años de experiencia y tiene 1"}
   - {cv: sin_experiencia_practicante, vacante: mag-1008663, accion_esperada: SIN_DATOS, mitad: prueba,
      justificacion: "Aprendiz en Medellín sin requisitos concretos: que la revise ella"}
   - {cv: experiencia_implicita_y_datos_incompletos, vacante: mag-1072923, accion_esperada: SIN_DATOS, mitad: prueba,

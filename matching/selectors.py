@@ -14,6 +14,7 @@ from vacantes.models import Vacante
 from .formato import pesos
 from .models import Decision, FotoDiaria, SolicitudDecision
 from .politica import Accion
+from .services import SIMILITUD_CERCANA
 from .preseleccion import OPUESTA as MODALIDAD_OPUESTA
 
 ACCIONES_DEL_PLAN = (Accion.POSTULAR, Accion.AJUSTAR_CV)
@@ -125,7 +126,8 @@ def conteo_por_accion(perfil) -> dict[str, int]:
 def plan_de_aprendizaje(perfil, n: int = 5) -> list[tuple[str, int]]:
     """Las brechas agregadas: qué requisito obligatorio te falta en más vacantes de CERRAR_BRECHA."""
     conteo, nombres = Counter(), {}
-    decisiones = Decision.objects.filter(perfil=perfil, accion=Accion.CERRAR_BRECHA).order_by("id")
+    decisiones = Decision.objects.filter(perfil=perfil, accion=Accion.CERRAR_BRECHA,
+                                         similitud__gte=SIMILITUD_CERCANA).order_by("id")
     for cobertura in decisiones.values_list("cobertura", flat=True):  # orden fijo: el nombre mostrado no varía
         for r in cobertura:
             if r["estado"] == "faltante" and r["tipo"] == "obligatorio":

@@ -40,10 +40,10 @@ def test_informe_separa_medido_de_proyectado():
 
 
 def test_corrida_minima_de_punta_a_punta(db, embedder_falso, monkeypatch, tmp_path):
-    from django.db import connection
-    monkeypatch.setitem(connection.settings_dict, "NAME", "prueba_bench")
+    from matching.management.commands import benchmark_escala
+    monkeypatch.setattr(benchmark_escala, "_base_conectada", lambda: "prueba_bench")
     salida = tmp_path / "BENCHMARK.md"
-    call_command("benchmark_escala", vacantes=60, muestra=20, candidatos=2, salida=salida)
+    call_command("benchmark_escala", vacantes=60, muestra=20, candidatos=2, salida=salida, confirmar=True)
     texto = salida.read_text(encoding="utf-8")
     for etapa in ("delta_diario_min", "carga_inicial_cpu_h", "carga_masiva_min", "decision_candidato_s"):
         assert f"| {etapa} |" in texto

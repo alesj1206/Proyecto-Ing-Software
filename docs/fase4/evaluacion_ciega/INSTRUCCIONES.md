@@ -45,4 +45,4 @@ se abre antes de tabular. El resultado dice en qué porcentaje de las veces se p
 las sugerencias del Taller, en total y por reclutador. Si no se consiguen reclutadores, el informe reporta solo el set
 de evaluación (§13.3).
 
-Los paquetes se regeneran con `manage.py evaluacion_ciega preparar`; con la misma semilla salen idénticos.
+Los paquetes se generan con `manage.py evaluacion_ciega preparar`. El sorteo usa el azar del sistema, así que la clave no se puede recalcular desde el repositorio. Volver a correr el comando produce otra clave y otros paquetes. El SHA-256 de la clave vigente está en `CLAVE_SHA256.txt`: al tabular se comprueba que no cambió después de recibir las respuestas.

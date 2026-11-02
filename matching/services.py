@@ -68,9 +68,15 @@ def decidir_par(perfil: Perfil, vacante: Vacante, similitud: float, politica: Po
 TOP_EMPRESAS = 3
 
 
+# "Tu mercado" y el plan de aprendizaje miran solo lo de verdad cercano al perfil. τ_relevancia (0,25) deja pasar casi
+# todo el catálogo para que el decisor vea las vacantes escuetas; para describir el mercado de la persona hace falta
+# un corte más estricto (el τ_relevancia anterior a la Fase 4).
+SIMILITUD_CERCANA = 0.40
+
+
 def _mercado(decisiones: list[Decision]) -> dict:
-    """Sobre las relevantes que no son DESCARTAR: cuántas, el rango de salarios y las empresas que más publican."""
-    utiles = [d.vacante for d in decisiones if d.accion != Accion.DESCARTAR]
+    """Sobre las cercanas que no son DESCARTAR: cuántas, el rango de salarios y las empresas que más publican."""
+    utiles = [d.vacante for d in decisiones if d.accion != Accion.DESCARTAR and d.similitud >= SIMILITUD_CERCANA]
     minimos = [v.salario_min for v in utiles if v.salario_min]
     maximos = [v.salario_max for v in utiles if v.salario_max]
     empresas = Counter(v.empresa for v in utiles if v.empresa).most_common(TOP_EMPRESAS)

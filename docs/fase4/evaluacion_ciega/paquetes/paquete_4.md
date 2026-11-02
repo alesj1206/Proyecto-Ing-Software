@@ -19,15 +19,15 @@ Habilidades: BPM, manipulación de alimentos, operación de maquinaria, trabajo 
 2. Operario Ayudante Figurado — STAFFING S.A.S (Bogotá, D.C.)
 3. Operario De Producción Alimentos (dosificación) - Bogotá — LISTOS S.A.S (Bogotá, D.C. - Soacha)
 4. Operario de Producción (Plásticos) — SERO SERVICIOS OCASIONALES (Bogotá, D.C.)
-5. Operarios de producción o empaque — ACTIVOS S.A.S (El Rosal - Funza - Mosquera)
+5. Operario de Producción (Manufactura) - Madrid — Colsubsidio Empleo (Funza - Mosquera)
 
 **Lista B**
 
 1. Operario De Producción Alimentos (dosificación) - Bogotá — LISTOS S.A.S (Bogotá, D.C. - Soacha)
-2. Operarios de producción o empaque — ACTIVOS S.A.S (Bogotá, D.C.)
-3. Operario de Producción (Plásticos) — SERO SERVICIOS OCASIONALES (Bogotá, D.C.)
-4. Operario Ayudante Figurado — STAFFING S.A.S (Bogotá, D.C.)
-5. Operario de Producción (Manufactura) - Madrid — Colsubsidio Empleo (Funza - Mosquera)
+2. Operarios de producción o empaque — ACTIVOS S.A.S (El Rosal - Funza - Mosquera)
+3. Operarios de producción o empaque — ACTIVOS S.A.S (Bogotá, D.C.)
+4. Operario de Producción (Plásticos) — SERO SERVICIOS OCASIONALES (Bogotá, D.C.)
+5. Operario Ayudante Figurado — STAFFING S.A.S (Bogotá, D.C.)
 
 ## Pregunta 2: ¿cuál CV pasaría tu primer filtro para esta vacante?
 
@@ -43,9 +43,6 @@ Experiencia:
 Educación:
 - Bachiller académico
 Habilidades: BPM, manipulación de alimentos, operación de maquinaria, trabajo en equipo
-Perfil para esta vacante:
-Bachiller académico (Habilidades matemáticas y de lectoescritura desarrolladas).
-Resumen sugerido: experiencia en Nivel educativo requerido: Bachiller básico y Experiencia mínima de 6 meses en empaque sellado conteo vinipelado o manejo de máquinas en empresas de manufactura.
 
 **CV 2**
 
@@ -57,3 +54,6 @@ Experiencia:
 Educación:
 - Bachiller académico
 Habilidades: BPM, manipulación de alimentos, operación de maquinaria, trabajo en equipo
+Perfil para esta vacante:
+Bachiller académico (Habilidades matemáticas y de lectoescritura desarrolladas).
+Resumen sugerido: experiencia en Nivel educativo requerido: Bachiller básico y Experiencia mínima de 6 meses en empaque sellado conteo vinipelado o manejo de máquinas en empresas de manufactura.

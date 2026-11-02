@@ -53,3 +53,18 @@ def test_todo_par_apunta_a_datos_existentes():
     vacantes = {v["id"] for v in json.loads((DATOS / "vacantes.json").read_text(encoding="utf-8"))}
     assert all(p["cv"] in cvs and p["vacante"] in vacantes for p in PARES)
     assert len({(p["cv"], p["vacante"]) for p in PARES}) == len(PARES)
+
+
+def test_la_prueba_no_tiene_clones_de_lo_ya_visto():
+    """Magneto republica el mismo aviso por ciudad con otro id: hay que comparar el texto, no solo el id."""
+    from difflib import SequenceMatcher
+    textos = {v["id"]: " ".join(v["descripcion"].lower().split())[:1500]
+              for v in json.loads((DATOS / "vacantes.json").read_text(encoding="utf-8"))}
+    vistas = {p["vacante"] for p in PARES if p["mitad"] in ("ajuste", "prueba_1")}
+    clones = []
+    for nueva in {p["vacante"] for p in _mitad("prueba")}:
+        for vista in vistas:
+            comparador = SequenceMatcher(None, textos[nueva], textos[vista])
+            if comparador.quick_ratio() > 0.9 and comparador.ratio() > 0.9:
+                clones.append((nueva, vista))
+    assert clones == []

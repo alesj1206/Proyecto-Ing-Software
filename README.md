@@ -95,10 +95,10 @@ solo después de que el equipo revise los términos de uso de Magneto.
 
 Los detalles están en [`docs/fase4/EVALUACION.md`](docs/fase4/EVALUACION.md).
 
-- **Como filtro, es confiable:** en 52 pares nunca vistos acertó los 14 DESCARTAR, y en la prueba final no descartó
-  ninguna vacante que valiera la pena.
-- **Distinguir entre Postular, Ajustar CV y Cerrar brecha no lo es:** la exactitud global en vacantes nuevas fue 50%,
-  por debajo del 70% que se fijó como meta. Esas tres acciones son orientativas.
+- **Como filtro da una buena señal:** en la prueba final limpia, con vacantes nunca vistas, acertó las 5 DESCARTAR y no
+  descartó ninguna vacante que valiera la pena. Son pocos casos.
+- **Distinguir entre Postular, Ajustar CV y Cerrar brecha no funciona bien:** la exactitud global en vacantes nuevas
+  fue 46%, por debajo del 70% que se fijó como meta. Esas tres acciones son orientativas.
 - **El Taller de CV puede proponer emparejamientos sin sentido.** El candidato debe aceptar solo lo que sea verdad
   ([`docs/fase4/VERIFICACION.md`](docs/fase4/VERIFICACION.md)).
 - **Las etiquetas del set de evaluación las propuso el equipo de desarrollo** y están pendientes de revisión.

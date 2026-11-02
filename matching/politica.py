@@ -14,7 +14,7 @@ from .restricciones import ResultadoRestriccion
 
 @dataclass(frozen=True)
 class Politica:
-    version: str = "2026-11-04.2"  # 11-04.1: prácticas y enumeraciones; .2: correcciones tras la prueba 1 (docs/fase4)
+    version: str = "2026-11-04.3"  # .1 prácticas y enumeraciones; .2 tras la prueba 1; .3 revisión final (docs/fase4)
     tau_alto: float = 0.45
     tau_bajo: float = 0.35  # 0,40 → 0,35 y τ_relevancia 0,40 → 0,25: barrido sobre ajuste + prueba_1 (docs/fase4)
     tau_relevancia: float = 0.25

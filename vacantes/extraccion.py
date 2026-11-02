@@ -32,7 +32,8 @@ PALABRAS_ENCABEZADO_OTRAS = (
 )
 ENCABEZADOS_EXACTOS_OTROS = {"cargo"}
 # El pie que Magneto agrega a cada vacante repite las etiquetas como palabras sueltas: son señales, no obligatorios.
-PIE_HABILIDADES = ("otras habilidades", "habilidades tecnicas", "habilidades interpersonales")
+PIE_INICIO = "otras habilidades"
+PIE_SUBTITULOS = ("habilidades tecnicas", "habilidades interpersonales")  # del pie, o un encabezado del empleador
 PALABRAS_DESEABLE = ("deseable", "plus", "valorable", "ideal", "preferible", "preferiblemente", "opcional",
                      "se valora", "valoramos", "no indispensable")
 PALABRAS_INICIO_DESEABLE = 4  # "Deseable conocimiento…", "Experiencia deseable en…", "Valoramos: …"
@@ -49,10 +50,13 @@ RUIDO = re.compile(
     r"horario\s*:|jornada|somos una|nuestra empresa|te invitamos|te invita|auxilio de|bonificaci|lugar de trabajo|"
     r"modalidad\s*:|ubicaci[oó]n\s*:|^ciudad\s*:|cupos|fecha de publicaci|buen ambiente|crecimiento profesional|"
     r"palabras clave|pagos? quincenal|parte de (?:este|nuestro) equipo|listo para|contratación inmediata|"
-    r"vinculaci[oó]n inmediata|remuneraci|^ser[aá]s\b|^tendr[aá]s\b|^si (?:tienes|eres|cuentas)\b|^buscamos personas|"
-    r"^haz parte|esta vacante es para ti",
+    r"vinculaci[oó]n inmediata|remuneraci|esta vacante es para ti",
     re.IGNORECASE,
 )
+# Frases de presentación: ruido solo fuera de una sección de requisitos ("Requisitos: - Si tienes 2 años en ventas"
+# sí es un requisito).
+PRESENTACION = re.compile(r"^(?:ser[aá]s|tendr[aá]s|si (?:tienes|eres|cuentas)|buscamos personas|haz parte)\b",
+                          re.IGNORECASE)
 VINETA = re.compile(r"^\s*(?:[-*•▪●◦‣·–✓✔➢►o]\s+|\d+[.)]\s*|[-*•▪●◦‣·–✓✔➢►])\s*")
 VINETA_EN_LINEA = re.compile(r"\s+[•▪●]\s+")
 # Sub-viñetas "o" en una misma línea ("Conocimientos: o Power BI… o Python y SQL"). Solo se separan si la línea las
@@ -123,8 +127,10 @@ def _tipo_encabezado(linea: str) -> str | None:
         return None
     if normal.startswith(RESUMEN_MAGNETO):
         return "resumen"
-    if limpio == "Habilidades" or normal.startswith(PIE_HABILIDADES):  # bloque final de etiquetas de Magneto
+    if limpio == "Habilidades" or normal.startswith(PIE_INICIO):  # bloque final de etiquetas de Magneto
         return "etiquetas"
+    if normal.startswith(PIE_SUBTITULOS):
+        return "subtitulo_habilidades"
     if normal in ENCABEZADOS_EXACTOS_OTROS and limpio.endswith(":"):
         return "otra"
     termina_en_dos_puntos = limpio.endswith(":") and len(limpio) <= 70
@@ -161,6 +167,8 @@ def _clasificar(texto: str) -> tuple[list[tuple[str | None, str]], list[str]]:
         tipo = _tipo_encabezado(linea)
         if tipo == "resumen":
             restantes_resumen, seccion = MAX_LINEAS_RESUMEN, None
+        elif tipo == "subtitulo_habilidades":  # dentro del pie sigue siendo pie; fuera, es una sección de requisitos
+            seccion = "etiquetas" if seccion == "etiquetas" else "requisitos"
         elif tipo:
             seccion = tipo
         else:
@@ -180,8 +188,9 @@ def _unidades(linea: str) -> list[str]:
     return _oraciones(texto)
 
 
-def _es_ruido(texto: str) -> bool:
-    return len(texto) < 3 or bool(RUIDO.search(texto))
+def _es_ruido(texto: str, seccion: str | None = None) -> bool:
+    fuera_de_requisitos = seccion not in ("requisitos", "deseables")
+    return len(texto) < 3 or bool(RUIDO.search(texto)) or (fuera_de_requisitos and bool(PRESENTACION.search(texto)))
 
 
 def _tipo(texto: str, seccion: str | None) -> str:
@@ -214,6 +223,8 @@ ENUMERACION = re.compile(r",\s+|\s+y\s+")
 
 NIVELES = {"avanzado", "intermedio", "basico", "básico"}
 LISTA_ENTRE_PARENTESIS = re.compile(r"\(([^()]+)\)")
+LUGAR = re.compile(r"\b(resid|vivir|viva|disponibilidad|ubicad|zona|sede|ciudad|municipio|desplaz)", re.IGNORECASE)
+MIN_LARGO_ITEM = 3
 
 
 def _es_nombre(item: str) -> bool:
@@ -238,8 +249,12 @@ def _separar_enumeracion(unidad: str) -> list[str]:
     Solo se separan enumeraciones con "y" (todas se piden); con "o" son alternativas y quedan juntas. Las frases en
     minúscula ("atención al cliente, ventas y cobranza") no se tocan."""
     entre_parentesis = LISTA_ENTRE_PARENTESIS.search(unidad)
-    if entre_parentesis and (items := _lista(entre_parentesis.group(1))):
-        return items  # "…con las herramientas del cargo (RPG/ILE, Java, DB2 y Git)": lo concreto son los ítems
+    if entre_parentesis:
+        items = _lista(entre_parentesis.group(1))
+        afuera = unidad[:entre_parentesis.start()]
+        if items and all(len(i) >= MIN_LARGO_ITEM for i in items) and not LUGAR.search(afuera):
+            return items  # "…con las herramientas del cargo (RPG/ILE, Java, DB2 y Git)": lo concreto son los ítems
+        return [unidad]  # lugares ("Medellín (Bello, Itagüí)"), siglas cortas ("(A2 y B1)") o frases: queda entera
     if (items := _lista(unidad)) and len(items) >= 2:
         return items  # "Power BI avanzado, Excel avanzado"
     partes = ENUMERACION.split(unidad)
@@ -259,13 +274,18 @@ def _separar_enumeracion(unidad: str) -> list[str]:
 def extraer_requisitos(texto: str, etiquetas: list[str]) -> list[RequisitoExtraido]:
     requisitos: list[RequisitoExtraido] = []
     vistos: set[str] = set()
-    for seccion, unidad in ((s, parte) for s, u in _candidatos(texto) for parte in _separar_enumeracion(u.strip(" .;"))):
-        unidad = unidad.strip(" .;")
-        clave = normalizar(unidad)
-        if _es_ruido(unidad) or not clave or clave in vistos:
+    for seccion, linea in _candidatos(texto):
+        linea = linea.strip(" .;")
+        if _es_ruido(linea, seccion):
             continue
-        vistos.add(clave)
-        requisitos.append(RequisitoExtraido(unidad, _tipo(unidad, seccion), "texto"))
+        tipo = _tipo(linea, seccion)  # "Deseable … (Excel, Word y PowerPoint)": los ítems heredan "deseable"
+        for unidad in _separar_enumeracion(linea):
+            unidad = unidad.strip(" .;")
+            clave = normalizar(unidad)
+            if _es_ruido(unidad, seccion) or not clave or clave in vistos:
+                continue
+            vistos.add(clave)
+            requisitos.append(RequisitoExtraido(unidad, tipo, "texto"))
 
     texto_unidades = " ".join(vistos)
     for etiqueta in etiquetas:
@@ -277,17 +297,25 @@ def extraer_requisitos(texto: str, etiquetas: list[str]) -> list[RequisitoExtrai
 
 
 EXPERIENCIA_CON_AREA = re.compile(
-    r"^experiencia\s*:?\s*(?:(?:m[ií]nim[ao]|de\s+m[aá]s\s+de|superior\s+a|al\s+menos)\s+)*(?:de\s+)?"
+    r"^experiencia(?:\s*:\s*|\s+)(?:(?:m[ií]nim[ao]|de\s+m[aá]s\s+de|superior\s+a|al\s+menos)\s+)*(?:de\s+)?"
     r"(?:m[ií]nim[ao]\s+)?(?:\(?\d+\)?|un|una|dos|tres|cuatro|cinco)\s+(?:años?|meses)\s*(?:de\s+experiencia\s*)?"
     r"(?:certificad[ao]\s+)?(?:en|como|trabajando\s+(?:con|en)|desempeñando|en\s+el\s+cargo\s+de)\s+",
     re.IGNORECASE)
 
 
+MAX_LARGO_NUCLEO = 300
+RESTOS_GENERICOS = ("el cargo", "cargos similares", "cargos afines", "cargos relacionados", "funciones similares",
+                    "posiciones similares", "roles similares", "el area", "areas afines", "la misma posicion")
+
+
 def nucleo(texto: str) -> str:
     """Lo que se compara por similitud de un requisito de experiencia con área: "Experiencia mínima de 2 años en
     análisis de datos" → "análisis de datos". Los años ya los evalúa la restricción de experiencia."""
-    resto = EXPERIENCIA_CON_AREA.sub("", texto, count=1).strip()
-    return resto if resto and resto != texto.strip() else texto
+    limpio = " ".join(texto.split())[:MAX_LARGO_NUCLEO]
+    resto = EXPERIENCIA_CON_AREA.sub("", limpio, count=1).strip()
+    if not resto or resto == limpio or normalizar(resto).startswith(RESTOS_GENERICOS):
+        return texto  # "…en el cargo", "…en cargos similares": no hay área que comparar
+    return resto
 
 
 def requisitos_insuficientes(requisitos: list[RequisitoExtraido]) -> bool:

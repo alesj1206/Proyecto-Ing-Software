@@ -35,7 +35,8 @@ def test_la_asignacion_ab_es_aleatoria_pero_reproducible():
 
 
 def test_tabular_cuenta_preferencias():
-    clave = {"1": {"cv": "x", "listas": {"A": "decisor", "B": "similitud"}, "cvs": {"1": "adaptado", "2": "original"}}}
+    clave = {"1": {"cv": "x", "tiene_cv": True, "listas": {"A": "decisor", "B": "similitud"},
+                   "cvs": {"1": "adaptado", "2": "original"}}}
     filas = [{"reclutador": "r1", "paquete": "1", "pregunta": "lista", "eleccion": "A"},
              {"reclutador": "r2", "paquete": "1", "pregunta": "lista", "eleccion": "B"},
              {"reclutador": "r1", "paquete": "1", "pregunta": "cv", "eleccion": "1"}]
@@ -44,7 +45,8 @@ def test_tabular_cuenta_preferencias():
     assert resultado["cv"]["adaptado"] == 1.0 and resultado["cv"]["n"] == 1
 
 
-def test_csv_mal_formado_da_error_claro(tmp_path):
+def test_csv_mal_formado_da_error_claro(tmp_path, monkeypatch):
+    monkeypatch.setattr("matching.management.commands.evaluacion_ciega.HUELLA", tmp_path / "no_existe.txt")
     respuestas, clave = tmp_path / "r.csv", tmp_path / "clave.json"
     respuestas.write_text("reclutador,paquete,eleccion\nr1,1,A\n", encoding="utf-8")
     clave.write_text(json.dumps({}), encoding="utf-8")

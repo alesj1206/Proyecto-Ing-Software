@@ -16,7 +16,7 @@ from .models import EstadoIngesta, Requisito, Vacante
 
 log = logging.getLogger(__name__)
 # Va dentro del hash: al cambiar las reglas de extracción o lo que se embebe, la próxima ingesta reprocesa todo.
-VERSION_EXTRACCION = "2026-11-04.2"
+VERSION_EXTRACCION = "2026-11-04.3"
 MODALIDAD_POR_DEFECTO = Vacante.Modalidad.PRESENCIAL  # como en v2, si ni la fuente ni el texto la dicen
 
 
