@@ -111,9 +111,10 @@ porque no había más vacantes escuetas. El resultado está en `mejoras/resultad
 - **Embeber:** es unas 4 veces más lento. Según el benchmark de la Fase 4, la carga inicial de 120.000 pasaría de ~1 h
   a ~4 h (límite 8 h) y el delta diario de 1,5 a ~5 min (límite 15).
 - **Datos:** usa 768 dimensiones en vez de 384, así que la matriz de requisitos por vacante ocupa el doble.
-- **Decisión por candidato:** los productos punto de la cobertura cuestan el doble, y el peor candidato ya estaba en
-  4,8 s con un límite de 5 s. Hay que volver a correr `benchmark_escala`; probablemente obligue a bajar el tope o a
-  decidir en paralelo.
+- **Decisión por candidato: riesgo bajo.** Un microbenchmark (decodificar la matriz y calcular la cobertura de 3.000
+  vacantes) da 0,063 s con 384 dimensiones y 0,093 s con 768. Eso es ~0,03 s más sobre los ~3 s que toma decidir; el
+  resto del tiempo se va en el trabajo por vacante en Python y en la base de datos. A eso se suma embeber el perfil
+  con mpnet (~0,1 s). Antes de adoptarlo conviene igual volver a correr `benchmark_escala`.
 - **Preselección:** puede seguir con MiniLM, porque solo cambió la cobertura.
 - **Migración:** cambiar el modelo implica re-embeber todo (`VERSION_EXTRACCION` ya lo fuerza) y migrar la columna de
   la matriz.
@@ -190,9 +191,9 @@ escrito. Así el Taller conserva su valor (recordar qué hacer explícito) sin e
 
 ## Recomendaciones, en orden
 
-0. **mpnet para la cobertura + fusión:** 69% en la prueba preregistrada. Antes de adoptarlo hay que volver a correr el
-   benchmark de escala con mpnet (el riesgo es la decisión por candidato) y migrar la matriz de requisitos a 768
-   dimensiones.
+0. **mpnet para la cobertura + fusión:** 69% en la prueba preregistrada. El costo principal está en la ingesta
+   (~4 veces más lenta, dentro de los límites de §6) y en migrar la matriz de requisitos a 768 dimensiones. La decisión
+   por candidato casi no cambia (+0,03 s medidos).
 1. **Fusionar Postular y Ajustar CV:** +8 a +21 puntos en todos los sets, sin recalibrar nada. Es un cambio de
    producto (§13.2), pero el prototipo ya está. Hay que actualizar §13.2 de la spec, el informe y las capturas.
 2. **Taller como preguntas guiadas, sin texto propuesto:** elimina el riesgo de inventar. El prototipo ya está en
