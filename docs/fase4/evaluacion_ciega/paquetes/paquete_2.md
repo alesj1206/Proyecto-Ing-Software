@@ -15,46 +15,16 @@ Habilidades: Excel intermedio, facturación electrónica, conciliaciones bancari
 
 **Lista A**
 
-1. Auxiliar Contable — IMPOCOSER S.A.S. (Bogotá, D.C.)
-2. Analista Contable (Conciliaciones) [Híbrido] - Bogotá — LISTOS S.A.S (Bogotá, D.C.)
-3. Auxiliar Contable (Siigo Nube) - Bogotá D. C. — ATCOM OUTSORCING SA (Bogotá, D.C.)
-4. ASISTENTE ADMINISTRATIVO — Grupo Vardí (Bogotá, D.C.)
-5. AUXILIAR ADMINISTRATIVO EN COMPRAS — Confidencial (Bogotá, D.C.)
+1. Auxiliar Contable (Siigo Nube) - Bogotá D. C. — ATCOM OUTSORCING SA (Bogotá, D.C.)
+2. Auxiliar de Facturación (Liquidación CEDI) — Job&Talent Colombia (Bogotá, D.C.)
+3. Practicante contable 1626495529-28 — Servicio de Empleo Comfama (Medellín)
+4. Auxiliar Contable (NIIF y Excel) — CM GLOBAL CONSULTING SAS (Bogotá, D.C.)
+5. Analista Contable (Conciliaciones) [Híbrido] - Bogotá — LISTOS S.A.S (Bogotá, D.C.)
 
 **Lista B**
 
-1. Auxiliar Contable (Siigo Nube) - Bogotá D. C. — ATCOM OUTSORCING SA (Bogotá, D.C.)
+1. Auxiliar Contable — IMPOCOSER S.A.S. (Bogotá, D.C.)
 2. Auxiliar Contable (NIIF y Excel) — CM GLOBAL CONSULTING SAS (Bogotá, D.C.)
 3. Analista Contable (Conciliaciones) [Híbrido] - Bogotá — LISTOS S.A.S (Bogotá, D.C.)
-4. AUXILIAR CONTABLE MEDELLIN — ML CONSULTORIA S.A.S. (Medellín)
-5. Gtr Analista Junior De Workforce , Manejo Base De Datos, Mallas Horarias Bogotá — Confidencial (Bogotá, D.C.)
-
-## Pregunta 2: ¿cuál CV pasaría tu primer filtro para esta vacante?
-
-Vacante: Auxiliar Contable (Siigo Nube) - Bogotá D. C. — ATCOM OUTSORCING SA (Bogotá, D.C.)
-
-**CV 1**
-
-Experiencia:
-- Auxiliar contable en Distribuidora Ficticia (2022-2025).
-- Causé facturas de proveedores y realicé conciliaciones bancarias mensuales.
-- Emití facturación electrónica en el portal de la DIAN y seguí la cartera.
-- Manejé World Office y Siigo para registrar operaciones contables.
-Educación:
-- Tecnología en Contabilidad y Finanzas, SENA
-Habilidades: Excel intermedio, facturación electrónica, conciliaciones bancarias, NIIF, World Office, Siigo
-Perfil para esta vacante:
-Auxiliar contable en Distribuidora Ficticia (2022-2025) (Experiencia mínima de 18 meses desempeñando funciones como Auxiliar Contable Auxiliar de Contabilidad o Asistente Contable).
-Tecnología en Contabilidad y Finanzas, SENA (Experiencia en elaboración de comprobantes de egreso y apoyo en procesos tributarios).
-Resumen sugerido: experiencia en Manejo de Siigo Nube, Conocimientos en conciliaciones bancarias registros contables y facturación y Conocimientos de normatividad contable y NIIF.
-
-**CV 2**
-
-Experiencia:
-- Auxiliar contable en Distribuidora Ficticia (2022-2025).
-- Causé facturas de proveedores y realicé conciliaciones bancarias mensuales.
-- Emití facturación electrónica en el portal de la DIAN y seguí la cartera.
-- Manejé World Office y Siigo para registrar operaciones contables.
-Educación:
-- Tecnología en Contabilidad y Finanzas, SENA
-Habilidades: Excel intermedio, facturación electrónica, conciliaciones bancarias, NIIF, World Office, Siigo
+4. Auxiliar de Cartera Sector Salud — Activos (Bogotá, D.C.)
+5. Asistente Administrativo — Grupo Vardí (Bogotá, D.C.)

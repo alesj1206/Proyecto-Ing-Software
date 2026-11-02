@@ -328,3 +328,19 @@ def test_procesos_tiene_un_tope(db):
 
     with pytest.raises(CommandError, match="máximo"):
         call_command("decidir", "--escuchar", "--procesos", "50")
+
+
+# --- revisión independiente, hallazgo menor: una cola larga no retrasa las notificaciones ------------------------------
+
+def test_una_cola_larga_notifica_por_tandas(db, django_user_model, catalogo, monkeypatch):  # noqa: F811
+    import matching.management.commands.decidir as comando
+
+    for i in range(3):
+        solicitar_decision(_perfil(django_user_model.objects.create_user(email=f"u{i}@ejemplo.com",
+                                                                         password="Lienzo-Tardio-73")))
+    tandas = []
+    monkeypatch.setattr(comando, "TANDA_NOTIFICACIONES", 2)
+    monkeypatch.setattr("notificaciones.services.generar_notificaciones",
+                        lambda **k: tandas.append(1) or type("R", (), {"creadas": 0, "correos": 0})())
+    call_command("decidir", "--pendientes")
+    assert len(tandas) == 2  # tras los 2 primeros perfiles, y al terminar la cola

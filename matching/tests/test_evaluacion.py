@@ -99,3 +99,23 @@ def test_informe_markdown_lleva_todo_lo_que_se_reporta():
     texto = informe_markdown(_informe([("POSTULAR", "POSTULAR"), ("DESCARTAR", "POSTULAR")]), "prueba", POLITICA)
     for esperado in ("prueba", POLITICA.version, "exactitud", "línea base", "clase mayoritaria", "| POSTULAR |", "50%"):
         assert esperado in texto
+
+
+def test_una_vacante_con_vectores_de_otro_modelo_no_rompe_la_evaluacion(db):
+    """decidir_par devuelve None si la matriz no sirve: la evaluación lo cuenta como no relevante."""
+    from matching.evaluacion.evaluar import NO_RELEVANTE, predecir
+    from vacantes.models import Vacante
+
+    fuente = FuenteEnMemoria([cruda("ok", "Requisitos:\n- Reportes de ventas en Excel\n- Atención de clientes")])
+    escenario = preparar(CVS, fuente, MODELOS)
+    Vacante.objects.filter(id="ok").update(matriz_requisitos=b"\x00\x00")
+    accion, _ = predecir(escenario, Par("ana", "ok", "POSTULAR", "", "ajuste"), Politica(tau_relevancia=0.0))
+    assert accion == NO_RELEVANTE
+
+
+def test_el_barrido_incluye_la_politica_vigente(db):
+    from matching.evaluacion.evaluar import barrido
+
+    escenario = preparar(CVS, FuenteEnMemoria([cruda("ok", "Requisitos:\n- Reportes de ventas en Excel\n- Caja")]), MODELOS)
+    probadas = {(p.tau_alto, p.tau_bajo) for p, _ in barrido(escenario, [Par("ana", "ok", "POSTULAR", "", "ajuste")], POLITICA)}
+    assert (POLITICA.tau_alto, POLITICA.tau_bajo) in probadas

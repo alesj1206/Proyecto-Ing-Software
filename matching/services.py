@@ -7,7 +7,6 @@ from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
 
-import numpy as np
 from django.db import transaction
 from django.db.models import F, Q
 from django.utils import timezone
@@ -45,13 +44,13 @@ def solicitar_decision(perfil: Perfil) -> None:
 
 def _decision(perfil, vacante, similitud, evidencias, matriz_evid, politica) -> Decision | None:
     requisitos = sorted(vacante.requisito_set.all(), key=lambda r: r.posicion)
-    matriz_req = de_bytes(vacante.matriz_requisitos, len(requisitos))
-    if matriz_req is None or matriz_evid is None:
-        return None  # vectores desalineados con el texto: se conserva la decisión anterior (_guardar)
-    if len(matriz_req) and len(matriz_evid) and matriz_req.shape[1] != matriz_evid.shape[1]:
-        return None  # embebidas con modelos distintos (por ejemplo, a mitad de un cambio de modelo)
-    if not len(matriz_req):
-        matriz_req = np.zeros((0, matriz_evid.shape[1]), dtype=np.float32)
+    if matriz_evid is None:
+        return None
+    # Con la dimensión de la evidencia, una matriz de otro modelo o desalineada con el texto da None: se conserva la
+    # decisión anterior (_guardar).
+    matriz_req = de_bytes(vacante.matriz_requisitos, len(requisitos), matriz_evid.shape[1] if len(matriz_evid) else None)
+    if matriz_req is None:
+        return None
     cobertura = cubrir(requisitos, matriz_req, evidencias, matriz_evid, politica.tau_alto, politica.tau_bajo)
     restricciones = [res for r in RESTRICCIONES if (res := r.evaluar(perfil, vacante, politica)) is not None]
     contexto = ContextoDecision(cobertura, restricciones, requisitos, politica)
@@ -67,8 +66,8 @@ def _decision(perfil, vacante, similitud, evidencias, matriz_evid, politica) -> 
     )
 
 
-def decidir_par(perfil: Perfil, vacante: Vacante, similitud: float, politica: Politica = POLITICA) -> Decision:
-    """La decisión para un solo par, sin guardarla (la usa la evaluación)."""
+def decidir_par(perfil: Perfil, vacante: Vacante, similitud: float, politica: Politica = POLITICA) -> Decision | None:
+    """La decisión para un solo par, sin guardarla (la usa la evaluación). None si los vectores no sirven."""
     evidencias = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))
     return _decision(perfil, vacante, similitud, evidencias, de_bytes(perfil.matriz_evidencia, len(evidencias)),
                      politica)
@@ -155,8 +154,9 @@ def decidir_para_perfil(perfil: Perfil, modelos: ModelosEmbebido, ordenador: Ord
     embeber_perfil(perfil, modelos, evidencias)
     preseleccion = preseleccionar(perfil, politica.tau_relevancia, modelos=modelos.firma)
     similitudes = dict(preseleccion.relevantes)
-    vacantes = Vacante.objects.filter(id__in=similitudes).prefetch_related("requisito_set")
-    matriz_evid = de_bytes(perfil.matriz_evidencia, len(evidencias))
+    vacantes = (Vacante.objects.filter(id__in=similitudes).defer("texto_completo", "vector")  # pesan y no se usan
+                .prefetch_related("requisito_set"))
+    matriz_evid = de_bytes(perfil.matriz_evidencia, len(evidencias), modelos.cobertura.dimension)
     decisiones, saltadas = [], set()
     for v in vacantes:
         if d := _decision(perfil, v, similitudes[v.id], evidencias, matriz_evid, politica):

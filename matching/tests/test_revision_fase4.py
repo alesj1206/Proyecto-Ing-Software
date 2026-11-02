@@ -173,3 +173,16 @@ def test_descripcion_sin_aprendizaje_no_se_normaliza(client_con_cv, usuario, mon
     monkeypatch.setattr(restricciones, "normalizar", lambda t: vistos.append(t) or original(t))
     assert _estudiante(usuario.perfil, ["Bachiller, 2015"], "Auxiliar de bodega", "Texto largo " * 50) is None
     assert vistos == ["Auxiliar de bodega"]  # solo el título: la descripción no menciona aprendizaje
+
+
+def test_preparar_deja_la_huella_de_la_clave_junto_a_los_paquetes(tmp_path, monkeypatch):
+    """Regenerar los paquetes con una huella vieja hacía que tabular rechazara la clave nueva."""
+    import hashlib
+
+    import matching.management.commands.evaluacion_ciega as comando
+
+    monkeypatch.setattr(comando, "_sortear", lambda cvs, semilla: ([], {"1": {}}))
+    clave, salida = tmp_path / "privado" / "clave.json", tmp_path / "ciega" / "paquetes"
+    call_command("evaluacion_ciega", "preparar", "--clave", str(clave), "--salida", str(salida))
+    huella = (tmp_path / "ciega" / "CLAVE_SHA256.txt").read_text(encoding="utf-8").split()[0]
+    assert huella == hashlib.sha256(clave.read_bytes()).hexdigest()

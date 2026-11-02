@@ -167,11 +167,12 @@ def test_solo_se_reescribe_la_decision_que_cambio(usuario, catalogo):
     decidir_para_perfil(perfil, M, politica=TODAS)
     decidir_para_perfil(perfil, M, politica=TODAS)
     antes = _escrituras(perfil)
-    EvidenciaPerfil.objects.create(perfil=perfil, texto="Docker Kubernetes despliegue", seccion="experiencia", posicion=9)
+    ingerir(FuenteEnMemoria([cruda("vbrecha", "Requisitos:\n- Reportes de ventas en Excel\n- Atención de clientes en tienda")]))
+    embeber_vacantes(M)
     decidir_para_perfil(perfil, M, politica=TODAS)
     despues = _escrituras(perfil)
     assert despues["vbrecha"] > antes["vbrecha"]
-    assert Decision.objects.get(perfil=perfil, vacante_id="vbrecha").accion == "POSTULAR"
+    assert {v: f for v, f in despues.items() if v != "vbrecha"} == {v: f for v, f in antes.items() if v != "vbrecha"}
 
 
 def test_un_cambio_de_contenido_sin_cambio_de_accion_se_reescribe(usuario, catalogo):
@@ -204,3 +205,16 @@ def test_vacantes_sin_reembeber_conservan_su_decision_y_no_se_notifican_otra_vez
     decidir_para_perfil(perfil, ModelosEmbebido(E, nuevo), politica=TODAS)
     assert not Decision.objects.filter(perfil=perfil, accion_anterior="NUEVA").exists()
     assert not _por_notificar(timezone.now()).filter(perfil=perfil).exists()
+
+
+def test_decidir_no_trae_los_campos_pesados_de_la_vacante(usuario, catalogo, django_assert_num_queries):
+    """3.000 vacantes con su texto completo y su vector son decenas de MB por candidato que el decisor no usa."""
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    perfil = _perfil(usuario)
+    with CaptureQueriesContext(connection) as consultas:
+        decidir_para_perfil(perfil, M, politica=TODAS)
+    lectura = next(q["sql"] for q in consultas if 'FROM "vacantes_vacante"' in q["sql"] and "matriz_requisitos" in q["sql"]
+                   and "distancia" not in q["sql"] and "<=>" not in q["sql"])
+    assert '"texto_completo"' not in lectura and '"vacantes_vacante"."vector"' not in lectura

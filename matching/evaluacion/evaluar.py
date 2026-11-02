@@ -125,7 +125,8 @@ def predecir(escenario: Escenario, par: Par, politica: Politica) -> tuple[str, f
     similitud = float(np.dot(np.asarray(perfil.vector, np.float32), np.asarray(vacante.vector, np.float32)))
     if similitud < politica.tau_relevancia:
         return NO_RELEVANTE, similitud
-    return str(decidir_par(perfil, vacante, similitud, politica).accion), similitud
+    decision = decidir_par(perfil, vacante, similitud, politica)
+    return (str(decision.accion) if decision else NO_RELEVANTE), similitud
 
 
 def esperada(par: Par, politica: Politica) -> str:
@@ -152,14 +153,14 @@ def evaluar(escenario: Escenario, pares: list[Par], politica: Politica) -> Infor
     return informe
 
 
-GRILLA = {"tau_alto": (0.45, 0.50, 0.55), "tau_bajo": (0.35, 0.40), "tau_relevancia": (0.35, 0.40, 0.45)}
+GRILLA = {"tau_alto": (0.425, 0.45, 0.475, 0.50), "tau_bajo": (0.35, 0.40, 0.425), "tau_relevancia": (0.25, 0.35, 0.40)}
 
 
 def barrido(escenario: Escenario, pares: list[Par], base: Politica) -> list[tuple[Politica, Informe]]:
     """Todas las combinaciones de la grilla, de mejor a peor exactitud (solo sobre la mitad de ajuste)."""
     resultados = []
     for alto, bajo, relevancia in itertools.product(*GRILLA.values()):
-        if bajo >= alto:
+        if bajo > alto:  # iguales = sin banda parcial, como la política vigente
             continue
         politica = replace(base, tau_alto=alto, tau_bajo=bajo, tau_relevancia=relevancia)
         resultados.append((politica, evaluar(escenario, pares, politica)))

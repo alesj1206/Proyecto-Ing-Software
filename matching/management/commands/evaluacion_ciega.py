@@ -58,6 +58,9 @@ class Command(BaseCommand):
         with os.fdopen(descriptor, "w", encoding="utf-8") as archivo:
             json.dump(sorteo, archivo, indent=1)
         os.chmod(clave, 0o600)
+        # La huella va junto a los paquetes (salida/../CLAVE_SHA256.txt): commitearla prueba que la clave no cambió después.
+        salida.resolve().parent.joinpath(HUELLA.name).write_text(hashlib.sha256(clave.read_bytes()).hexdigest() + "\n",
+                                                                  encoding="utf-8")
         self.stdout.write(f"{len(paquetes)} paquetes en {salida}; clave en {clave} (no la compartas antes de tabular)")
 
     def _tabular(self, respuestas, clave, **_):

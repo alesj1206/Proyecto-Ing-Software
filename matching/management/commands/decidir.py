@@ -17,6 +17,7 @@ from matching.vectores import embeber_vacantes
 
 PAUSA_ESCUCHA_S = 5
 PAUSA_SUPERVISION_S = 1
+TANDA_NOTIFICACIONES = 20  # perfiles decididos entre una generación de notificaciones y la siguiente
 MAX_PROCESOS = 6  # en este PC (31 GB), 3 ya rinden lo mismo que 6 (docs/exploracion/2026-11-02-eficiencia.md)
 MAX_INTENTOS = 3  # tras 3 fallos el perfil sale de la cola (queda en el log) para no bloquear a nadie
 log = logging.getLogger(__name__)
@@ -112,6 +113,9 @@ class Command(BaseCommand):
                     break
                 vistos.append(solicitud.perfil_id)  # uno que falla no se reintenta en esta misma vuelta
                 decididos += self._decidir_uno(solicitud.perfil)
+            if decididos >= TANDA_NOTIFICACIONES:  # fuera de la transacción: una cola larga no retrasa los correos
+                self._notificar(decididos)
+                decididos = 0
         self._notificar(decididos)
 
     def _decidir(self, perfiles):

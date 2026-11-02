@@ -20,16 +20,13 @@ def a_bytes(matriz: np.ndarray) -> bytes:
     return np.asarray(matriz, dtype=np.float16).tobytes()
 
 
-DIMENSIONES = (384, 768)  # MiniLM-L12 (búsqueda) y mpnet-base-v2 (cobertura)
-
-
-def de_bytes(datos: bytes | memoryview | None, filas: int) -> np.ndarray | None:
-    """La matriz guardada, de `filas` filas. La dimensión sale del tamaño, porque la búsqueda y la cobertura usan
-    modelos distintos; solo se aceptan las de `DIMENSIONES`. None si el tamaño no corresponde (matriz vieja)."""
+def de_bytes(datos: bytes | memoryview | None, filas: int, dimension: int | None = None) -> np.ndarray | None:
+    """La matriz guardada, de `filas` filas. None si el tamaño no corresponde (matriz vieja). Si se conoce la `dimension`
+    esperada se exige: 2×384 y 1×768 ocupan los mismos bytes. Si no, se deduce del tamaño."""
     valores = np.frombuffer(bytes(datos or b""), dtype=np.float16)
     if filas == 0:
-        return np.zeros((0, 0), dtype=np.float32) if not len(valores) else None
-    if len(valores) % filas or len(valores) // filas not in DIMENSIONES:
+        return np.zeros((0, dimension or 0), dtype=np.float32) if not len(valores) else None
+    if not len(valores) or len(valores) % filas or (dimension is not None and len(valores) != filas * dimension):
         return None
     return valores.reshape(filas, -1).astype(np.float32)
 

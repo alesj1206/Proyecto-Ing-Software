@@ -21,7 +21,8 @@ def _ingerir(*crudas):
 def test_bytes_ida_y_vuelta():
     m = np.random.default_rng(0).normal(size=(3, 384)).astype(np.float32)
     assert np.allclose(de_bytes(a_bytes(m), 3), m, atol=1e-2) and de_bytes(b"", 0).shape == (0, 0)
-    assert de_bytes(a_bytes(m), 4) is None  # no alcanza para esas filas: matriz vieja
+    assert de_bytes(a_bytes(m), 4, dimension=384) is None  # no alcanza para esas filas: matriz vieja
+    assert de_bytes(a_bytes(m), 5) is None  # no se divide en esas filas
 
 
 def test_embeber_vacantes_solo_las_nuevas_o_cambiadas(db):
@@ -107,3 +108,14 @@ def test_cada_texto_distinto_se_embebe_una_vez_por_lote(db):
     for v in Vacante.objects.all():  # el resultado es el mismo que embebiendo todo
         textos = [r.texto for r in v.requisito_set.order_by("posicion")]
         assert np.allclose(de_bytes(v.matriz_requisitos, len(textos)), cobertura.embeber(textos), atol=1e-2)
+
+
+# --- revisión independiente, hallazgos menores ------------------------------------------------------------------------
+
+def test_de_bytes_no_confunde_filas_con_dimension():
+    """2×384 y 1×768 ocupan los mismos bytes: se compara contra la dimensión que se espera."""
+    m = np.random.default_rng(0).normal(size=(2, 384)).astype(np.float32)
+    assert de_bytes(a_bytes(m), 1, dimension=768) is not None  # bytes compatibles con 1×768 si se pide esa dimensión
+    assert de_bytes(a_bytes(m), 1, dimension=384) is None
+    assert de_bytes(a_bytes(m), 2, dimension=384).shape == (2, 384)
+    assert de_bytes(a_bytes(m), 2, dimension=768) is None
