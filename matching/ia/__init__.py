@@ -2,7 +2,7 @@
 
 from django.conf import settings
 
-from ..puertos import Embedder, Redactor, Reordenador
+from ..puertos import Embedder, ModelosEmbebido, Redactor, Reordenador
 
 DIMENSION_COBERTURA = 768  # paraphrase-multilingual-mpnet-base-v2
 
@@ -27,6 +27,11 @@ def obtener_embedder_cobertura() -> Embedder:
     from .fastembed import MODELO_COBERTURA, EmbedderFastembed
 
     return EmbedderFastembed(MODELO_COBERTURA)
+
+
+def obtener_modelos() -> ModelosEmbebido:
+    """Los dos modelos del decisor, cargados una vez por proceso (solo el batch los carga)."""
+    return ModelosEmbebido(obtener_embedder(), obtener_embedder_cobertura())
 
 
 def obtener_reordenador() -> Reordenador | None:

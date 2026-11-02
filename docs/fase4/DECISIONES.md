@@ -89,6 +89,20 @@ arreglaron.
   - Ahora la decisión anterior se conserva tal cual.
   - La preselección exige además que la vacante esté embebida con los modelos actuales.
   - *Costo:* mientras dura el re-embebido, el candidato ve la decisión vieja de esas vacantes.
+- **Revisión independiente, hallazgos importantes (arreglados):**
+  - `ModelosEmbebido(busqueda, cobertura)` es obligatorio; ya no se puede decidir con un solo modelo.
+  - `matching/candados.py` centraliza los candados de aviso y no los deja tomados si hay un error.
+  - La cola bloquea solo su propia fila, no la del perfil.
+  - **El Taller decide la vigencia por requisito.** La migración `matching/0008` borra las sugerencias del Taller
+    anterior, que tenían texto escrito por el sistema. *Costo:* quien hubiera aceptado una pierde ese historial. Solo
+    había cuentas ficticias.
+  - **`--procesos`:** se lanza con la ruta de `manage.py`, maneja SIGTERM, avisa si un hijo muere y tiene un máximo
+    de 6.
+  - **Con la política vigente, parte de la fusión no se ejecuta** (la nota "Resalta…"). Se documentó y se conserva el
+    código para políticas con banda parcial. *Costo:* código que hoy no corre.
+- **Incidente (2026-11-02):** una prueba de `--procesos 50`, escrita antes de implementar el tope, lanzó procesos reales
+  de ~2 GB y agotó la memoria del PC, que se colgó. No hubo correos ni datos perdidos. Las pruebas de ese módulo ahora
+  prohíben lanzar procesos reales.
 - **(usuario)** Las decisiones que no cambiaron no se reescriben.
   - Una huella del contenido decide cuáles escribir.
   - `fecha_decision` pasa a significar "última escritura".

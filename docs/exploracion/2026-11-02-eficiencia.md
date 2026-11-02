@@ -83,11 +83,16 @@ pero es un número indicativo, sin el hardware descrito.
 
 - **Cada proceso toma un perfil a la vez** con `SELECT … FOR UPDATE SKIP LOCKED`, así que dos procesos nunca deciden el
   mismo. Si uno muere, Postgres suelta el candado y el perfil vuelve a la cola.
-- **Un solo proceso embebe vacantes a la vez** (candado de aviso): los demás no repiten ese trabajo.
-- **`generar_notificaciones` también va de a un proceso** (candado de aviso), para no enviar dos veces el mismo
-  correo. El riesgo ya existía entre el batch y la API de n8n.
-- **Mientras un perfil se está decidiendo,** si la persona vuelve a subir el CV, la página espera a que termine
-  (~2 s), porque la fila de su solicitud está tomada.
+- **Un solo proceso embebe vacantes a la vez** (candado de aviso, `matching/candados.py`), sea cual sea el comando. Los
+  que escuchan no esperan; `--todos`, `embeber_vacantes` y la evaluación sí.
+- **`generar_notificaciones` también va de a un proceso,** para no enviar dos veces el mismo correo. El riesgo ya
+  existía entre el batch y la API de n8n. Los que escuchan no esperan: reintentan en la vuelta siguiente. Cada correo
+  tiene un tiempo máximo (`EMAIL_TIMEOUT`, 15 s).
+- **Mientras un perfil se está decidiendo,** si la persona vuelve a subir el CV o cambia sus expectativas, la página
+  espera a que termine (~2 s) solo por la fila de su solicitud en la cola. La fila del perfil no se bloquea, así que
+  borrar la cuenta no depende del batch.
+- **`--procesos` tiene un máximo de 6.** Cada proceso ocupa ~2 GB (medido). El padre termina a sus hijos con SIGTERM y
+  avisa si alguno muere.
 
 **Medido en `scoutly_bench`:** una cola de 11 candidatos con 3.000 vacantes cada uno, incluida la carga de modelos.
 

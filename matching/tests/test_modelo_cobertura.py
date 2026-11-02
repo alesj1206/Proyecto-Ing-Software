@@ -9,6 +9,7 @@ from cuentas.tests.cvs import pdf_cv
 from matching.ia import obtener_embedder_cobertura
 from matching.ia.fakes import EmbedderFalso
 from matching.politica import POLITICA
+from matching.puertos import ModelosEmbebido
 from matching.services import decidir_para_perfil
 from matching.vectores import de_bytes, embeber_perfil, embeber_vacantes
 from vacantes.models import Vacante
@@ -16,11 +17,12 @@ from vacantes.services import ingerir
 from vacantes.tests.test_ingesta import FuenteEnMemoria, cruda
 
 BUSQUEDA, COBERTURA = EmbedderFalso(384), EmbedderFalso(768)
+VIEJOS, NUEVOS = ModelosEmbebido(BUSQUEDA, BUSQUEDA), ModelosEmbebido(BUSQUEDA, COBERTURA)
 
 
 def test_la_matriz_de_requisitos_sale_del_modelo_de_cobertura(db):
     ingerir(FuenteEnMemoria([cruda("v1", "Requisitos:\n- Experiencia de 2 años en análisis de datos\n- Excel")]))
-    embeber_vacantes(BUSQUEDA, cobertura=COBERTURA)
+    embeber_vacantes(NUEVOS)
     v = Vacante.objects.get(id="v1")
     textos = [r.texto for r in v.requisito_set.order_by("posicion")]
     assert len(v.vector) == 384  # la preselección no cambia
@@ -29,7 +31,7 @@ def test_la_matriz_de_requisitos_sale_del_modelo_de_cobertura(db):
 
 def test_la_evidencia_del_perfil_usa_el_modelo_de_cobertura(usuario):
     perfil = guardar_perfil_desde_cv(usuario, pdf_cv())
-    embeber_perfil(perfil, BUSQUEDA, cobertura=COBERTURA)
+    embeber_perfil(perfil, NUEVOS)
     perfil.refresh_from_db()
     n = perfil.evidencias.count()
     assert len(perfil.vector) == 384 and de_bytes(perfil.matriz_evidencia, n).shape == (n, 768)
@@ -37,18 +39,18 @@ def test_la_evidencia_del_perfil_usa_el_modelo_de_cobertura(usuario):
 
 def test_cambiar_el_modelo_de_cobertura_vuelve_a_embeber_el_perfil(usuario):
     perfil = guardar_perfil_desde_cv(usuario, pdf_cv())
-    assert embeber_perfil(perfil, BUSQUEDA) is True
-    assert embeber_perfil(perfil, BUSQUEDA, cobertura=COBERTURA) is True  # la firma incluye el modelo
-    assert embeber_perfil(perfil, BUSQUEDA, cobertura=COBERTURA) is False
+    assert embeber_perfil(perfil, VIEJOS) is True
+    assert embeber_perfil(perfil, NUEVOS) is True  # la firma incluye el modelo
+    assert embeber_perfil(perfil, NUEVOS) is False
 
 
 def test_matrices_de_modelos_distintos_no_se_cruzan(usuario):
     """Una vacante embebida con el modelo viejo (384) y un perfil con el nuevo (768) no rompen la decisión: la
     vacante no se decide hasta que se re-embeba (test_decidir: su decisión anterior se conserva)."""
     ingerir(FuenteEnMemoria([cruda("v1", "Requisitos:\n- SQL\n- Excel")]))
-    embeber_vacantes(BUSQUEDA)
+    embeber_vacantes(VIEJOS)
     perfil = guardar_perfil_desde_cv(usuario, pdf_cv())
-    resumen = decidir_para_perfil(perfil, BUSQUEDA, cobertura=COBERTURA)
+    resumen = decidir_para_perfil(perfil, NUEVOS)
     assert resumen.relevantes == 0
 
 
@@ -86,6 +88,26 @@ def test_el_comando_embeber_vacantes_usa_el_modelo_de_cobertura(db, settings):
 
 def test_cambiar_de_modelo_vuelve_a_embeber_las_vacantes_sin_esperar_la_ingesta(db):
     ingerir(FuenteEnMemoria([cruda("v1", "Requisitos:\n- SQL\n- Excel")]))
-    assert embeber_vacantes(BUSQUEDA) == 1
-    assert embeber_vacantes(BUSQUEDA, cobertura=COBERTURA) == 1  # el contenido no cambió, el modelo sí
-    assert embeber_vacantes(BUSQUEDA, cobertura=COBERTURA) == 0
+    assert embeber_vacantes(VIEJOS) == 1
+    assert embeber_vacantes(NUEVOS) == 1  # el contenido no cambió, el modelo sí
+    assert embeber_vacantes(NUEVOS) == 0
+
+
+# --- revisión independiente, hallazgo 2: los dos modelos viajan juntos ----------------------------------------------
+
+def test_obtener_modelos_da_busqueda_y_cobertura(settings):
+    from matching.ia import obtener_modelos
+
+    settings.SCOUTLY_EMBEDDER = "falso"
+    modelos = obtener_modelos()
+    assert (modelos.busqueda.dimension, modelos.cobertura.dimension) == (384, 768)
+    assert modelos.firma == "falso-384|falso-768"
+
+
+def test_la_fachada_no_acepta_un_solo_modelo(usuario):
+    """Pasar solo el modelo de búsqueda embebía la evidencia con MiniLM y dejaba al perfil sin decisiones."""
+    import pytest
+
+    perfil = guardar_perfil_desde_cv(usuario, pdf_cv())
+    with pytest.raises(TypeError, match="ModelosEmbebido"):
+        decidir_para_perfil(perfil, BUSQUEDA)

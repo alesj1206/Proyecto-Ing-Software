@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from matching.evaluacion.evaluar import barrido as barrer_umbrales, cargar_pares, evaluar, informe_markdown, preparar
-from matching.ia import obtener_embedder, obtener_embedder_cobertura
+from matching.ia import obtener_modelos
 from matching.politica import POLITICA
 from vacantes.fuentes.fixture import FuenteFixture
 
@@ -29,8 +29,7 @@ class Command(BaseCommand):
         cvs = yaml.safe_load((DATOS / "cvs.yaml").read_text(encoding="utf-8"))
         pares = cargar_pares(DATOS / "pares.yaml", mitad)
         with transaction.atomic():
-            escenario = preparar(cvs, FuenteFixture(DATOS / "vacantes.json"), obtener_embedder(),
-                                 obtener_embedder_cobertura())
+            escenario = preparar(cvs, FuenteFixture(DATOS / "vacantes.json"), obtener_modelos())
             if barrido:
                 for politica, informe in barrer_umbrales(escenario, pares, POLITICA)[:5]:
                     self.stdout.write(f"τ_alto={politica.tau_alto} τ_bajo={politica.tau_bajo} "

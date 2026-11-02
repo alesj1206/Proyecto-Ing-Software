@@ -8,6 +8,9 @@ from django.core.management.base import CommandError
 
 from matching.evaluacion.evaluar import Par, cargar_pares, evaluar, linea_base, preparar
 from matching.ia.fakes import EmbedderFalso
+from matching.puertos import ModelosEmbebido
+
+MODELOS = ModelosEmbebido(EmbedderFalso(), EmbedderFalso())
 from matching.politica import POLITICA, Politica
 from vacantes.tests.test_ingesta import FuenteEnMemoria, cruda
 
@@ -20,7 +23,7 @@ def test_evaluar_calcula_exactitud_y_linea_base(db):
     fuente = FuenteEnMemoria([
         cruda("ok", "Requisitos:\n- Reportes de ventas en Excel\n- Atención de clientes en tienda"),
         cruda("lejos", "Requisitos:\n- Docker Kubernetes\n- Python Django\n- Linux redes")])
-    escenario = preparar(CVS, fuente, EmbedderFalso())
+    escenario = preparar(CVS, fuente, MODELOS)
     pares = [Par("ana", "ok", "POSTULAR", "cubre todo", "ajuste"), Par("ana", "lejos", "DESCARTAR", "otra área", "ajuste")]
     informe = evaluar(escenario, pares, Politica(tau_relevancia=0.0))
     assert informe.total == 2 and informe.exactitud == 1.0
@@ -31,7 +34,7 @@ def test_evaluar_calcula_exactitud_y_linea_base(db):
 def test_con_fusion_una_etiqueta_ajustar_cv_se_compara_como_postular(db):
     """Con la fusión, Ajustar CV y Postular son una sola acción: así se preregistró y midió prueba_3."""
     escenario = preparar(CVS, FuenteEnMemoria([cruda("ok", "Requisitos:\n- Reportes de ventas en Excel\n- Atención de "
-                                                            "clientes en tienda")]), EmbedderFalso())
+                                                            "clientes en tienda")]), MODELOS)
     pares = [Par("ana", "ok", "AJUSTAR_CV", "lo tiene a medias", "ajuste")]
     con_fusion = evaluar(escenario, pares, Politica(tau_relevancia=0.0, fusionar_ajustar=True))
     sin_fusion = evaluar(escenario, pares, Politica(tau_relevancia=0.0, fusionar_ajustar=False))

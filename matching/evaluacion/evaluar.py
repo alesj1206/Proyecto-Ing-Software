@@ -17,7 +17,7 @@ from vacantes.models import Vacante
 from vacantes.services import ingerir
 
 from ..politica import Politica
-from ..puertos import Embedder
+from ..puertos import ModelosEmbebido
 from ..services import decidir_par
 from ..vectores import embeber_perfil, embeber_vacantes
 
@@ -92,11 +92,10 @@ def cargar_pares(ruta: Path, mitad: str) -> list[Par]:
     return [Par(**p) for p in datos["pares"] if p["mitad"] == mitad]
 
 
-def preparar(cvs: dict[str, dict], fuente: FuenteVacantes, embedder: Embedder,
-             cobertura: Embedder | None = None) -> Escenario:
+def preparar(cvs: dict[str, dict], fuente: FuenteVacantes, modelos: ModelosEmbebido) -> Escenario:
     """Carga las vacantes y crea un perfil por CV pasando el PDF por el parser real, con sus vectores."""
     ingerir(fuente)
-    embeber_vacantes(embedder, cobertura=cobertura)
+    embeber_vacantes(modelos)
     perfiles = {}
     for clave, cv in cvs.items():
         usuario = crear_usuario_con_autorizacion(f"eval-{clave}@correo-ficticio.co", None)
@@ -106,7 +105,7 @@ def preparar(cvs: dict[str, dict], fuente: FuenteVacantes, embedder: Embedder,
         for campo, valor in cv.get("expectativas", {}).items():
             setattr(perfil, campo, valor)
         perfil.save()
-        embeber_perfil(perfil, embedder, cobertura=cobertura)
+        embeber_perfil(perfil, modelos)
         perfiles[clave] = perfil
     return Escenario(perfiles)
 

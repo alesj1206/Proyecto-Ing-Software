@@ -27,7 +27,7 @@
     </form>
     {% else %}
     {% if s.respuesta %}<p style="margin-top:0.6rem;font-size:0.95rem;">«{{ s.respuesta }}»</p>{% endif %}
-    <p class="decision-cubres">{{ s.get_estado_display }}{% if not s.vigente %} · esta vacante ya no lo pide así: revísalo antes de usarlo{% endif %}</p>
+    <p class="decision-cubres">{{ s.get_estado_display }}{% if s.ya_en_cv %} · ya aparece en tu hoja de vida{% elif not s.vigente %} · esta vacante ya no lo pide así: revísalo antes de usarlo{% endif %}</p>
     {% endif %}
   </div>
   {% empty %}

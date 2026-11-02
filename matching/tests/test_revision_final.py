@@ -19,7 +19,7 @@ from vacantes.models import Vacante
 from vacantes.services import ingerir
 from vacantes.tests.test_ingesta import FuenteEnMemoria, cruda
 
-from .test_decidir import E, TODAS, VACANTES, _perfil, catalogo  # noqa: F401 (fixture)
+from .test_decidir import M, TODAS, VACANTES, _perfil, catalogo  # noqa: F401 (fixture)
 
 
 # 1. vacante modificada después de embeberse -------------------------------------------------------------
@@ -27,7 +27,7 @@ from .test_decidir import E, TODAS, VACANTES, _perfil, catalogo  # noqa: F401 (f
 def test_vacante_cambiada_sin_reembeber_no_entra_al_decisor(usuario, catalogo):
     perfil = _perfil(usuario)
     ingerir(FuenteEnMemoria([cruda("vpost", VACANTES["vpost"] + "\n- Docker Kubernetes\n- Python Django")]))
-    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, M, politica=TODAS)
     assert not Decision.objects.filter(perfil=perfil, vacante_id="vpost").exists()
 
 
@@ -60,7 +60,7 @@ def test_una_solicitud_durante_la_decision_no_se_pierde(usuario, catalogo, monke
         return resultado
 
     monkeypatch.setattr(servicios, "preseleccionar", y_el_usuario_cambia_algo)
-    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, M, politica=TODAS)
     assert SolicitudDecision.objects.filter(perfil=perfil).exists()
 
 
@@ -95,13 +95,13 @@ def test_sin_obligatorios_comparables_es_sin_datos():
 def test_ocultas_por_modalidad_se_guarda_en_la_foto(usuario, catalogo):
     Vacante.objects.filter(id="vpost").update(modalidad="Presencial", modalidad_inferida=False)
     perfil = _perfil(usuario, exp_modalidad="Remoto")
-    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, M, politica=TODAS)
     assert FotoDiaria.objects.get(perfil=perfil).ocultas_por_modalidad >= 1
 
 
 def test_el_dashboard_no_repite_la_busqueda_vectorial(client, usuario, catalogo, monkeypatch):
     perfil = _perfil(usuario)
-    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, M, politica=TODAS)
     monkeypatch.setattr("matching.preseleccion.preseleccionar", lambda *a, **k: pytest.fail("búsqueda en la web"))
     client.force_login(usuario)
     assert client.get(reverse("dashboard")).status_code == 200
@@ -111,9 +111,9 @@ def test_el_dashboard_limita_cada_grupo(client, usuario, db):
     from matching.selectors import MAX_POR_GRUPO
 
     ingerir(FuenteEnMemoria([cruda(f"v{i:02d}", VACANTES["vdesc"]) for i in range(MAX_POR_GRUPO + 5)]))
-    embeber_vacantes(E)
+    embeber_vacantes(M)
     perfil = _perfil(usuario)
-    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, M, politica=TODAS)
     client.force_login(usuario)
     html = client.get(reverse("dashboard")).content.decode()
     assert f"y 5 más" in html
@@ -121,7 +121,7 @@ def test_el_dashboard_limita_cada_grupo(client, usuario, db):
 
 def test_sin_plan_pero_con_decisiones_no_dice_que_no_hay_relevantes(client, usuario, catalogo):
     perfil = _perfil(usuario, evidencia=["Reportes de ventas en Excel"])
-    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, M, politica=TODAS)
     Decision.objects.filter(perfil=perfil, accion__in=["POSTULAR", "AJUSTAR_CV"]).delete()
     client.force_login(usuario)
     html = client.get(reverse("dashboard")).content.decode()
@@ -132,10 +132,10 @@ def test_sin_plan_pero_con_decisiones_no_dice_que_no_hay_relevantes(client, usua
 
 def test_accion_anterior_distingue_nueva_de_sin_cambios(usuario, catalogo):
     perfil = _perfil(usuario)
-    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, M, politica=TODAS)
     primera = Decision.objects.get(perfil=perfil, vacante_id="vpost")
     assert primera.accion_anterior == NUEVA and primera.cambio_en is not None
-    decidir_para_perfil(perfil, E, politica=TODAS)
+    decidir_para_perfil(perfil, M, politica=TODAS)
     segunda = Decision.objects.get(perfil=perfil, vacante_id="vpost")
     assert segunda.accion_anterior == "POSTULAR" and segunda.cambio_en == primera.cambio_en
 

@@ -25,7 +25,7 @@ class Preseleccion:
 
 
 def preseleccionar(perfil: Perfil, tau: float, tope: int = TOPE_TECNICO, modelos: str | None = None) -> Preseleccion:
-    """`modelos` (vectores.firma_modelos): si se da, solo entran vacantes embebidas con esos modelos."""
+    """`modelos` (ModelosEmbebido.firma): si se da, solo entran vacantes embebidas con esos modelos."""
     if perfil.vector is None:
         return Preseleccion()
     # Solo vacantes con vectores al día: una re-ingesta posterior al embebido dejaría una matriz desalineada, y una

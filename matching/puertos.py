@@ -1,6 +1,7 @@
 """Puertos (Adapter + Ports) de los modelos de IA. El decisor solo conoce estas interfaces; los adaptadores reales
 (fastembed) y los falsos de los tests las implementan."""
 
+from dataclasses import dataclass
 from typing import Protocol
 
 import numpy as np
@@ -13,6 +14,20 @@ class Embedder(Protocol):
     def embeber(self, textos: list[str]) -> np.ndarray:
         """Matriz float32 de forma (len(textos), dimension) con filas normalizadas (norma L2 = 1)."""
         ...
+
+
+@dataclass(frozen=True)
+class ModelosEmbebido:
+    """Los dos modelos viajan juntos (spec §13.6): el de búsqueda da el vector de la preselección y el de cobertura las
+    matrices requisito × evidencia. Un parámetro obligatorio evita llamar con uno solo y mezclar espacios."""
+
+    busqueda: Embedder
+    cobertura: Embedder
+
+    @property
+    def firma(self) -> str:
+        """Qué modelos produjeron vector y matriz: si cambia alguno, hay que volver a embeber."""
+        return f"{self.busqueda.modelo}|{self.cobertura.modelo}"
 
 
 class Redactor(Protocol):

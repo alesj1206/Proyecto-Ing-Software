@@ -253,6 +253,7 @@ SCOUTLY_GROQ_MODELO = os.environ.get('SCOUTLY_GROQ_MODELO', 'qwen/qwen3.8-27b') 
 EMAIL_BACKEND = os.environ.get(
     'DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend'
 )
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '15'))  # s; un SMTP colgado no retiene el candado de notificaciones
 EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')

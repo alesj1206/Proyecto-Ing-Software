@@ -20,10 +20,10 @@ from .models import Decision, FotoDiaria, SolicitudDecision
 from .orden import Ordenador, OrdenSimilitudCobertura
 from .politica import POLITICA, Accion, ContextoDecision, Politica, decidir
 from .preseleccion import preseleccionar
-from .puertos import Embedder
+from .puertos import ModelosEmbebido
 from .restricciones import RESTRICCIONES
 from .solidez import calcular_solidez
-from .vectores import de_bytes, embeber_perfil, firma_modelos
+from .vectores import de_bytes, embeber_perfil
 
 TOP_POR_ACCION_EN_FOTO = 10
 NUEVA = "NUEVA"  # accion_anterior de una vacante que recién entra al conjunto relevante (spec §5.7)
@@ -146,15 +146,14 @@ def _con_vectores_viejos(perfil: Perfil, modelos: str) -> set[str]:
                .values_list("vacante_id", flat=True))
 
 
-def decidir_para_perfil(perfil: Perfil, embedder: Embedder, ordenador: Ordenador | None = None,
-                        politica: Politica = POLITICA, hoy: date | None = None,
-                        cobertura: Embedder | None = None) -> ResumenDecision:
-    """`embedder` da el vector de la preselección y `cobertura` (mpnet en producción) la matriz de la evidencia."""
+def decidir_para_perfil(perfil: Perfil, modelos: ModelosEmbebido, ordenador: Ordenador | None = None,
+                        politica: Politica = POLITICA, hoy: date | None = None) -> ResumenDecision:
+    if not isinstance(modelos, ModelosEmbebido):  # con un solo modelo la evidencia quedaba en otro espacio
+        raise TypeError("decidir_para_perfil necesita ModelosEmbebido(busqueda, cobertura) (matching.ia.obtener_modelos)")
     inicio, reloj = timezone.now(), time.perf_counter()
     evidencias = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))  # se leen una vez
-    embeber_perfil(perfil, embedder, evidencias, cobertura)
-    modelos = firma_modelos(embedder, cobertura)
-    preseleccion = preseleccionar(perfil, politica.tau_relevancia, modelos=modelos)
+    embeber_perfil(perfil, modelos, evidencias)
+    preseleccion = preseleccionar(perfil, politica.tau_relevancia, modelos=modelos.firma)
     similitudes = dict(preseleccion.relevantes)
     vacantes = Vacante.objects.filter(id__in=similitudes).prefetch_related("requisito_set")
     matriz_evid = de_bytes(perfil.matriz_evidencia, len(evidencias))
@@ -167,6 +166,6 @@ def decidir_para_perfil(perfil: Perfil, embedder: Embedder, ordenador: Ordenador
     (ordenador or OrdenSimilitudCobertura()).ordenar(perfil, decisiones)
     with transaction.atomic():
         _guardar(perfil, decisiones, hoy or timezone.localdate(), preseleccion.ocultas_por_modalidad, inicio,
-                 conservar=saltadas | _con_vectores_viejos(perfil, modelos))
+                 conservar=saltadas | _con_vectores_viejos(perfil, modelos.firma))
     return ResumenDecision(len(decisiones), dict(Counter(d.accion for d in decisiones)),
                            preseleccion.ocultas_por_modalidad, time.perf_counter() - reloj)

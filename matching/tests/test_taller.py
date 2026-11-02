@@ -121,11 +121,50 @@ def test_sin_decision_el_taller_es_404(client_con_cv, vacante_v1):
 
 # --- revisión final de la Fase 3 -----------------------------------------------------------------------
 
-def test_el_texto_para_copiar_no_lleva_evidencia_que_ya_no_esta(decision, usuario, vacante_v1):
+def test_la_respuesta_propia_no_depende_de_la_pista(decision, usuario, vacante_v1):
+    """Lo que se copia son palabras del candidato: que la pista ya no esté en el CV no las invalida."""
     [s] = taller(usuario.perfil, vacante_v1)
     responder(s, acepta=True, respuesta="Usé Power BI")
     usuario.perfil.evidencias.filter(texto="Hice tableros en Excel.").delete()
+    assert texto_adaptado(usuario.perfil, vacante_v1) == "Usé Power BI"
+
+
+# --- revisión independiente, hallazgo 6: vigencia por requisito -------------------------------------------------------
+
+def test_una_respuesta_que_ya_esta_en_el_cv_sigue_vigente(client_con_cv, decision, usuario, vacante_v1):
+    """El candidato copió su respuesta al CV y el requisito pasó a cubierto: no es "ya no lo pide"."""
+    [s] = taller(usuario.perfil, vacante_v1)
+    responder(s, acepta=True, respuesta="Construí tableros en Power BI")
+    cobertura = [dict(r, estado="cubierto") if r["texto"] == "Power BI" else r for r in COBERTURA]
+    Decision.objects.filter(id=decision.id).update(cobertura=cobertura)
+    assert texto_adaptado(usuario.perfil, vacante_v1) == "Construí tableros en Power BI"
+    html = client_con_cv.get(reverse("taller", args=["v1"])).content.decode()
+    assert "ya aparece en tu hoja de vida" in html and "ya no lo pide así" not in html
+
+
+def test_una_respuesta_de_un_requisito_que_la_vacante_ya_no_pide_no_se_copia(client_con_cv, decision, usuario,
+                                                                              vacante_v1):
+    [s] = taller(usuario.perfil, vacante_v1)
+    responder(s, acepta=True, respuesta="Usé Power BI")
+    Decision.objects.filter(id=decision.id).update(cobertura=COBERTURA[:2])
     assert texto_adaptado(usuario.perfil, vacante_v1) == ""
+    assert "ya no lo pide así" in client_con_cv.get(reverse("taller", args=["v1"])).content.decode()
+
+
+def test_la_migracion_borra_las_sugerencias_del_taller_anterior(decision, usuario, vacante_v1):
+    import importlib
+
+    from django.apps import apps
+
+    perfil = usuario.perfil
+    [nueva] = taller(perfil, vacante_v1)
+    SugerenciaCV.objects.create(perfil=perfil, vacante=vacante_v1, tipo="resumen", requisito="", propuesta="Resumen…",
+                                estado="aceptada")
+    SugerenciaCV.objects.create(perfil=perfil, vacante=vacante_v1, tipo="requisito", requisito="Excel",
+                                propuesta="Manejé Excel avanzado en reportes", estado="aceptada")
+    migracion = importlib.import_module("matching.migrations.0008_borrar_taller_anterior")
+    migracion.borrar_sugerencias_del_taller_anterior(apps, None)
+    assert list(SugerenciaCV.objects.values_list("id", flat=True)) == [nueva.id]
 
 
 def test_taller_get_concurrente_no_da_500(decision, usuario, vacante_v1):

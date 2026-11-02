@@ -14,11 +14,12 @@ from datetime import date, timedelta
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db import connection
 from django.db.models import Exists, OuterRef
 from django.utils import timezone
 
 from cuentas.models import Perfil
+from matching import candados
+from matching.candados import candado_de_aviso
 from matching.models import Decision
 from matching.politica import Accion
 
@@ -89,18 +90,13 @@ def _enviar_pendientes(perfil: Perfil, hoy: date, ahora) -> int:
     return correos
 
 
-CANDADO_NOTIFICACIONES = 731_002  # candado de aviso de Postgres
-
-
-def generar_notificaciones(hoy: date | None = None) -> ResumenNotificaciones:
+def generar_notificaciones(hoy: date | None = None, esperar: bool = True) -> ResumenNotificaciones | None:
     """De a un proceso a la vez (los `decidir --escuchar` en paralelo y la API de n8n): dos corridas simultáneas verían
-    las mismas pendientes y enviarían el mismo correo dos veces. La segunda espera y luego no encuentra nada nuevo."""
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT pg_advisory_lock(%s)", [CANDADO_NOTIFICACIONES])
-        try:
-            return _generar(hoy)
-        finally:
-            cursor.execute("SELECT pg_advisory_unlock(%s)", [CANDADO_NOTIFICACIONES])
+    las mismas pendientes y enviarían el mismo correo dos veces. Con `esperar=False`, si otro proceso ya está
+    notificando, devuelve None sin esperar (el batch reintenta en su siguiente vuelta). Cada correo tiene un tiempo
+    máximo (EMAIL_TIMEOUT), así que quien tiene el candado no lo retiene indefinidamente."""
+    with candado_de_aviso(candados.NOTIFICACIONES, esperar) as tomado:
+        return _generar(hoy) if tomado else None
 
 
 def _generar(hoy: date | None) -> ResumenNotificaciones:

@@ -24,8 +24,9 @@ class Politica:
     cobertura_nota: float = 0.70
     factor_experiencia: float = 0.5
     max_palabras_herramienta: int = 4
-    # AJUSTAR_CV se vuelve POSTULAR con lo que hay que resaltar: subió la exactitud 8–21 puntos en todos los sets,
-    # incluida la prueba preregistrada (docs/exploracion/2026-11-02-mejoras-decisor.md).
+    # AJUSTAR_CV se vuelve POSTULAR con lo que hay que resaltar. Con τ_alto = τ_bajo no hay parciales, así que esta rama
+    # no se ejecuta con la política vigente: la fusión solo actúa en la evaluación (evaluar.esperada). Se conserva para
+    # políticas con banda parcial (docs/exploracion/2026-11-02-mejoras-decisor.md).
     fusionar_ajustar: bool = True
 
 

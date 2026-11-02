@@ -10,6 +10,7 @@ from django.urls import reverse
 
 from cuentas.tests.cvs import pdf_cv
 from matching.ia.fastembed import MODELO_COBERTURA, EmbedderFastembed
+from matching.puertos import ModelosEmbebido
 from matching.services import decidir_para_perfil
 from vacantes.fuentes.fixture import FuenteFixture
 from vacantes.services import ingerir
@@ -34,9 +35,9 @@ def test_cv_real_hasta_dashboard(client, usuario, settings):
     assert "Estamos analizando" not in html and "· solidez" in html and "Cubres" in html
 
     # los dos modelos ya cargados, como en producción: se mide solo la decisión
-    embedder, cobertura = EmbedderFastembed(), EmbedderFastembed(MODELO_COBERTURA)
+    modelos = ModelosEmbebido(EmbedderFastembed(), EmbedderFastembed(MODELO_COBERTURA))
     inicio = time.perf_counter()
-    resumen = decidir_para_perfil(usuario.perfil, embedder, cobertura=cobertura)
+    resumen = decidir_para_perfil(usuario.perfil, modelos)
     segundos = time.perf_counter() - inicio
     print(f"\ndecidir_para_perfil: {resumen.relevantes} relevantes en {segundos:.2f} s")
     assert resumen.relevantes > 0 and segundos <= LIMITE_DECISION_S

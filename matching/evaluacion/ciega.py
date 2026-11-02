@@ -68,13 +68,13 @@ def _rotulo(vacante: Vacante) -> str:
     return f"{vacante.titulo} — {vacante.empresa} ({vacante.ubicacion})"
 
 
-def preparar(escenario, cvs: dict[str, dict], claves: list[str], embedder,
-             semilla: int | None, cobertura=None) -> tuple[list[Paquete], dict]:
+def preparar(escenario, cvs: dict[str, dict], claves: list[str], modelos,
+             semilla: int | None) -> tuple[list[Paquete], dict]:
     sorteo, paquetes, clave = asignar(claves, semilla), [], {}
     hoy = timezone.localdate()
     for numero, nombre in enumerate(claves, 1):
         perfil = escenario.perfiles[nombre]
-        decidir_para_perfil(perfil, embedder, cobertura=cobertura)
+        decidir_para_perfil(perfil, modelos)
         decisor = [_rotulo(item.vacante) for item in plan_de_hoy(perfil, TAMANO_LISTA, hoy)]
         ids = [i for i, _ in preseleccionar(perfil, POLITICA.tau_relevancia).relevantes[:TAMANO_LISTA]]
         por_id = Vacante.objects.in_bulk(ids)

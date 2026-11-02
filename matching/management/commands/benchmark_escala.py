@@ -14,7 +14,8 @@ from cuentas.models import Usuario
 from matching.benchmark.medir import Medicion, cronometro, informe_markdown
 from matching.benchmark.sintetico import FuenteSintetica
 from matching.evaluacion.evaluar import preparar
-from matching.ia import obtener_embedder, obtener_embedder_cobertura
+from matching.ia import obtener_modelos
+from matching.puertos import ModelosEmbebido
 from matching.politica import POLITICA
 from matching.preseleccion import TOPE_TECNICO
 from matching.services import decidir_para_perfil
@@ -51,7 +52,7 @@ class EmbedderConMemoria:
 
     def __init__(self, embedder):
         self.embedder, self.memoria = embedder, {}
-        self.modelo = getattr(embedder, "modelo", "")
+        self.modelo, self.dimension = embedder.modelo, embedder.dimension
 
     def embeber(self, textos: list[str]) -> np.ndarray:
         nuevos = [t for t in dict.fromkeys(textos) if t not in self.memoria]
@@ -84,13 +85,13 @@ class Command(BaseCommand):
         if not confirmar:
             raise CommandError(f"Esto borra TODAS las vacantes de {base}. Repite con --confirmar.")
         plantillas = json.loads((DATOS / "vacantes.json").read_text(encoding="utf-8"))
-        embedder, cobertura, mediciones = obtener_embedder(), obtener_embedder_cobertura(), []
+        modelos, mediciones = obtener_modelos(), []
         Vacante.objects.all().delete()
         Usuario.objects.filter(email__startswith="eval-").delete()
 
         with cronometro() as t:  # 1. muestra real: extracción + embebido de verdad (sin memoria)
             ingerir(FuenteSintetica(plantillas, muestra, semilla=1))
-            embeber_vacantes(embedder, cobertura=cobertura)
+            embeber_vacantes(modelos)
         por_vacante = t["s"] / muestra
         mediciones += [Medicion("delta_diario_min", DELTA_DIARIO, por_vacante * DELTA_DIARIO,
                                 "medido" if muestra == DELTA_DIARIO else "proyectado", f"muestra de {muestra}"),
@@ -101,17 +102,17 @@ class Command(BaseCommand):
         resto = max(vacantes - muestra, 0)
         with cronometro() as t:  # 2. carga masiva hasta N, reutilizando embeddings de textos repetidos
             ingerir(FuenteSintetica(plantillas, resto, semilla=1, desde=muestra))
-            embeber_vacantes(EmbedderConMemoria(embedder), cobertura=EmbedderConMemoria(cobertura))
+            embeber_vacantes(ModelosEmbebido(EmbedderConMemoria(modelos.busqueda), EmbedderConMemoria(modelos.cobertura)))
         mediciones.append(Medicion("carga_masiva_min", resto, t["s"], "medido",
                                    "embeddings reutilizados: mide extracción y escritura"))
         self.stdout.write(f"carga masiva: {resto} vacantes en {t['s']:.0f} s; total {Vacante.objects.count()}")
 
         cvs = yaml.safe_load((DATOS / "cvs.yaml").read_text(encoding="utf-8"))
         cvs = dict(list(cvs.items())[:candidatos])
-        perfiles = preparar(cvs, FuenteVacia(), embedder, cobertura).perfiles
+        perfiles = preparar(cvs, FuenteVacia(), modelos).perfiles
         tiempos, relevantes, topes = [], [], 0
         for clave, perfil in perfiles.items():  # 3. decisión completa por candidato
-            resumen = decidir_para_perfil(perfil, embedder, cobertura=cobertura)
+            resumen = decidir_para_perfil(perfil, modelos)
             tiempos.append(resumen.segundos)
             relevantes.append(resumen.relevantes)
             topes += resumen.relevantes >= TOPE_TECNICO
@@ -122,7 +123,7 @@ class Command(BaseCommand):
                        Medicion("decision_candidato_s", len(tiempos), max(tiempos), "medido", "el peor candidato")]
 
         contexto = {"fecha": timezone.now().strftime("%Y-%m-%d %H:%M"), "vacantes en la base": Vacante.objects.count(),
-                    "CPU": _cpu(), "embeddings": f"búsqueda {getattr(embedder, 'modelo', '')}, cobertura {getattr(cobertura, 'modelo', '')}",
+                    "CPU": _cpu(), "embeddings": f"búsqueda|cobertura = {modelos.firma}",
                     "política": f"{POLITICA.version} (τ_relevancia {POLITICA.tau_relevancia})",
                     "reranker": "apagado (el umbral de 1,5 s por página no aplica, §13.1)"}
         informe = informe_markdown(mediciones, contexto)

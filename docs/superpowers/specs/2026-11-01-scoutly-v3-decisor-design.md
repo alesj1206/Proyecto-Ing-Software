@@ -448,8 +448,10 @@ la política anterior.
   vacante guarda con qué modelos se embebió, así que un cambio de modelo se re-embebe en la siguiente corrida sin
   esperar a la ingesta.
 - **Política 2026-11-05.1:** τ_alto = τ_bajo = 0,425, así que no hay banda "parcial".
-- **Fusión de Postular y Ajustar CV.** Lo que era AJUSTAR_CV sale como POSTULAR con la nota "Resalta en tu hoja de
-  vida: …". AJUSTAR_CV sigue en el modelo de datos, pero la política vigente no lo produce.
+- **Fusión de Postular y Ajustar CV.** Son una sola acción para el candidato. Con la política vigente no hay
+  parciales, así que AJUSTAR_CV nunca se produce y la nota "Resalta en tu hoja de vida: …" no aparece: esa regla solo
+  actúa con una política que tenga banda parcial. Hoy la fusión se nota en la evaluación, donde una etiqueta AJUSTAR_CV
+  se compara como POSTULAR.
 - **El Taller pregunta, no redacta.** Por cada obligatorio faltante (o parcial con evidencia) pregunta "¿Has trabajado
   con X?" y copia solo lo que la persona escribe. Se ofrece en Postular, Ajustar CV y Cerrar brecha cuando hay algo que
   preguntar.

@@ -56,11 +56,17 @@ def taller(perfil: Perfil, vacante: Vacante) -> list[SugerenciaCV]:
     for vieja in SugerenciaCV.objects.filter(perfil=perfil, vacante=vacante, estado=SugerenciaCV.Estado.PENDIENTE):
         if (vieja.tipo, vieja.requisito) not in claves:
             vieja.delete()
-    propuestas_vigentes = {s.propuesta for s in vigentes}
+    estados = _estados(decision)
     sugerencias = list(SugerenciaCV.objects.filter(perfil=perfil, vacante=vacante))
-    for s in sugerencias:  # una respondida cuya evidencia ya no está en el CV se marca (se guarda como historial)
-        s.vigente = s.propuesta in propuestas_vigentes
+    for s in sugerencias:  # una respondida de un requisito que la vacante ya no pide se marca (queda como historial)
+        s.vigente = s.requisito in estados
+        s.ya_en_cv = estados.get(s.requisito) == "cubierto"
     return sugerencias
+
+
+def _estados(decision: Decision) -> dict[str, str]:
+    """Estado de cada requisito obligatorio que la vacante pide hoy."""
+    return {r["texto"]: r["estado"] for r in decision.cobertura if r["tipo"] == "obligatorio"}
 
 
 def responder(sugerencia: SugerenciaCV, acepta: bool, respuesta: str = "") -> None:
@@ -74,11 +80,11 @@ def responder(sugerencia: SugerenciaCV, acepta: bool, respuesta: str = "") -> No
 
 
 def texto_adaptado(perfil: Perfil, vacante: Vacante) -> str:
-    """Las aceptadas que siguen respaldadas por el CV actual: nunca se copia algo cuya evidencia ya no está."""
+    """Las respuestas aceptadas de requisitos que la vacante todavía pide. Son palabras del candidato: siguen valiendo
+    aunque la pista ya no esté en el CV o el requisito ya aparezca cubierto (quizá porque las copió)."""
     decision = Decision.objects.filter(perfil=perfil, vacante=vacante).first()
     if decision is None:
         return ""
-    vigentes = {s.propuesta for s in generar_sugerencias(decision, list(perfil.evidencias.values_list("texto",
-                                                                                                    flat=True)))}
+    estados = _estados(decision)
     aceptadas = SugerenciaCV.objects.filter(perfil=perfil, vacante=vacante, estado=SugerenciaCV.Estado.ACEPTADA)
-    return "\n".join(s.respuesta for s in aceptadas if s.propuesta in vigentes)
+    return "\n".join(s.respuesta for s in aceptadas if s.requisito in estados and s.respuesta)

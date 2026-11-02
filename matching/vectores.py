@@ -4,14 +4,16 @@ en la misma transacción que el vector (spec §13.1, P3 y P4)."""
 import hashlib
 
 import numpy as np
-from django.db import connection, transaction
+from django.db import transaction
 from django.db.models import F, Q
 
 from cuentas.models import Perfil
 from vacantes.extraccion import nucleo
 from vacantes.models import Vacante
 
-from .puertos import Embedder
+from . import candados
+from .candados import candado_de_aviso
+from .puertos import Embedder, ModelosEmbebido
 
 
 def a_bytes(matriz: np.ndarray) -> bytes:
@@ -49,17 +51,20 @@ def _embeber_distintos(embedder: Embedder, textos: list[str]) -> np.ndarray:
     return matriz[[posicion[t] for t in textos]] if textos else matriz
 
 
-def firma_modelos(embedder: Embedder, cobertura: Embedder | None) -> str:
-    """Qué modelos produjeron vector y matriz: si cambia alguno, hay que volver a embeber."""
-    busqueda = getattr(embedder, "modelo", "")
-    return f"{busqueda}|{getattr(cobertura, 'modelo', '') if cobertura is not None else busqueda}"
+def embeber_vacantes(modelos: ModelosEmbebido, lote: int = 256, esperar: bool = True) -> int | None:
+    """Embebe las vacantes nuevas, las que cambiaron de contenido y las embebidas con otros modelos. Devuelve cuántas.
+    El vector (preselección) sale del modelo de búsqueda; la matriz de requisitos, del de cobertura.
+
+    Un solo proceso embebe a la vez (candado de aviso). Con `esperar=False` (los que escuchan la cola), si otro ya está
+    embebiendo, devuelve None sin hacer nada; las vacantes a medio embeber no entran a la preselección y conservan su
+    decisión anterior (services._con_vectores_viejos)."""
+    with candado_de_aviso(candados.EMBEBIDO, esperar) as tomado:
+        return _embeber_vacantes(modelos, lote) if tomado else None
 
 
-def embeber_vacantes(embedder: Embedder, lote: int = 256, cobertura: Embedder | None = None) -> int:
-    """Embebe las vacantes nuevas o cuyo contenido cambió desde la última vez. Devuelve cuántas. El vector (preselección)
-    sale de `embedder`; la matriz de requisitos, de `cobertura` si se da (si no, del mismo `embedder`)."""
-    modelos = firma_modelos(embedder, cobertura)
-    pendientes = (Vacante.objects.exclude(Q(hash_embebido=F("hash_contenido")) & Q(modelos_embebido=modelos))
+def _embeber_vacantes(modelos: ModelosEmbebido, lote: int) -> int:
+    firma = modelos.firma
+    pendientes = (Vacante.objects.exclude(Q(hash_embebido=F("hash_contenido")) & Q(modelos_embebido=firma))
                   .prefetch_related("requisito_set").order_by("id"))
     total = 0
     ids = list(pendientes.values_list("id", flat=True))
@@ -71,50 +76,30 @@ def embeber_vacantes(embedder: Embedder, lote: int = 256, cobertura: Embedder | 
             tramos.append((len(textos), len(crudos), [r.origen == "texto" for r in requisitos]))
             textos += [v.titulo] + [nucleo(r.texto) for r in requisitos]  # la experiencia, por su área
             crudos += [r.texto for r in requisitos]
-        matriz = _embeber_distintos(embedder, textos)
-        # mpnet se midió sobre el texto completo del requisito (prueba_3); `nucleo` es el ajuste que necesitó MiniLM.
-        matriz_cob = _embeber_distintos(cobertura, crudos) if cobertura is not None else None
+        matriz = _embeber_distintos(modelos.busqueda, textos)
+        # La cobertura se mide sobre el texto completo del requisito, como se midió mpnet en prueba_3; `nucleo` es el
+        # ajuste que necesitó MiniLM y solo entra al vector de la preselección.
+        matriz_cob = _embeber_distintos(modelos.cobertura, crudos)
         for v, (desde, desde_cob, de_texto) in zip(vacantes, tramos):
             titulo, reqs = matriz[desde], matriz[desde + 1: desde + 1 + len(de_texto)]
             base = np.vstack([titulo[None, :], reqs[np.array(de_texto, dtype=bool)]]) if len(de_texto) else titulo[None, :]
-            if matriz_cob is not None:
-                reqs = matriz_cob[desde_cob: desde_cob + len(de_texto)]
-            v.vector, v.matriz_requisitos, v.hash_embebido = _promedio_normalizado(base), a_bytes(reqs), v.hash_contenido
-            v.modelos_embebido = modelos
+            v.vector, v.hash_embebido, v.modelos_embebido = _promedio_normalizado(base), v.hash_contenido, firma
+            v.matriz_requisitos = a_bytes(matriz_cob[desde_cob: desde_cob + len(de_texto)])
         with transaction.atomic():
             Vacante.objects.bulk_update(vacantes, ["vector", "matriz_requisitos", "hash_embebido", "modelos_embebido"])
         total += len(vacantes)
     return total
 
 
-CANDADO_EMBEBIDO = 731_001  # candado de aviso de Postgres: un solo proceso embebe vacantes a la vez
-
-
-def embeber_vacantes_si_libre(embedder: Embedder, cobertura: Embedder | None = None) -> int | None:
-    """Como `embeber_vacantes`, salvo que otro proceso ya esté embebiendo: entonces devuelve None sin hacer nada (las
-    vacantes a medio embeber no entran a la preselección, y se deciden en la próxima corrida)."""
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT pg_try_advisory_lock(%s)", [CANDADO_EMBEBIDO])
-        if not cursor.fetchone()[0]:
-            return None
-        try:
-            return embeber_vacantes(embedder, cobertura=cobertura)
-        finally:
-            cursor.execute("SELECT pg_advisory_unlock(%s)", [CANDADO_EMBEBIDO])
-
-
-def embeber_perfil(perfil: Perfil, embedder: Embedder, textos: list[str] | None = None,
-                   cobertura: Embedder | None = None) -> bool:
+def embeber_perfil(perfil: Perfil, modelos: ModelosEmbebido, textos: list[str] | None = None) -> bool:
     """Embebe la evidencia del perfil si cambió (o si cambió algún modelo). Devuelve si hizo algo. `textos` evita
-    leerla dos veces. El vector sale de `embedder` y la matriz de `cobertura` si se da."""
+    leerla dos veces. El vector sale del modelo de búsqueda y la matriz del de cobertura."""
     if textos is None:
         textos = list(perfil.evidencias.order_by("posicion").values_list("texto", flat=True))
-    firma = hashlib.sha256("\n".join([firma_modelos(embedder, cobertura)] + textos).encode("utf-8")).hexdigest()
+    firma = hashlib.sha256("\n".join([modelos.firma] + textos).encode("utf-8")).hexdigest()
     if perfil.hash_embebido == firma:
         return False
-    matriz = embedder.embeber(textos)
-    matriz_cob = cobertura.embeber(textos) if cobertura is not None else matriz
-    perfil.vector, perfil.matriz_evidencia, perfil.hash_embebido = (_promedio_normalizado(matriz), a_bytes(matriz_cob),
-                                                                    firma)
+    vector = _promedio_normalizado(modelos.busqueda.embeber(textos))
+    perfil.vector, perfil.matriz_evidencia, perfil.hash_embebido = vector, a_bytes(modelos.cobertura.embeber(textos)), firma
     perfil.save(update_fields=["vector", "matriz_evidencia", "hash_embebido"])
     return True

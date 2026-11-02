@@ -9,6 +9,9 @@ from django.core.management.base import CommandError
 from matching.evaluacion.ciega import asignar, preparar as preparar_ciega, tabular
 from matching.evaluacion.evaluar import preparar
 from matching.ia.fakes import EmbedderFalso
+from matching.puertos import ModelosEmbebido
+
+MODELOS = ModelosEmbebido(EmbedderFalso(), EmbedderFalso())
 from vacantes.tests.test_ingesta import FuenteEnMemoria, cruda
 
 PROHIBIDAS = ("decisor", "similitud", "adaptado", "plan de hoy", "postular", "ajustar", "cerrar_brecha", "descartar",
@@ -20,8 +23,8 @@ CVS = {"ana": {"nombre": "Ana Ficticia", "experiencia": ["Reportes de ventas en 
 def test_paquete_no_revela_el_origen(db):
     fuente = FuenteEnMemoria([cruda(f"v{i}", "Requisitos:\n- Reportes de ventas en Excel\n- Atención de clientes")
                               for i in range(4)])
-    escenario = preparar(CVS, fuente, EmbedderFalso())
-    paquetes, clave = preparar_ciega(escenario, CVS, ["ana"], EmbedderFalso(), semilla=1)
+    escenario = preparar(CVS, fuente, MODELOS)
+    paquetes, clave = preparar_ciega(escenario, CVS, ["ana"], MODELOS, semilla=1)
     texto = paquetes[0].markdown().lower()
     assert "lista a" in texto and "lista b" in texto
     assert not [p for p in PROHIBIDAS if p in texto]
@@ -61,7 +64,7 @@ def test_con_el_taller_guiado_no_hay_pregunta_de_cv(db, monkeypatch):
     from vacantes.models import Vacante
     fuente = FuenteEnMemoria([cruda(f"v{i}", "Requisitos:\n- Reportes de ventas en Excel\n- Atención de clientes")
                               for i in range(4)])
-    escenario = preparar(CVS, fuente, EmbedderFalso())
+    escenario = preparar(CVS, fuente, MODELOS)
     evidencia = escenario.perfiles["ana"].evidencias.first().texto
 
     def decidir_con_un_ajustar(perfil, embedder, **_):
@@ -71,5 +74,5 @@ def test_con_el_taller_guiado_no_hay_pregunta_de_cv(db, monkeypatch):
                                 cobertura=[{"texto": "Power BI", "tipo": "obligatorio", "origen": "texto",
                                             "estado": "parcial", "similitud": 0.4, "evidencia": evidencia}])
     monkeypatch.setattr(ciega, "decidir_para_perfil", decidir_con_un_ajustar)
-    paquetes, clave = preparar_ciega(escenario, CVS, ["ana"], EmbedderFalso(), semilla=1)
+    paquetes, clave = preparar_ciega(escenario, CVS, ["ana"], MODELOS, semilla=1)
     assert not paquetes[0].cvs and clave["1"]["tiene_cv"] is False

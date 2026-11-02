@@ -12,13 +12,13 @@ siempre con sus razones:
 
 | Acción | Qué significa |
 |---|---|
-| **Postular** | Cubres los requisitos obligatorios (a veces "con nota": te falta una sola herramienta, o hay algo que conviene resaltar). |
+| **Postular** | Cubres los requisitos obligatorios (a veces "con nota": te falta una sola herramienta). |
 | **Cerrar brecha** | Te faltan 1 o 2 obligatorios: van a tu plan de aprendizaje. |
 | **Descartar** | Viola una restricción tuya (salario, ciudad, modalidad, experiencia o prácticas) o te faltan 3 o más. Siempre dice el motivo. |
 | **Revísala tú** | La vacante no dice lo suficiente para decidir. |
 
-En cualquier vacante con algo que tu hoja de vida no dice, el Taller de CV te pregunta si lo has hecho y te deja
-contarlo con tus palabras; nunca redacta por ti.
+En las vacantes de Postular o Cerrar brecha que piden algo obligatorio que tu hoja de vida no dice, el Taller de CV te
+pregunta si lo has hecho y te deja contarlo con tus palabras; nunca redacta por ti.
 
 Ningún modelo de pago decide nada. Los embeddings corren en la máquina con fastembed (ONNX, sin torch): MiniLM para
 encontrar las vacantes relevantes y mpnet para comparar cada requisito con tu experiencia (spec §13.6). Groq solo
@@ -82,7 +82,7 @@ solo después de que el equipo revise los términos de uso de Magneto.
 | Comando | Para qué |
 |---|---|
 | `manage.py ingerir_vacantes --fuente magneto\|fixture` | Trae vacantes. Solo reprocesa las que cambiaron. |
-| `manage.py decidir --todos\|--pendientes\|--escuchar [--procesos N]` | Corre el decisor (el batch). Con `--procesos N`, N procesos se reparten la cola. Cada uno ocupa ~2 GB de RAM; en este PC, 3 rinden lo mismo que 6. |
+| `manage.py decidir --todos\|--pendientes\|--escuchar [--procesos N]` | Corre el decisor (el batch). Con `--procesos N`, N procesos se reparten la cola. Máximo 6. Cada uno ocupa ~2 GB de RAM; en este PC, 3 rinden lo mismo que 6. |
 | `manage.py evaluar_decisor --mitad ajuste\|prueba_1\|prueba` | Exactitud contra el set etiquetado. |
 | `manage.py benchmark_escala --salida …` | Benchmark de 120.000 vacantes (solo en una base `*_bench`). |
 | `manage.py evaluacion_ciega preparar\|tabular` | Materiales y resultados de la evaluación con reclutadores. |
