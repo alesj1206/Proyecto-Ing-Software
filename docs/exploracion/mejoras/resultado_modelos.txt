@@ -1,0 +1,4 @@
+MiniLM-L12 (actual)      5 acciones 51% | con fusión 63% | 8 s
+multilingual-e5-small    5 acciones 50% | con fusión 59% | 13 s
+multilingual-e5-base     5 acciones 52% | con fusión 64% | 24 s
+mpnet-base-v2            5 acciones 62% | con fusión 71% | 23 s
