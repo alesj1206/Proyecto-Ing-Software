@@ -1,0 +1,16 @@
+[Unit]
+Description=Scoutly: la web (gunicorn en localhost; el túnel la publica)
+Requires=scoutly-postgres.service
+After=scoutly-postgres.service
+
+[Service]
+WorkingDirectory=@RUTA@
+Environment=PYTHONUNBUFFERED=1
+# Solo localhost: publicarla es decisión aparte (cloudflared tunnel --url http://localhost:8000). La web no carga modelos.
+ExecStart="@RUTA@/.venv/bin/gunicorn" scoutly.wsgi:application --bind 127.0.0.1:8000 --workers 2 --threads 4 --timeout 60 --access-logfile -
+Restart=on-failure
+RestartSec=5
+MemoryMax=2G
+
+[Install]
+WantedBy=default.target

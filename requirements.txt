@@ -13,3 +13,6 @@ numpy>=2.5,<3
 pyyaml>=6.0.3,<7
 # B1: cifrado de los tokens OAuth de Magneto
 cryptography>=46,<48
+# Web en producción: servidor WSGI y estáticos sin DEBUG
+gunicorn>=23,<26
+whitenoise>=6.9,<7
