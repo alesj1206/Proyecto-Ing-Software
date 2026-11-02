@@ -36,7 +36,8 @@ def test_exportar_omite_las_ya_conocidas_y_limpia_contactos():
 
 
 def test_las_mitades_no_comparten_vacantes():
-    assert {p["vacante"] for p in _mitad("prueba")} & {p["vacante"] for p in _mitad("ajuste")} == set()
+    ajuste, prueba_1, prueba = ({p["vacante"] for p in _mitad(m)} for m in ("ajuste", "prueba_1", "prueba"))
+    assert prueba & (ajuste | prueba_1) == set() and prueba_1 & ajuste == set()
 
 
 def test_la_prueba_esta_balanceada():
