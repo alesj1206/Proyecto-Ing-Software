@@ -82,3 +82,23 @@ def test_experiencia_con_area_se_embebe_por_su_nucleo(db):
     matriz = de_bytes(Vacante.objects.get(id="v1").matriz_requisitos, len(reqs))
     assert reqs[0].texto.startswith("Experiencia mínima")  # el texto que se muestra no cambia
     assert np.allclose(matriz[0], E.embeber(["análisis de datos"])[0], atol=1e-2)
+
+
+class EmbedderQueCuenta(EmbedderFalso):
+    def __init__(self, dimension=384):
+        super().__init__(dimension)
+        self.recibidos = []
+
+    def embeber(self, textos):
+        self.recibidos += textos
+        return super().embeber(textos)
+
+
+def test_cada_texto_distinto_se_embebe_una_vez_por_lote(db):
+    _ingerir(cruda("v1", "Requisitos:\n- Trabajo en equipo\n- SQL"), cruda("v2", "Requisitos:\n- Trabajo en equipo\n- Excel"))
+    busqueda, cobertura = EmbedderQueCuenta(), EmbedderQueCuenta(768)
+    embeber_vacantes(busqueda, cobertura=cobertura)
+    assert busqueda.recibidos.count("Trabajo en equipo") == 1 and cobertura.recibidos.count("Trabajo en equipo") == 1
+    for v in Vacante.objects.all():  # el resultado es el mismo que embebiendo todo
+        textos = [r.texto for r in v.requisito_set.order_by("posicion")]
+        assert np.allclose(de_bytes(v.matriz_requisitos, len(textos)), cobertura.embeber(textos), atol=1e-2)
