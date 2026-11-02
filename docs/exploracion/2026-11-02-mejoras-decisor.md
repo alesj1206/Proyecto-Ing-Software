@@ -100,12 +100,30 @@ la spec prohíbe (inflar el CV). La recomendación es cambiar el diseño: el Tal
 La evidencia más parecida se muestra solo como pista. No se propone texto y no se copia nada que la persona no haya
 escrito. Así el Taller conserva su valor (recordar qué hacer explícito) sin el riesgo de inventar.
 
+### Prototipo del Taller guiado (commit `c56f393`, en esta rama)
+
+- Cada tarjeta dice "Esta vacante pide: X" y "Pista: en tu hoja de vida dice «…»", y pregunta "¿Has trabajado con
+  «X»? Si es así, cuéntalo con tus palabras".
+- Hay un cuadro de texto y dos botones: **Agregar a mi postulación** y **No lo he hecho**.
+- Aceptar sin escribir no cuenta y muestra un aviso. Lo que se copia en "Texto para tu postulación" son solo las
+  respuestas del candidato (`SugerenciaCV.respuesta`, migración `0006`). Ya no hay resumen generado.
+- **Capturas** en `mejoras/capturas/`:
+  - `taller_guiado.png`: la pregunta;
+  - `taller_guiado_sin_texto.png`: el aviso al aceptar sin escribir;
+  - `taller_guiado_respondido.png`: la respuesta propia como texto para copiar.
+- **Lo que no resuelve:** la pregunta sigue saliendo de la decisión. En la captura, a una analista de datos se le
+  pregunta por experiencia en tiendas de ropa, porque el decisor marcó esa vacante como Ajustar CV. La diferencia es
+  que ahora la respuesta honesta ("No lo he hecho") está a un clic y no se le propone ningún texto. Para que las
+  preguntas también tengan sentido hay que mejorar el decisor (recomendaciones 1 y 4).
+- **Efecto en la evaluación ciega:** su pregunta 2 (CV original contra CV con sugerencias) dependía del texto
+  automático y en esta rama se omite. Habrá que retomarla cuando existan respuestas reales de candidatos.
+
 ## Recomendaciones, en orden
 
 1. **Fusionar Postular y Ajustar CV:** +8 a +21 puntos en todos los sets, sin recalibrar nada. Es un cambio de
    producto (§13.2), pero el prototipo ya está. Hay que actualizar §13.2 de la spec, el informe y las capturas.
-2. **Taller como preguntas guiadas, sin texto propuesto:** elimina el riesgo de inventar. Es un cambio de diseño
-   acotado (la plantilla del Taller y `generar_sugerencias`).
+2. **Taller como preguntas guiadas, sin texto propuesto:** elimina el riesgo de inventar. El prototipo ya está en
+   esta rama (`c56f393`), con pruebas y capturas.
 3. **Contar el decisor tal como es:**
    - un pre-filtro gratuito y explicable que descarta con buena precisión;
    - un orden de prioridad;
@@ -122,4 +140,5 @@ escrito. Así el Taller conserva su valor (recordar qué hacer explícito) sin e
 
 - Revisar las etiquetas de `prueba_2` (25 pares en `pares.yaml`).
 - Decidir si se adopta la fusión: el prototipo se enciende con `fusionar_ajustar=True` en `matching/politica.py`.
-- Decidir el rediseño del Taller.
+- Decidir si se adopta el Taller guiado. Para unirlo a `sprint-3` hay que aplicar la migración
+  `matching/0006_sugerencia_respuesta`; en la base de desarrollo se aplicó para la captura y luego se revirtió.
