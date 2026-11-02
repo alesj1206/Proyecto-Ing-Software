@@ -13,6 +13,7 @@ from vacantes.models import Vacante
 
 from .formato import pesos
 from .models import Decision, FotoDiaria, SolicitudDecision
+from . import politica
 from .politica import Accion
 from .services import SIMILITUD_CERCANA
 from .preseleccion import OPUESTA as MODALIDAD_OPUESTA
@@ -153,8 +154,13 @@ def detalle(perfil, vacante) -> dict | None:
                           "razon_no_aplica": "" if aplica else r["motivo"],
                           "es_del_candidato": r["motivo"].startswith("No declaraste"),
                           "explicacion": r["motivo"] if aplica else None})
+    parciales_con_evidencia = any(r["estado"] == "parcial" and r.get("evidencia") for r in _contables(decision))
     return {
         "decision": decision,
+        # El Taller también aplica a un POSTULAR que tiene algo que resaltar (la fusión en exploración).
+        "ofrece_taller": decision.accion == Accion.AJUSTAR_CV or (politica.POLITICA.fusionar_ajustar and
+                                                                   decision.accion == Accion.POSTULAR
+                                                                   and parciales_con_evidencia),
         "match": {"score": decision.cobertura_pct, "coincidencias": _textos(decision, "cubierto"),
                   "faltantes": [r["texto"] for r in _contables(decision) if r["estado"] == "faltante"],
                   "razones": decision.motivos},

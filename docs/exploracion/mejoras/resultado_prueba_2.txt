@@ -1,0 +1,18 @@
+actual (política .3, coseno): 36% (9/25) | DESCARTAR recall 4/7 precisión 4/5 | dist {'POSTULAR': 4, 'CERRAR_BRECHA': 9, 'AJUSTAR_CV': 6, 'DESCARTAR': 5, 'SIN_DATOS': 1}
+    POSTULAR       [1, 2, 1, 0, 0]
+    AJUSTAR_CV     [1, 1, 2, 0, 0]
+    CERRAR_BRECHA  [2, 1, 3, 0, 0]
+    DESCARTAR      [0, 1, 1, 4, 1]
+    SIN_DATOS      [0, 1, 2, 1, 0]
+A: fusionar Postular + Ajustar CV: 48% (12/25) | DESCARTAR recall 4/7 precisión 4/5 | dist {'POSTULAR': 10, 'CERRAR_BRECHA': 9, 'DESCARTAR': 5, 'SIN_DATOS': 1}
+    POSTULAR       [5, 0, 3, 0, 0]
+    CERRAR_BRECHA  [3, 0, 3, 0, 0]
+    DESCARTAR      [1, 0, 1, 4, 1]
+    SIN_DATOS      [1, 0, 2, 1, 0]
+cross-encoder (mejor umbral visto: alto 0.4, bajo 0.02): 28% (7/25) | DESCARTAR recall 5/7 precisión 5/11 | dist {'AJUSTAR_CV': 6, 'CERRAR_BRECHA': 7, 'DESCARTAR': 11, 'SIN_DATOS': 1}
+    POSTULAR       [0, 2, 2, 0, 0]
+    AJUSTAR_CV     [0, 1, 2, 1, 0]
+    CERRAR_BRECHA  [0, 2, 1, 3, 0]
+    DESCARTAR      [0, 1, 0, 5, 1]
+    SIN_DATOS      [0, 0, 2, 2, 0]
+línea base similitud (τ 0,25): 16%; clase mayoritaria: 28%

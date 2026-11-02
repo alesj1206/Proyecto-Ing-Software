@@ -1,0 +1,125 @@
+# Exploración: las dos mejoras principales del decisor (noche del 2026-11-02)
+
+Rama `exploracion/mejoras-decisor`, que sale de `sprint-3` en `013a80b`. No se unió a `sprint-3`: esa decisión es del
+equipo. Los scripts están en `docs/exploracion/mejoras/`.
+
+## Qué se buscaba
+
+La Fase 4 dejó dos problemas abiertos:
+1. **El decisor no distingue bien** entre Postular, Ajustar CV y Cerrar brecha: 46% en la prueba limpia, lejos del 70%.
+2. **El Taller de CV propone emparejamientos absurdos** entre la evidencia del CV y el requisito.
+
+## Cómo se midió, sin hacerse trampa
+
+- **Simulador** (`simular.py`): vuelca cada par etiquetado (requisitos, evidencias, similitudes y restricciones) y
+  re-decide sin modelos. Antes de usarlo se comprobó que reproduce las cifras reales de la política .3: ajuste 69%,
+  prueba 1 73% y prueba limpia 46%.
+- **Desarrollo:** se hizo solo con los 76 pares ya vistos (ajuste, prueba 1 y la prueba de la Fase 4).
+- **`prueba_2`:** 25 pares sobre 19 vacantes nuevas de magneto365.com, sin clones por texto contra ninguna mitad
+  anterior. Las etiquetas se commitearon (`05f1f69`) **antes** de medir. Se midió **una sola vez**, y solo con las
+  tres variantes definidas de antemano.
+
+## Resultado en `prueba_2` (nunca vista)
+
+| Variante | Exactitud | DESCARTAR: recall / precisión |
+|---|---|---|
+| Actual (política .3, coseno MiniLM) | **36%** (9/25) | 4/7 · 4/5 |
+| **A. Fusionar Postular + Ajustar CV** | **48%** (12/25) | 4/7 · 4/5 |
+| Cobertura con cross-encoder bge-reranker-v2-m3 | 28% (7/25) | 5/7 · 5/11 |
+| Línea base: similitud pura | 16% | — |
+| Línea base: clase mayoritaria | 28% | — |
+
+En `prueba_2` la política actual queda **más baja que en la Fase 4 (36% frente a 46%)**. Con dos pruebas nuevas de
+unos 25 pares cada una, la exactitud real del decisor de 5 acciones parece estar entre 35% y 50%.
+
+## La fusión es la única mejora que se sostiene
+
+| Set | Actual | Con fusión |
+|---|---|---|
+| Ajuste (visto) | 69% | 81% |
+| Prueba 1 (vista) | 73% | 81% |
+| Prueba Fase 4 limpia (vista) | 46% | 67% |
+| **`prueba_2` (nueva)** | **36%** | **48%** |
+
+- **Por qué mejora:** la diferencia entre "lo tienes" y "lo tienes a medias" depende de centésimas de similitud y no
+  generaliza. Al unir esas dos acciones, el decisor deja de equivocarse en esa frontera.
+- **Producto:** "Postular" pasa a decir "Resalta en tu hoja de vida: …" cuando hay algo que hacer explícito, y ofrece
+  el Taller.
+- **Umbrales:** se re-barrieron con la fusión, solo sobre lo visto, y los actuales siguen siendo los mejores. No hubo
+  que recalibrar nada.
+- **Prototipo en esta rama:** `Politica.fusionar_ajustar` (apagado por defecto), la regla `AjustarCV` y el detalle, que
+  ofrece el Taller para un Postular con algo que resaltar. Lo cubre `matching/tests/test_fusion.py`.
+
+Aun con la fusión, 48% en vacantes nuevas sigue lejos del 70%.
+
+## Lo que no sirvió
+
+- **Cross-encoder (bge-reranker-v2-m3) para medir la cobertura:** sobre lo visto bajó de 63% a 58%, y en `prueba_2`
+  dio 28%. Además es caro: en CPU puntúa ~24 pares por segundo, lo que daría horas por candidato con 3.000 vacantes.
+  La GPU no arrancó porque al entorno de la Fase 0 le faltan cuDNN 9 y CUDA 13. No se recomienda.
+- **Compuerta léxica** (`lexico.py`): si un requisito nombra herramientas (SQL, Python, Siigo, RETHUS) y el CV no
+  nombra ninguna, el requisito no puede quedar cubierto. Se diseñó **después** de ver los errores de `prueba_2`, así
+  que solo se probó sobre lo visto: sin fusión gana 4 puntos, con fusión no cambia nada. No compensa gastar otra prueba
+  nueva en ella.
+
+## Por qué falla, en el fondo (de los errores de `prueba_2`)
+
+1. **MiniLM mide parecido de tema, no si la persona sabe hacer algo.**
+   - "Monitoreo pediátrico" queda cubierto con experiencia en hospitalización de adultos.
+   - "Python, SQL y Macros" queda cubierto con un CV que solo dice SQL.
+   - "Cálculo de comisiones" queda cubierto con "análisis de datos".
+
+   Es el error más frecuente: CERRAR_BRECHA predicho como POSTULAR.
+2. **Todavía entra ruido en la extracción:**
+   - hashtags ("#BeKPMG");
+   - frases de cultura ("Estamos interesados en crear una cultura…");
+   - "Modalidad de trabajo: híbrida";
+   - "No se requiere experiencia previa";
+   - "Contar con documentación al día".
+3. **Lo que la persona etiquetó no se puede medir con el texto:** carrera distinta (Contaduría frente a
+   Administración), un aviso que es "banco de talentos", o requisitos de cursos.
+
+## El Taller de CV
+
+De las 29 sugerencias que el Taller generaría en los pares vistos, se etiquetaron a mano, **sin mirar ningún
+puntaje**, cuáles son sensatas (la evidencia de verdad respalda el requisito). El archivo es
+`mejoras/sugerencias_taller_etiquetadas.json`.
+
+- **Solo 4 de 29 son sensatas (14%).** Las demás emparejan cosas como "RPG/ILE" con "Git", "Python" con "consultas
+  SQL" o "Manejo de Office" con "Me encargaba de la papelería".
+- **Ningún puntaje las separa:** ni el coseno, ni el cross-encoder, ni la similitud del par. Para conservar las 4
+  sensatas hay que dejar pasar 15–20 sugerencias, con una precisión de 20–27%.
+- **Un filtro estructural** (evidencia solo de la sección de experiencia, requisitos cortos, sin blandas ni cursos)
+  sube la precisión a 30–40% y pierde la mitad de las sensatas.
+
+**Conclusión:** con estos modelos, que el Taller proponga texto reescrito no es confiable, y es justo el riesgo que
+la spec prohíbe (inflar el CV). La recomendación es cambiar el diseño: el Taller **pregunta** en vez de redactar.
+
+> «Esta vacante pide **Power BI**. ¿Lo has usado? Si sí, escríbelo con tus palabras (por ejemplo, en qué proyecto).»
+
+La evidencia más parecida se muestra solo como pista. No se propone texto y no se copia nada que la persona no haya
+escrito. Así el Taller conserva su valor (recordar qué hacer explícito) sin el riesgo de inventar.
+
+## Recomendaciones, en orden
+
+1. **Fusionar Postular y Ajustar CV:** +8 a +21 puntos en todos los sets, sin recalibrar nada. Es un cambio de
+   producto (§13.2), pero el prototipo ya está. Hay que actualizar §13.2 de la spec, el informe y las capturas.
+2. **Taller como preguntas guiadas, sin texto propuesto:** elimina el riesgo de inventar. Es un cambio de diseño
+   acotado (la plantilla del Taller y `generar_sugerencias`).
+3. **Contar el decisor tal como es:**
+   - un pre-filtro gratuito y explicable que descarta con buena precisión;
+   - un orden de prioridad;
+   - una orientación ("te falta X"), pero no una clasificación fina confiable.
+
+   Ningún ajuste de reglas o umbrales probado esta noche cambia eso.
+4. **Calibrar con datos reales:** `ResultadoDecision` ya guarda los insumos de cada decisión cuando una postulación
+   pasa a Entrevista o Descartado. Con unos cientos de casos se puede ajustar una regresión logística sobre esas
+   señales. Es el camino con más chances de pasar el 70%, y no requiere LLM.
+5. **Filtros de ruido** (hashtags, frases de cultura, "no se requiere"): mejoras pequeñas. Conviene hacerlas junto con
+   el punto 4, para medirlas con datos reales.
+
+## Pendiente del equipo
+
+- Revisar las etiquetas de `prueba_2` (25 pares en `pares.yaml`).
+- Decidir si se adopta la fusión: el prototipo se enciende con `fusionar_ajustar=True` en `matching/politica.py`.
+- Decidir el rediseño del Taller.
