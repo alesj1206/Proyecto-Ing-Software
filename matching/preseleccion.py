@@ -1,5 +1,7 @@
 """Preselección exacta en Postgres (spec §13.1, P2): entra toda vacante cuya similitud con el perfil supere τ, sin índice
-aproximado (recall 100%). El tope técnico solo protege contra perfiles degenerados y se registra si se alcanza."""
+aproximado (recall 100%), hasta las 3.000 más parecidas. Con MiniLM casi todo el catálogo supera τ (benchmark de la
+Fase 4), así que a escala Magneto el que recorta es el tope: cada candidato recibe decisión sobre sus 3.000 vacantes
+más parecidas, lo que asume §6 y mantiene la decisión por debajo de 5 s."""
 
 import logging
 from dataclasses import dataclass, field
@@ -11,7 +13,7 @@ from cuentas.models import Perfil
 from vacantes.models import Vacante
 
 log = logging.getLogger(__name__)
-TOPE_TECNICO = 5000
+TOPE_TECNICO = 3000
 OPUESTA = {"Remoto": "Presencial", "Presencial": "Remoto"}
 
 
@@ -37,5 +39,5 @@ def preseleccionar(perfil: Perfil, tau: float, tope: int = TOPE_TECNICO) -> Pres
     filas = list(candidatas.order_by("distancia", "id").values_list("id", "distancia")[: tope + 1])
     tope_alcanzado = len(filas) > tope
     if tope_alcanzado:
-        log.warning("Perfil %s alcanzó el tope técnico de %s vacantes relevantes", perfil.pk, tope)
+        log.info("Perfil %s alcanzó el tope de %s vacantes relevantes", perfil.pk, tope)  # normal con catálogos grandes
     return Preseleccion([(i, 1 - float(d)) for i, d in filas[:tope]], ocultas, tope_alcanzado)

@@ -49,3 +49,13 @@ def test_corrida_minima_de_punta_a_punta(db, embedder_falso, monkeypatch, tmp_pa
         assert f"| {etapa} |" in texto
     from vacantes.models import Vacante
     assert Vacante.objects.filter(id__startswith="syn-").count() == 60
+
+
+def test_cada_vacante_sintetica_es_de_un_area():
+    """Los requisitos de una vacante vienen de una misma vacante real (un catálogo real está agrupado por área)."""
+    fuente = FuenteSintetica(PLANTILLAS, 50, semilla=3)
+    for v in fuente.obtener():
+        lineas = [l[2:] for l in v.texto_completo.splitlines() if l.startswith("- ")]
+        plantilla = fuente.plantilla_de[v.id]
+        propios = sum(any(r.lower() in l.lower() for r in fuente.requisitos_de[plantilla]) for l in lineas)
+        assert propios >= len(lineas) - 1

@@ -78,6 +78,11 @@ def test_perfil_sin_vector_no_tiene_relevantes(perfil):
 def test_tope_tecnico_se_marca_y_se_registra(perfil, caplog):
     for i in range(3):
         _vacante(f"v{i}", 0.9 - i / 100)
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.INFO):
         p = preseleccionar(perfil, tau=0.4, tope=2)
     assert p.tope_alcanzado and len(p.relevantes) == 2 and "tope" in caplog.text
+
+
+def test_el_tope_es_el_de_la_spec():
+    from matching.preseleccion import TOPE_TECNICO
+    assert TOPE_TECNICO == 3000  # §6: "un perfil amplio de unas 3.000"; decisión del usuario tras el benchmark

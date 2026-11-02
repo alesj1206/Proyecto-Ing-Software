@@ -13,6 +13,7 @@ CIUDADES = ("Bogotá, D.C.", "Medellín", "Cali", "Barranquilla", "Bucaramanga",
             "Ibagué", "Neiva", "Santa Marta", "Villavicencio", "Cúcuta", "Pasto", "Montería", "Armenia")
 NIVELES = ("", "Junior", "Senior", "I", "II", "III", "Líder", "Auxiliar")
 MODALIDADES = ("Presencial", "Presencial", "Presencial", "Híbrido", "Remoto")
+MIN_REQUISITOS_PLANTILLA = 4
 PREFIJOS = ("", "", "Conocimiento en ", "Experiencia en ", "Manejo de ", "Dominio de ")
 SUFIJOS = ("", "", "", " (deseable)", " avanzado", " intermedio")
 
@@ -22,15 +23,26 @@ class FuenteSintetica:
 
     def __init__(self, plantillas: list[dict], n: int, semilla: int = 0, desde: int = 0):
         self.n, self.semilla, self.desde = n, semilla, desde
-        self.titulos = sorted({p["titulo"].split(" 16")[0].strip() for p in plantillas})
-        self.requisitos = sorted({r.texto for p in plantillas
-                                  for r in extraer_requisitos(p.get("descripcion", ""), []) if len(r.texto) < 160})
+        self.plantillas = []  # (título, requisitos) de cada vacante real con al menos 4 requisitos
+        for p in plantillas:
+            requisitos = sorted({r.texto for r in extraer_requisitos(p.get("descripcion", ""), []) if len(r.texto) < 160})
+            if len(requisitos) >= MIN_REQUISITOS_PLANTILLA:
+                self.plantillas.append((p["titulo"].split(" 16")[0].strip(), requisitos))
+        self.requisitos_de = [r for _, r in self.plantillas]
+        self.todos = sorted({r for reqs in self.requisitos_de for r in reqs})
+        self.plantilla_de: dict[str, int] = {}
 
     def _vacante(self, i: int, azar: random.Random) -> VacanteCruda:
-        titulo = " ".join(t for t in (azar.choice(self.titulos), azar.choice(NIVELES)) if t)
+        indice = azar.randrange(len(self.plantillas))
+        base, propios = self.plantillas[indice]
+        self.plantilla_de[f"syn-{i}"] = indice
+        titulo = " ".join(t for t in (base, azar.choice(NIVELES)) if t)
         ciudad = azar.choice(CIUDADES)
+        elegidos = azar.sample(propios, azar.randint(MIN_REQUISITOS_PLANTILLA - 1, min(10, len(propios))))
+        if azar.random() < 0.3:  # a veces un requisito de otra área, como en las vacantes reales mixtas
+            elegidos.append(azar.choice(self.todos))
         requisitos = [f"{azar.choice(PREFIJOS)}{r[0].lower() + r[1:] if azar.random() < 0.3 else r}{azar.choice(SUFIJOS)}"
-                      for r in azar.sample(self.requisitos, azar.randint(4, 10))]
+                      for r in elegidos]
         salario = azar.choice((None, *range(1_750_000, 9_000_001, 250_000)))
         texto = "\n".join([f"{titulo} - {ciudad}", "Requisitos:", *(f"- {r}" for r in requisitos)])
         return VacanteCruda(
