@@ -45,15 +45,6 @@ def total_vacantes() -> int:
     return Vacante.objects.filter(activa=True).count()
 
 
-def _contables(decision: Decision) -> list[dict]:
-    return [r for r in decision.cobertura if r["tipo"] == "obligatorio" and r["estado"] not in ("formacion", "experiencia", "blando")]
-
-
-def _cubres(decision: Decision) -> str:
-    contables = _contables(decision)
-    return f"{sum(r['estado'] == 'cubierto' for r in contables)}/{len(contables)}"
-
-
 def _textos(decision: Decision, estado: str) -> list[str]:
     return [r["texto"] for r in decision.cobertura if r["estado"] == estado]
 
@@ -83,7 +74,7 @@ class ItemPlan:
 
     @property
     def cubres(self) -> str:
-        return _cubres(self.decision)
+        return self.decision.cubres
 
 
 def clave_empresa(nombre: str) -> str:
@@ -147,14 +138,17 @@ def detalle(perfil, vacante) -> dict | None:
     if decision is None:
         return None
     por_criterio = {r["criterio"]: r for r in decision.restricciones}
-    criterios = [{"etiqueta": "Habilidades", "peso_pct": None, "score_pct": decision.cobertura_pct, "aplica": True,
+    criterios = [{"etiqueta": "Habilidades", "peso_pct": None, "score_pct": decision.cobertura_pct, "valor": decision.cubres_visible,
+                  "aplica": True,
                   "razon_no_aplica": "", "es_del_candidato": False,
-                  "explicacion": f"Cubres {_cubres(decision)} requisitos obligatorios"}]
+                  "explicacion": f"Cubres {decision.cubres} requisitos obligatorios" if decision.contables
+                  else "La vacante no pide requisitos que podamos comparar con tu hoja de vida"}]
     for clave, etiqueta in CRITERIOS:
         r = por_criterio.get(clave, {"estado": "sin_datos", "motivo": "Sin datos"})
         aplica = r["estado"] != "sin_datos"
         criterios.append({"etiqueta": etiqueta, "peso_pct": None,
-                          "score_pct": {"cumple": 100, "parcial": 50}.get(r["estado"], 0), "aplica": aplica,
+                          "score_pct": (pct := {"cumple": 100, "parcial": 50}.get(r["estado"], 0)),
+                          "valor": f"{pct}%", "aplica": aplica,
                           "razon_no_aplica": "" if aplica else r["motivo"],
                           "es_del_candidato": r["motivo"].startswith("No declaraste"),
                           "explicacion": r["motivo"] if aplica else None})
@@ -165,7 +159,7 @@ def detalle(perfil, vacante) -> dict | None:
         "ofrece_taller": decision.accion in (Accion.POSTULAR, Accion.AJUSTAR_CV, Accion.CERRAR_BRECHA)
                          and any(se_pregunta(r, evidencias) for r in decision.cobertura),
         "match": {"score": decision.cobertura_pct, "coincidencias": _textos(decision, "cubierto"),
-                  "faltantes": [r["texto"] for r in _contables(decision) if r["estado"] == "faltante"],
+                  "faltantes": [r["texto"] for r in decision.contables if r["estado"] == "faltante"],
                   "razones": decision.motivos},
         "criterios": criterios,
         "modificador": None,

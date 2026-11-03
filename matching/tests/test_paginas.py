@@ -1,4 +1,5 @@
 import importlib
+import re
 
 import pytest
 from django.urls import reverse
@@ -80,6 +81,12 @@ LINEAS_V2_QUE_CAMBIAN = {  # cambios acordados (ledger Task 8 y 9); todo lo dem�
     '<p style="margin-top:1rem;color:var(--muted-foreground);">Todavía no hay vacantes que coincidan con tus habilidades registradas.</p>',
     '<span class="criterio-peso">peso {{ c.peso_pct }}%</span>',
     '5 criterios, cada uno con su propio peso. Toca "¿Por qué?" para el detalle.',
+    '{{ m.score_pct }}%',  # cuenta obligatorios: "100%" se leía como "encajas del todo" al lado de "solidez baja"
+    '{{ match.score }}%',
+    'Compatibilidad con tu perfil',
+    'Calculada sobre las habilidades registradas en tu hoja de vida.',
+    '<h3 style="font-size:0.875rem;color:var(--navy);">Desglose de compatibilidad</h3>',
+    '<span class="criterio-score">{{ c.score_pct }}%</span>',
 }
 
 
@@ -155,3 +162,32 @@ def test_los_templates_solo_agregan_lineas_a_v2(plantilla):
     borradas = {l[1:].strip() for l in difflib.unified_diff(v2, v3, lineterm="", n=0)
                 if l.startswith("-") and not l.startswith("---")}
     assert borradas <= LINEAS_V2_QUE_CAMBIAN, borradas - LINEAS_V2_QUE_CAMBIAN
+
+
+# --- el porcentaje se leía como "encajas 100%" justo al lado de "solidez baja" ----------------------------------------
+
+def _porcentaje_visible(html: str, valor: int) -> bool:
+    """El relleno del anillo sigue usando el porcentaje (conic-gradient); aquí solo cuenta el texto a la vista."""
+    return re.search(rf">\s*{valor}%\s*<", html) is not None
+
+
+def test_el_plan_y_las_filas_muestran_cuantos_obligatorios_cubre_y_no_un_porcentaje(client_con_cv, usuario, vacante_v1):
+    _decidir(usuario.perfil, vacante_v1)
+    html = client_con_cv.get(reverse("dashboard")).content.decode()
+    assert not _porcentaje_visible(html, 75)
+    assert len(re.findall(r">\s*1/3\s*<", html)) == 2  # el anillo del plan y la fila de su grupo
+
+
+def test_el_detalle_nombra_lo_que_mide_el_anillo_y_lo_que_mide_la_solidez(client_con_cv, usuario, vacante_v1):
+    _decidir(usuario.perfil, vacante_v1)
+    html = client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
+    assert not _porcentaje_visible(html, 75) and "Compatibilidad" not in html
+    assert "Requisitos obligatorios que cubres" in html
+    assert "qué tan segura es esta recomendación" in html
+    assert len(re.findall(r">\s*1/3\s*<", html)) == 2  # el anillo y la fila "Habilidades" del desglose
+
+
+def test_sin_requisitos_obligatorios_no_muestra_cero_de_cero(client_con_cv, usuario, vacante_v1):
+    _decidir(usuario.perfil, vacante_v1, accion="SIN_DATOS", cobertura=[], cobertura_pct=0)
+    html = client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
+    assert "0/0" not in html and re.search(r">\s*—\s*<", html)

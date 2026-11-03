@@ -171,5 +171,6 @@ set (§13.3).
 6. **Falsos positivos a la vista en el catálogo real.** Con 5 CV ficticios, el Plan de hoy es sensato en general, pero
    muestra "Cocinero" a un operario de producción y "Analista Senior" a un perfil junior. Es el mismo límite del punto 1
    (parecido de tema). Es una revisión a ojo, no una medición, y no se ajustaron umbrales mirando estos casos.
-7. **El "100%" puede confundir.** La misma tarjeta dice "100%" y "Postular · solidez baja": el porcentaje cuenta los
-   requisitos obligatorios cubiertos y la solidez mide otra cosa. Se dejó igual a la espera de una decisión del equipo.
+7. **Historial y notificaciones siguen mostrando porcentaje.** En el Plan de hoy, las filas y el detalle el anillo ya
+   dice "3/3" y no "100%", porque ese porcentaje se leía como "encajas del todo" al lado de "solidez baja". Las otras
+   dos páginas guardan solo el porcentaje, así que para cambiarlas hay que agregar datos a sus tablas.

@@ -33,6 +33,21 @@ class Decision(models.Model):
         constraints = [models.UniqueConstraint(fields=["perfil", "vacante"], name="una_decision_por_par")]
         indexes = [models.Index(fields=["perfil", "accion", "-orden"])]
 
+    @property
+    def contables(self) -> list[dict]:
+        """Los obligatorios que se pueden comparar con el CV (formación, experiencia y blandos se evalúan aparte)."""
+        return [r for r in self.cobertura
+                if r["tipo"] == "obligatorio" and r["estado"] not in ("formacion", "experiencia", "blando")]
+
+    @property
+    def cubres(self) -> str:
+        return f"{sum(r['estado'] == 'cubierto' for r in self.contables)}/{len(self.contables)}"
+
+    @property
+    def cubres_visible(self) -> str:
+        """Para mostrar solo: un "0/0" se lee como un error."""
+        return self.cubres if self.contables else "—"
+
     def __str__(self):
         return f"{self.perfil} / {self.vacante_id}: {self.accion}"
 

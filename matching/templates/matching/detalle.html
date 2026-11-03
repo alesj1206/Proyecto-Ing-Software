@@ -47,15 +47,15 @@
       <div class="card" style="display:flex;align-items:center;gap:1.25rem;">
         <div style="width:88px;height:88px;border-radius:999px;background:conic-gradient(var(--brand) {{ match.score }}%, var(--surface-strong) 0);display:flex;align-items:center;justify-content:center;">
           <div style="width:70px;height:70px;border-radius:999px;background:var(--background);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:1.3rem;color:var(--navy);">
-            {{ match.score }}%
+            {{ decision.cubres_visible }}
           </div>
         </div>
         <div style="max-width:12rem;">
           <p style="margin:0;font-family:var(--font-display);font-size:0.875rem;font-weight:700;color:var(--navy);">
-            Compatibilidad con tu perfil
+            Requisitos obligatorios que cubres
           </p>
           <p style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">
-            Calculada sobre las habilidades registradas en tu hoja de vida.
+            La solidez dice qué tan segura es esta recomendación, no qué tanto encajas.
           </p>
           {% if decision %}
           <p class="decision-insignia decision-{{ decision.accion|lower }}" style="margin-top:0.6rem;">{{ decision.get_accion_display }} · solidez {{ decision.solidez }}</p>
@@ -102,7 +102,7 @@
   <aside>
     {% if criterios %}
     <div class="card">
-      <h3 style="font-size:0.875rem;color:var(--navy);">Desglose de compatibilidad</h3>
+      <h3 style="font-size:0.875rem;color:var(--navy);">Desglose por criterio</h3>
       <p style="margin-top:0.35rem;font-size:0.75rem;color:var(--muted-foreground);">
         Tus habilidades frente a los requisitos y las 4 condiciones que buscas. Toca "¿Por qué?" para el detalle.
       </p>
@@ -114,7 +114,7 @@
             <span class="criterio-nombre">{{ c.etiqueta }}</span>
             {% if c.peso_pct %}<span class="criterio-peso">peso {{ c.peso_pct }}%</span>{% endif %}
             {% if c.aplica %}
-              <span class="criterio-score">{{ c.score_pct }}%</span>
+              <span class="criterio-score">{{ c.valor }}</span>
             {% endif %}
           </div>
 
