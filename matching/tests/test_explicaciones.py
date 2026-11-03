@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from matching.explicaciones import explicar, insumos_publicos
 from matching.ia.fakes import RedactorFalso
-from matching.ia.groq import RedactorGroq
+from matching.ia.groq import MAX_TOKENS_RESPUESTA, RedactorGroq
 from matching.models import Decision, ExplicacionDecision
 
 EVIDENCIA = "Usé SQL en reportes de Comercial Andina"
@@ -74,3 +74,10 @@ def test_la_explicacion_requiere_sesion_y_decision_propia(client, decision, djan
 def test_el_detalle_ofrece_explicamelo(client_con_cv, decision):
     html = client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
     assert "Explícamelo" in html and reverse("explicacion", args=["v1"]) in html
+
+
+def test_la_respuesta_de_groq_tiene_un_tope_de_tokens(decision):
+    """Las instrucciones piden 2 o 3 oraciones, pero sin tope nada impide una respuesta larga."""
+    with mock.patch("matching.ia.groq.requests.post", side_effect=requests.Timeout) as post:
+        RedactorGroq("clave").redactar({"accion": "Postular"})
+    assert post.call_args.kwargs["json"]["max_tokens"] == MAX_TOKENS_RESPUESTA

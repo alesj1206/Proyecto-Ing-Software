@@ -9,6 +9,8 @@ from django.conf import settings
 
 URL = "https://api.groq.com/openai/v1/chat/completions"
 TIMEOUT_S = (3, 5)  # conectar + leer: en total una explicación no cuelga la página más de 8 s
+# Holgado para 2 o 3 oraciones. La v2 usaba 120, pero ahí algunos modelos devolvían vacío por gastar el tope razonando.
+MAX_TOKENS_RESPUESTA = 300
 INSTRUCCIONES = (
     "Eres el asistente de Scoutly, una plataforma colombiana de empleo. Recibes la acción que el sistema recomienda "
     "para una vacante y los datos que la producen. Explica en 2 o 3 oraciones, en español claro y sin markdown, por qué "
@@ -25,7 +27,7 @@ class RedactorGroq:
         try:
             respuesta = requests.post(
                 URL, headers={"Authorization": f"Bearer {self.api_key}"}, timeout=self.timeout,
-                json={"model": self.modelo, "temperature": 0.3, "messages": [
+                json={"model": self.modelo, "temperature": 0.3, "max_tokens": MAX_TOKENS_RESPUESTA, "messages": [
                     {"role": "system", "content": INSTRUCCIONES},
                     {"role": "user", "content": json.dumps(insumos, ensure_ascii=False)}]})
             respuesta.raise_for_status()
