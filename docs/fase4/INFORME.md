@@ -7,7 +7,7 @@ vacante con una llamada a Groq. A la escala de Magneto (~120.000 vacantes activa
 explicar. Además, el objetivo de fondo no es un ranking: es que el candidato **consiga entrevistas**.
 
 La v3 reemplaza el ranking por un **decisor local y gratuito**. Para cada par (candidato, vacante) da una acción
-(Postular, Ajustar CV, Cerrar brecha, Descartar o Revísala tú), su solidez (alta, media o baja) y las razones que la
+(Postular, Cerrar brecha, Descartar o Revísala tú), su solidez (alta, media o baja) y las razones que la
 respaldan, todas calculadas con datos y nunca redactadas por un LLM. Groq solo escribe, a pedido, una explicación en
 prosa con los campos de criterio, sin el texto del CV.
 
@@ -19,33 +19,41 @@ carga modelos; la web lee decisiones ya calculadas.
 
 | Patrón | Dónde | Para qué |
 |---|---|---|
-| **Ports & Adapters** | `matching/puertos.py:9` (Embedder), `:17` (Redactor), `:23` (Reordenador); adaptadores en `matching/ia/fastembed.py:17`, `matching/ia/groq.py:20`; fakes en `matching/ia/fakes.py:17`; `vacantes/fuentes/magneto_mcp.py:25` (ClienteMCP) | El dominio no conoce fastembed, Groq ni el MCP de Magneto. Los tests usan fakes y no cargan modelos ni salen a la red. |
-| **Strategy** (restricciones) | `matching/restricciones.py:33` (protocolo), `:156` (lista) | Modalidad, salario, ubicación (con áreas metropolitanas), experiencia y prácticas. Agregar un criterio es agregar una clase. |
-| **Strategy** (fuentes de vacantes) | `vacantes/fuentes/__init__.py:26` (FuenteVacantes); `vacantes/management/commands/ingerir_vacantes.py:31` (registro); implementaciones en `vacantes/fuentes/magneto_detalle.py:89`, `vacantes/fuentes/fixture.py:11`, `vacantes/fuentes/magneto_mcp.py:70`, `matching/benchmark/sintetico.py:21` | Scraping, fixture, MCP de Magneto (B1, apagado) y datos sintéticos del benchmark detrás del mismo puerto. |
+| **Ports & Adapters** | `matching/puertos.py:10` (Embedder), `:20` (ModelosEmbebido), `:33` (Redactor), `:39` (Reordenador); adaptadores en `matching/ia/fastembed.py:18`, `matching/ia/groq.py:20`; fakes en `matching/ia/fakes.py:17`; `vacantes/fuentes/magneto_mcp.py:25` (ClienteMCP) | El dominio no conoce fastembed, Groq ni el MCP de Magneto. Los tests usan fakes y no cargan modelos ni salen a la red. |
+| **Strategy** (restricciones) | `matching/restricciones.py:33` (protocolo), `:161` (lista) | Modalidad, salario, ubicación (con áreas metropolitanas), experiencia y prácticas. Agregar un criterio es agregar una clase. |
+| **Strategy** (fuentes de vacantes) | `vacantes/fuentes/__init__.py:26` (FuenteVacantes); `vacantes/management/commands/ingerir_vacantes.py:38` (registro); implementaciones en `vacantes/fuentes/magneto_detalle.py:91`, `vacantes/fuentes/fixture.py:11`, `vacantes/fuentes/magneto_mcp.py:70`, `matching/benchmark/sintetico.py:21` | Scraping, fixture, MCP de Magneto (B1, apagado) y datos sintéticos del benchmark detrás del mismo puerto. |
 | **Strategy** (orden) | `matching/orden.py:14` (Ordenador), `:20` (similitud × cobertura) | El reranker opcional entra sin tocar el decisor. |
-| **Chain of Responsibility** | `matching/politica.py:53` (Regla), `:111` (CADENA) | La primera regla que aplica decide: Descartar por restricción → Sin datos → Descartar por faltantes → Postular → Ajustar CV → Cerrar brecha. Los umbrales viven en un objeto versionado (`matching/politica.py:16`). |
-| **Facade** | `matching/services.py:109` (`decidir_para_perfil`) | Un punto de entrada para el batch: embebe el perfil, preselecciona, cubre, decide, ordena y guarda. |
+| **Chain of Responsibility** | `matching/politica.py:59` (Regla), `:120` (CADENA) | La primera regla que aplica decide: Descartar por restricción → Sin datos → Descartar por faltantes → Postular → Ajustar CV → Cerrar brecha. Los umbrales viven en un objeto versionado (`matching/politica.py:16`). |
+| **Facade** | `matching/services.py:148` (`decidir_para_perfil`) | Un punto de entrada para el batch: embebe el perfil, preselecciona, cubre, decide, ordena y guarda. |
 
 Piezas que sostienen la escala:
 - **Preselección exacta en Postgres** (`matching/preseleccion.py:27`): una consulta de pgvector sobre todas las
   vacantes, sin índice aproximado (recall 100%), con un tope de las 3.000 más parecidas.
 - **Cobertura vectorizada** (`matching/cobertura.py:100`): requisitos contra evidencias del CV en numpy, sobre una
   matriz guardada por vacante.
-- **Incrementalidad:** solo se embebe lo nuevo o lo cambiado. La versión de las reglas de extracción va dentro del hash
-  de contenido.
+- **Incrementalidad:** solo se embebe lo nuevo o lo cambiado, y solo se reescriben las decisiones que cambiaron. La
+  versión de las reglas de extracción va dentro del hash de contenido.
+- **Dos modelos locales:** MiniLM (384 dimensiones) para la preselección y mpnet (768) para comparar cada requisito con
+  la evidencia del CV (`matching/puertos.py:20`).
+- **Varios procesos en paralelo:** la cola se reparte con `SELECT … FOR UPDATE SKIP LOCKED` y los candados de aviso viven
+  en `matching/candados.py`.
 
 ## 3. Escala: el benchmark (`BENCHMARK.md`)
 
-Con 120.000 vacantes sintéticas en la base, en un i7-12700H y solo CPU, se cumplen los cuatro límites de la spec:
+Con 120.000 vacantes sintéticas en la base, en un i7-12700H y solo CPU, se cumplen los límites de la spec con los dos
+modelos:
 
 | Etapa | Resultado | Límite | |
 |---|---|---|---|
-| Vacantes nuevas de un día (3.000) | 1,5 min | 15 min | medido |
-| Carga inicial de 120.000 | 1 h | 8 h | proyectado |
-| Decisión por candidato | mediana 2,9 s, peor 4,8 s | 5 s | medido |
+| Vacantes nuevas de un día (3.000) | 4,3 min | 15 min | medido |
+| Carga inicial de 120.000 | 2,9 h | 8 h | proyectado |
+| Decisión por candidato | mediana 2,29 s, peor 3,51 s | 5 s | medido |
+| De subir el CV a ver las decisiones (navegador real) | 2,9 s | — | medido una vez |
+| Dashboard con 3.000 decisiones | 0,27 s | — | medido |
+| Vaciar una cola de 11 candidatos con 3 procesos | 10,7 s (32,0 s con 1) | — | medido |
 
-Con MiniLM, casi todo el catálogo supera el umbral de relevancia. A esta escala el que recorta es el tope de 3.000
-vacantes por candidato, que es lo que asume la spec.
+MiniLM deja pasar casi todo el catálogo por el umbral de relevancia. A esta escala el que recorta es el tope de 3.000
+vacantes por candidato, que es lo que asume la spec. Son datos sintéticos: repiten textos más que un catálogo real.
 
 ## 4. ¿Funciona? La evaluación (`EVALUACION.md`)
 
@@ -78,8 +86,40 @@ aviso por ciudad con otro id), y el número que vale es el limpio.
 - **La política final (.3)** corrige falsos descartes de la regla de prácticas. Sobre lo visto da lo mismo que la .2,
   y todavía no tiene medición en vacantes nuevas.
 
-**Evaluación ciega con reclutadores** (`evaluacion_ciega/`): los 6 paquetes, las instrucciones y la tabulación están
-listos. La clave queda fuera del repositorio. Falta conseguir a los reclutadores; si no se consiguen, se reporta solo el
+### Después de la exploración: la política vigente (2026-11-05.1)
+
+La exploración (`docs/exploracion/2026-11-02-mejoras-decisor.md`) encontró que el límite era la señal de MiniLM y que
+Ajustar CV no se distinguía de Postular. Antes de buscar vacantes nuevas se preregistraron cuatro variantes con sus
+umbrales, y se midieron una sola vez en `prueba_3`:
+
+| Variante (`prueba_3`, 26 pares nuevos) | Exactitud |
+|---|---|
+| Política anterior (MiniLM, 5 acciones) | 54% |
+| Fusión de Postular y Ajustar CV | 62% |
+| mpnet para la cobertura | 62% |
+| **mpnet + fusión (adoptada)** | **69%** (18/26) |
+
+Con la política adoptada y el código de producción, en todos los sets:
+
+| Set | Pares | Decisor | Línea base por similitud | Clase mayoritaria | ¿Vacantes nuevas? |
+|---|---:|---:|---:|---:|---|
+| `prueba_3` | 26 | **69%** | 42% | 42% | **sí, preregistrada** |
+| `prueba_2` | 25 | 48% | 32% | 32% | no: se usó para elegir umbrales |
+| `prueba` | 24 | 62% | 38% | 38% | no |
+| `prueba_1` | 26 | 85% | 38% | 38% | no |
+| `ajuste` | 26 | 88% | 38% | 42% | no |
+
+**Cómo leerlo:**
+- **El número que vale es 69%, y no alcanza la meta de 70%.** Con solo 26 pares, su intervalo de confianza del 95% va más
+  o menos de 50% a 83%. Es señal de mejora, no garantía.
+- **Las cifras de 85–88% no prueban nada sobre vacantes nuevas:** esos pares ya se conocían al elegir la política.
+- **No es del todo comparable con el 46% de arriba:** fusionar reduce las acciones de 5 a 4, y eso sube también la línea
+  base. Por eso la comparación justa es dentro de `prueba_3`.
+- **Las etiquetas las propuso el equipo de desarrollo** y siguen pendientes de revisión.
+
+**Evaluación ciega con reclutadores** (`evaluacion_ciega/`): los 6 paquetes, regenerados con la política vigente, las
+instrucciones y la tabulación están listos. Comparan el Plan de hoy con el top por similitud; la comparación de CV queda
+para cuando haya respuestas reales del Taller. La clave queda fuera del repositorio. Falta conseguir a los reclutadores; si no se consiguen, se reporta solo el
 set (§13.3).
 
 ## 5. El flujo de punta a punta (`VERIFICACION.md`)
@@ -88,7 +128,13 @@ set (§13.3).
   nuevas para postular".
 - **Visual:** las capturas de todas las páginas coinciden con las de v2. Solo se agregaron los bloques nuevos: tarjeta
   de mercado, Taller y "Explícamelo".
+- **Recorrido con navegador real** (2026-11-02, base de 120.000 vacantes y correo por consola): registro, verificación,
+  login, CV, decisiones, detalle, Taller, notificaciones, historial, perfil y expectativas, sin respuestas 4xx/5xx ni
+  errores de JavaScript. Encontró dos defectos que las pruebas no veían: el dashboard listaba todo el catálogo (86 MB,
+  30 s) y un candidato nuevo recibía miles de avisos. Se corrigieron con catálogo paginado y un máximo de 20 avisos al día.
+- **Servicios:** Postgres, el batch y la web corren como servicios de usuario con límites de memoria (`infra/systemd/`).
 - **Correo real:** queda pendiente probarlo con una cuenta real. En desarrollo solo hay cuentas ficticias.
+- **El flujo de n8n no se repitió** después de los cambios de esta sección; la última corrida es la de la Fase 4.
 
 ## 6. Privacidad (Ley 1581)
 
@@ -102,11 +148,10 @@ set (§13.3).
 
 ## 7. Límites conocidos y siguientes pasos
 
-1. **La distinción fina entre acciones.** Hay dos caminos: fusionar Postular y Ajustar CV en "Postúlate, y resalta
-   esto" (sobre la prueba final limpia habría dado 67%, pero es un cambio de producto que hay que medir con otra prueba), o
-   usar el reranker (cross-encoder, con GPU) para decidir la cobertura.
-2. **El Taller de CV puede emparejar evidencia y requisito sin relación.** Hay que exigir una similitud mínima más alta
-   para sugerir.
+1. **Mejorar la señal, no la lógica.** Un clasificador aprendido empata con las reglas. Lo pendiente es reconocer
+   herramientas y títulos concretos: mpnet todavía mide más parecido de tema que si la persona sabe hacer algo.
+2. **El Taller pregunta por lo que falta, pero la pregunta sale de la decisión.** Si el decisor se equivoca, pregunta algo
+   irrelevante; la respuesta honesta ("No lo he hecho") está a un clic y nunca se propone texto.
 3. **Calibrar con resultados reales:** cada vez que una postulación pasa a Entrevista o Descartado, se guarda junto con
    los insumos de la decisión (`ResultadoDecision`). Con suficientes casos se puede ajustar la política, o entrenar
    una regresión logística, con datos reales en vez de etiquetas propuestas.

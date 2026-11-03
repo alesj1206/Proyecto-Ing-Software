@@ -53,6 +53,10 @@ pero Django tiene que escuchar en todas las interfaces:
 
 Con `127.0.0.1:8000` el contenedor no lo alcanza.
 
+Si usas los servicios de `infra/systemd/`, el batch ya está corriendo y la web escucha solo en `127.0.0.1:8000`. Para n8n,
+detén la web (`systemctl --user stop scoutly-web`) y usa el `runserver` de arriba mientras pruebas el flujo. Para dejarla
+fija, agrega la puerta de enlace de Podman con `systemctl --user edit scoutly-web`.
+
 > **Cuidado:** `0.0.0.0` expone el servidor de desarrollo a toda la red (Wi-Fi compartida incluida). Úsalo solo en
 > una red de confianza, y **nunca con `DJANGO_DEBUG=true`**: una página de error mostraría datos del CV. Es más seguro
 > escuchar solo en la puerta de enlace de Podman (`podman network inspect podman` da la IP, por ejemplo

@@ -61,10 +61,11 @@ cp .env.example .env              # y llena DJANGO_SECRET_KEY y la base (ver los
 infra/postgres/levantar.sh        # Postgres 17 + pgvector en 127.0.0.1:5433
 .venv/bin/python manage.py migrate
 .venv/bin/python manage.py ingerir_vacantes --fuente magneto     # o --fuente fixture, sin red
-.venv/bin/python manage.py runserver --insecure                   # http://localhost:8000
-.venv/bin/python manage.py decidir --escuchar --procesos 3        # otra terminal: el batch (3 en paralelo)
-infra/systemd/instalar.sh   # o, en vez de lo anterior: Postgres y el batch como servicios que arrancan solos
+infra/systemd/instalar.sh         # Postgres, el batch (3 procesos) y la web como servicios: http://localhost:8000
 ```
+
+Sin servicios, en dos terminales: `manage.py runserver --insecure` y `manage.py decidir --escuchar --procesos 3`. Para
+publicar la demo y subir la rama, ver [`docs/PUBLICAR.md`](docs/PUBLICAR.md).
 
 Opcional, en el `.env`:
 - SMTP (`DJANGO_EMAIL_BACKEND` y `EMAIL_*`) para que los correos de verificación y los avisos lleguen de verdad. Sin
@@ -82,9 +83,9 @@ solo después de que el equipo revise los términos de uso de Magneto.
 
 | Comando | Para qué |
 |---|---|
-| `manage.py ingerir_vacantes --fuente magneto\|fixture` | Trae vacantes. Solo reprocesa las que cambiaron. |
+| `manage.py ingerir_vacantes --fuente magneto\|fixture [--por-termino N] [--solo-nuevas]` | Trae vacantes. Solo reprocesa las que cambiaron; con `--solo-nuevas` no abre las ya guardadas. |
 | `manage.py decidir --todos\|--pendientes\|--escuchar [--procesos N]` | Corre el decisor (el batch). Con `--procesos N`, N procesos se reparten la cola. Máximo 6. Cada uno ocupa ~2 GB de RAM; en este PC, 3 rinden lo mismo que 6. |
-| `manage.py evaluar_decisor --mitad ajuste\|prueba_1\|prueba` | Exactitud contra el set etiquetado. |
+| `manage.py evaluar_decisor --mitad ajuste\|prueba_1\|prueba\|prueba_2\|prueba_3` | Exactitud contra el set etiquetado. |
 | `manage.py benchmark_escala --salida …` | Benchmark de 120.000 vacantes (solo en una base `*_bench`). |
 | `manage.py evaluacion_ciega preparar\|tabular` | Materiales y resultados de la evaluación con reclutadores. |
 
