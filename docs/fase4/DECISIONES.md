@@ -108,6 +108,14 @@ arreglaron.
   - `fecha_decision` pasa a significar "última escritura".
   - *Costo:* si se agrega un campo a `Decision`, entra solo en la huella y fuerza una reescritura completa, una vez.
 
+- **`empresa` y `ubicacion` pasan a 500 caracteres** (migración `vacantes/0007`). Dos vacantes reales fallaron por pasar
+  de 150. No se recortan, porque recortar una lista de ciudades descartaría a quien vive en las últimas. *Costo:* no se
+  supo cuál de los dos campos falló, y esas dos vacantes (`mag-940469`, `mag-1089200`) siguen fuera del catálogo.
+- **Carga del catálogo real:** la primera corrida perdió 14 términos y casi todo "auxiliar contable" por una caída de
+  internet (20:00–20:13). Se relanzaron esos 15 y se cortó a las 23:35, el límite acordado con el usuario. *Costo:* el
+  término en curso al cortar se perdió, porque las vacantes se guardan al terminar cada término, y el catálogo quedó
+  con pocas vacantes de ingeniería y recursos humanos.
+
 ## Pendientes menores (no se arreglaron)
 
 - **Evaluación ciega:**
@@ -119,5 +127,7 @@ arreglaron.
   - el candado de ingesta no se renueva si tarda más de 30 minutos.
 - **Benchmark:** el delta diario se midió con la base vacía.
 - **Regla de prácticas:** hace una consulta por cada vacante de prácticas y por candidato.
+- **Una caída de red no se reintenta:** la carga registra el error, salta el término y sigue, y al final solo cuenta los
+  errores de guardado. El resumen `errores: 2` no mostró los 14 términos perdidos; se vieron en el registro.
 - **Etiquetas en conflicto:** mag-1118625 (Postular) y mag-1121592 (Ajustar CV) son casi iguales y tienen el mismo CV.
   El equipo debe decidir la etiqueta.

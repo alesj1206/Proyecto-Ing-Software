@@ -135,6 +135,16 @@ set (§13.3).
 - **Servicios:** Postgres, el batch y la web corren como servicios de usuario con límites de memoria (`infra/systemd/`).
 - **Correo real:** queda pendiente probarlo con una cuenta real. En desarrollo solo hay cuentas ficticias.
 - **El flujo de n8n no se repitió** después de los cambios de esta sección; la última corrida es la de la Fase 4.
+- **Catálogo real (2026-11-02):** 2.457 vacantes de Magneto y 17.399 requisitos, todas embebidas con la política vigente.
+  - **Cobertura incompleta:** la carga perdió términos por una caída de internet y el relanzamiento se cortó a la hora
+    acordada. Títulos como "recursos humanos" (4), "ingeniero industrial" (4), "ingeniero civil" (3) o "ingeniero de
+    sistemas" (2) casi no aparecen. Se retoma con `ingerir_vacantes --solo-nuevas`.
+  - **Vacantes sin requisitos:** 83 (3,4%).
+  - **Tiempo:** ~1,5 s por candidato con 5 CV ficticios (`decidir_para_perfil`). En el recorrido con navegador las
+    decisiones se vieron 6,2 s después de subir el CV, con el batch recién arrancado; es una sola medición.
+  - **Recorrido sobre una copia de esta base:** sin respuestas 4xx/5xx, errores de JavaScript ni trazas de error. Las
+    capturas están en `capturas/catalogo_real/`.
+  - **`prueba_3` se repitió sobre esa copia:** 69%, sin ajustes.
 
 ## 6. Privacidad (Ley 1581)
 
@@ -158,3 +168,8 @@ set (§13.3).
 4. **B1 (`job_detail` del MCP de Magneto)** trae el texto completo y las preguntas de la empresa. Está construido y
    apagado hasta revisar los términos de uso.
 5. **Revisión de las etiquetas del set** por parte del equipo, y la evaluación ciega con reclutadores.
+6. **Falsos positivos a la vista en el catálogo real.** Con 5 CV ficticios, el Plan de hoy es sensato en general, pero
+   muestra "Cocinero" a un operario de producción y "Analista Senior" a un perfil junior. Es el mismo límite del punto 1
+   (parecido de tema). Es una revisión a ojo, no una medición, y no se ajustaron umbrales mirando estos casos.
+7. **El "100%" puede confundir.** La misma tarjeta dice "100%" y "Postular · solidez baja": el porcentaje cuenta los
+   requisitos obligatorios cubiertos y la solidez mide otra cosa. Se dejó igual a la espera de una decisión del equipo.
