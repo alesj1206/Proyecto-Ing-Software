@@ -233,3 +233,14 @@ def test_cambiar_las_reglas_de_extraccion_reprocesa_las_vacantes(db, monkeypatch
     assert ingerir(fuente).sin_cambios == 1
     monkeypatch.setattr(services, "VERSION_EXTRACCION", "otra")
     assert ingerir(fuente).actualizadas == 1
+
+
+def test_una_empresa_o_ubicacion_larga_se_guarda_entera(db):
+    """Dos vacantes reales de la carga se perdieron por pasar de 150 caracteres. Recortar la ubicación quitaría
+    ciudades de la lista y descartaría por error a quien vive en una de ellas."""
+    ciudades = ", ".join(f"Ciudad {i}" for i in range(30))
+    empresa = "Empresa de nombre muy largo " * 7
+    resumen = ingerir(FuenteEnMemoria([cruda("v1", "Requisitos:\n- SQL", ubicacion=ciudades, empresa=empresa)]))
+    assert resumen.errores == 0
+    v = Vacante.objects.get(id="v1")
+    assert (v.ubicacion, v.empresa) == (ciudades, empresa)

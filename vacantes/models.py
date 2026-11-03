@@ -17,8 +17,8 @@ class Vacante(models.Model):
 
     id = models.CharField(max_length=20, primary_key=True)
     titulo = models.CharField(max_length=200)
-    empresa = models.CharField(max_length=150)
-    ubicacion = models.CharField(max_length=150)
+    empresa = models.CharField(max_length=500)
+    ubicacion = models.CharField(max_length=500)  # puede ser una lista de ciudades: no se recorta
     modalidad = models.CharField(max_length=20, choices=Modalidad.choices)
     salario_min = models.PositiveIntegerField(null=True, blank=True)
     salario_max = models.PositiveIntegerField(null=True, blank=True)
