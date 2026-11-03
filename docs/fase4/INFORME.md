@@ -135,7 +135,9 @@ set (§13.3).
   30 s) y un candidato nuevo recibía miles de avisos. Se corrigieron con catálogo paginado y un máximo de 20 avisos al día.
 - **Servicios:** Postgres, el batch y la web corren como servicios de usuario con límites de memoria (`infra/systemd/`).
 - **Correo real:** queda pendiente probarlo con una cuenta real. En desarrollo solo hay cuentas ficticias.
-- **El flujo de n8n no se repitió** después de los cambios de esta sección; la última corrida es la de la Fase 4.
+- **El flujo de n8n se repitió** el 2026-11-03 con la política vigente y sus tres nodos respondieron 202, 202 y 200 (ver
+  `VERIFICACION.md`). Fue en un contenedor temporal, con una copia de la base y correo por consola, pidiendo solo 2
+  vacantes. Falta dejarlo fijo: `N8N_SCORING_TOKEN` no está en el `.env`.
 - **Catálogo real (2026-11-02):** 2.457 vacantes de Magneto y 17.399 requisitos, todas embebidas con la política vigente.
   - **Cobertura incompleta:** la carga perdió términos por una caída de internet y el relanzamiento se cortó a la hora
     acordada. Títulos como "recursos humanos" (4), "ingeniero industrial" (4), "ingeniero civil" (3) o "ingeniero de

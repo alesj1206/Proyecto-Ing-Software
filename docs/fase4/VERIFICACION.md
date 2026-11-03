@@ -81,3 +81,23 @@ La revisión final encontró tres efectos en la interfaz:
 Arreglo parcial (política .3): "Tu mercado" y el plan de aprendizaje solo cuentan vacantes con similitud ≥ 0,40
 (`SIMILITUD_CERCANA` en `matching/services.py`). El Plan de hoy y el Taller siguen usando el conjunto amplio. Es una
 de las dos mejoras que se exploran aparte.
+
+## Repetición del flujo de n8n con la política vigente (2026-11-03)
+
+Se usó `n8n/workflow-matches-diarios.json` en un contenedor temporal de n8n, sin tocar la instancia local, contra una copia
+del catálogo real (2.457 vacantes) con correo por consola y un token de un solo uso.
+
+| Nodo | Respuesta |
+|---|---|
+| 0. Importar vacantes | 202, `{"estado": "ingesta iniciada"}` |
+| 1. Decidir | 202, `{"encolados": 3}` |
+| 2. Generar notificaciones | 200, `{"creadas": 0, "correos": 0}` |
+
+- **Sin token:** la API respondió 401.
+- **Notificaciones:** el nodo 2 dio 0 porque corre antes de que el batch termine. Después el batch decidió los 3 perfiles,
+  embebió la vacante actualizada y creó 60 avisos con 3 correos de "20 vacantes nuevas para postular". Sin trazas de error.
+- **Diferencias con el flujo diario:** el disparador de horario se cambió por uno manual (la CLI de n8n no arranca desde
+  uno de horario), el nodo 0 pidió 1 término y 2 vacantes en vez de los valores por defecto, y la URL apuntó a la copia.
+- **Sin probar:** el disparador de las 6 a. m. y el flujo con la web real de `scoutly-web`, que escucha solo en
+  `127.0.0.1:8000` y no se alcanza desde un contenedor en su red normal (ver `n8n/README.md`).
+
