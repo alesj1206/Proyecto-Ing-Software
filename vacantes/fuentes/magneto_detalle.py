@@ -143,7 +143,7 @@ class FuenteMagnetoDetalle:
         vistos, urls = set(), []
         for numero in range(1, MAX_PAGINAS_POR_TERMINO + 1):
             if numero > 1:
-                pagina.goto(f"{base}?paginator[page]={numero}", timeout=30000)
+                pagina.goto(f"{base}/pagina-{numero}", timeout=30000)  # el sitio ignora ?paginator[page]=N
                 pagina.wait_for_timeout(ESPERA_LISTADO_MS)
             nuevos = [u for u in enlaces_validos(pagina.eval_on_selector_all("a[href*='/co/empleos/']",
                                                                              "els => els.map(e => e.href)"))
