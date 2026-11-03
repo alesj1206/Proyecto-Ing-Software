@@ -26,7 +26,7 @@ def dashboard_view(request):
     contexto = {
         "perfil": perfil,
         "top_matches": selectors.plan_de_hoy(perfil) if perfil else [],
-        "vacantes": selectors.catalogo(modalidad_activa),
+        "vacantes": selectors.catalogo(modalidad_activa, request.GET.get("pagina", 1)),
         "total_vacantes": selectors.total_vacantes(),
         "modalidades": Vacante.Modalidad.choices,
         "modalidad_activa": modalidad_activa,

@@ -157,5 +157,12 @@
     </li>
     {% endfor %}
   </ul>
+  {% if vacantes.paginator.num_pages > 1 %}
+  <nav class="filter-bar" aria-label="Páginas del catálogo" style="align-items:center;">
+    {% if vacantes.has_previous %}<a class="filter-pill" href="?pagina={{ vacantes.previous_page_number }}{% if modalidad_activa %}&amp;modalidad={{ modalidad_activa }}{% endif %}">← Anterior</a>{% endif %}
+    <span style="font-size:0.875rem;color:var(--muted-foreground);">Página {{ vacantes.number }} de {{ vacantes.paginator.num_pages }}</span>
+    {% if vacantes.has_next %}<a class="filter-pill" href="?pagina={{ vacantes.next_page_number }}{% if modalidad_activa %}&amp;modalidad={{ modalidad_activa }}{% endif %}">Siguiente →</a>{% endif %}
+  </nav>
+  {% endif %}
 </div>
 {% endblock %}

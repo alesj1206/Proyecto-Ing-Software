@@ -86,3 +86,18 @@ def test_la_preferencia_se_guarda_desde_expectativas(client_con_cv, usuario):
     client_con_cv.post(reverse("expectativas"), {"notif_modo": "individual", "notif_max": 2})
     usuario.perfil.refresh_from_db()
     assert (usuario.perfil.notif_modo, usuario.perfil.notif_max) == ("individual", 2)
+
+
+# --- recorrido real (2026-11-02): un candidato nuevo recibió 2.577 notificaciones de golpe ------------------------------
+
+def test_el_maximo_diario_avisa_primero_las_mejores(perfil):
+    from notificaciones.services import MAX_AVISOS_DIA
+
+    for i in range(MAX_AVISOS_DIA + 5):
+        Decision.objects.filter(pk=_decision(perfil, i).pk).update(orden=i)
+    resumen = generar_notificaciones(hoy=date(2026, 11, 2))
+    assert resumen.creadas == MAX_AVISOS_DIA and Notificacion.objects.filter(perfil=perfil).count() == MAX_AVISOS_DIA
+    ids = set(Notificacion.objects.filter(perfil=perfil).values_list("vacante_id", flat=True))
+    assert ids == {f"v{i}" for i in range(5, MAX_AVISOS_DIA + 5)}  # las de mayor orden
+    assert generar_notificaciones(hoy=date(2026, 11, 2)).creadas == 0  # el mismo día, nada más
+    assert generar_notificaciones(hoy=date(2026, 11, 3)).creadas == 5  # al día siguiente, las que quedaron

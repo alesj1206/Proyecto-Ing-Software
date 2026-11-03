@@ -6,6 +6,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import date
 
+from django.core.paginator import Paginator
 from django.utils import timezone
 
 from vacantes.extraccion import normalizar
@@ -23,6 +24,7 @@ ORDEN_ACCIONES = (Accion.POSTULAR, Accion.AJUSTAR_CV, Accion.CERRAR_BRECHA, Acci
 ACCIONES_DEL_RANKING = (Accion.POSTULAR, Accion.AJUSTAR_CV, Accion.CERRAR_BRECHA)
 HORAS_POSTULAR_HOY = 72
 TOP_HISTORIAL = 10
+TAMANO_PAGINA_CATALOGO = 25
 MAX_POR_GRUPO = 20  # el dashboard muestra a lo sumo 20 por acción ("y N más"): §6 habla de ~3.000 relevantes
 CANDIDATAS_PLAN = 200  # el Plan de hoy reordena por frescura solo las mejores por `orden`
 # El dashboard no necesita el texto completo ni los vectores de cada vacante (decenas de MB con 3.000 decisiones).
@@ -32,9 +34,11 @@ CRITERIOS = (("experiencia", "Experiencia"), ("salario", "Salario"), ("modalidad
              ("ubicacion", "Ubicación"))
 
 
-def catalogo(modalidad: str = ""):
-    vacantes = Vacante.objects.filter(activa=True)
-    return vacantes.filter(modalidad=modalidad) if modalidad else vacantes
+def catalogo(modalidad: str = "", pagina: str | int = 1):
+    """Una página del catálogo: listarlo entero pesaba 86 MB con 120.000 vacantes. `get_page` tolera páginas inválidas."""
+    vacantes = (Vacante.objects.filter(activa=True).defer("texto_completo", "descripcion", "vector", "matriz_requisitos")
+                .order_by("-fecha_publicacion", "id"))  # orden total: las páginas no repiten ni saltan vacantes
+    return Paginator(vacantes.filter(modalidad=modalidad) if modalidad else vacantes, TAMANO_PAGINA_CATALOGO).get_page(pagina)
 
 
 def total_vacantes() -> int:

@@ -27,6 +27,7 @@ from .models import Notificacion
 
 VENTANA = timedelta(hours=36)  # un día más margen: cubre lo que el batch decidió después de la corrida anterior
 MAX_ASUNTO = 150
+MAX_AVISOS_DIA = 20  # por persona: un candidato nuevo con miles de POSTULAR no recibe miles de avisos
 log = logging.getLogger(__name__)
 
 
@@ -55,7 +56,9 @@ def _por_notificar(ahora):
                                                 creada_en__gte=OuterRef("cambio_en"))
     return (Decision.objects.filter(accion=Accion.POSTULAR, cambio_en__gte=ahora - VENTANA)
             .exclude(accion_anterior=Accion.POSTULAR).exclude(Exists(ya_notificada))
-            .select_related("vacante", "perfil__usuario"))
+            .select_related("vacante", "perfil__usuario").order_by("perfil_id", "-orden", "id")
+            .defer("cobertura", "restricciones", "motivos", "vacante__texto_completo", "vacante__descripcion",
+                   "vacante__vector", "vacante__matriz_requisitos"))
 
 
 def _crear(decision: Decision, hoy: date) -> bool:
@@ -103,7 +106,14 @@ def _generar(hoy: date | None) -> ResumenNotificaciones:
     ahora, hoy = timezone.now(), hoy or timezone.localdate()
     resumen = ResumenNotificaciones()
     perfiles = {}
+    cupos = {}
     for decision in _por_notificar(ahora):
+        if decision.perfil_id not in cupos:
+            cupos[decision.perfil_id] = MAX_AVISOS_DIA - Notificacion.objects.filter(perfil_id=decision.perfil_id,
+                                                                                     fecha=hoy).count()
+        if cupos[decision.perfil_id] <= 0:  # vienen de mejor a peor: las demás siguen en el dashboard
+            continue
+        cupos[decision.perfil_id] -= 1
         resumen.creadas += _crear(decision, hoy)
         perfiles[decision.perfil_id] = decision.perfil
     for perfil in Perfil.objects.filter(notificaciones__enviada=False,
