@@ -115,7 +115,7 @@ Los detalles están en [`docs/fase4/EVALUACION.md`](docs/fase4/EVALUACION.md).
 
 - **Sprint 1:** la entrega congelada vive en [`entregas/sprint-1/`](entregas/sprint-1/), en el tag `sprint-1` y en
   [`ENTREGA_SPRINT1.md`](ENTREGA_SPRINT1.md).
-- **Sprint 2 (v2):** ranking por 5 criterios y una llamada a Groq por vacante. El tag `pre-sprint3-rebuild` marca su
+- **Sprint 2 (v2):** ranking por 5 criterios sin IA y explicaciones de Groq al abrir el detalle de una vacante. El tag `pre-sprint3-rebuild` marca su
   final; el README de entonces está en el historial de git.
 - **Sprint 3 (v3):** esta reescritura.
   - Diseño: [`docs/superpowers/specs/2026-11-01-scoutly-v3-decisor-design.md`](docs/superpowers/specs/2026-11-01-scoutly-v3-decisor-design.md).

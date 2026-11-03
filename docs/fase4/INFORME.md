@@ -2,9 +2,10 @@
 
 ## 1. El problema
 
-El reto de Magneto (Idea 4) pide un flujo diario con n8n: vacantes → ranking → notificación. La v2 analizaba cada
-vacante con una llamada a Groq. A la escala de Magneto (~120.000 vacantes activas) eso es lento, caro y no se puede
-explicar. Además, el objetivo de fondo no es un ranking: es que el candidato **consiga entrevistas**.
+El reto de Magneto (Idea 4) pide un flujo diario con n8n: vacantes → ranking → notificación. La v2 calculaba el ranking
+sin IA, comparando habilidades por texto exacto ("coincide o no"), así que perdía requisitos dichos con otras palabras.
+Groq solo redactaba explicaciones al abrir el detalle de una vacante. Mejorar esa comparación con un LLM por vacante
+tampoco sirve a la escala de Magneto (~120.000 vacantes activas): sería lento, caro y difícil de explicar. Además, el objetivo de fondo no es un ranking: es que el candidato **consiga entrevistas**.
 
 La v3 reemplaza el ranking por un **decisor local y gratuito**. Para cada par (candidato, vacante) da una acción
 (Postular, Cerrar brecha, Descartar o Revísala tú), su solidez (alta, media o baja) y las razones que la
