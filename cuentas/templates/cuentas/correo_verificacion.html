@@ -1,0 +1,13 @@
+{% extends "correos/base.html" %}
+{% block anticipo %}Confirma tu correo para crear tu cuenta de Scoutly. El enlace vence en 3 días.{% endblock %}
+{% block titulo %}Ya casi estás en Scoutly{% endblock %}
+{% block bajada %}Confirma tu correo para crear tu cuenta y empezar a ver las vacantes para ti.{% endblock %}
+{% block contenido %}
+    <tr><td style="padding:24px 24px 0;text-align:center;font-size:15px;line-height:1.5;">
+      Toca el botón para terminar tu registro. El enlace vence en <strong>3 días</strong>.
+    </td></tr>
+{% endblock %}
+{% block tras_boton %}
+      <p style="margin:18px 0 0;font-size:12px;line-height:1.5;color:#6b7280;word-break:break-all;">Si el botón no abre, copia este enlace:<br>{{ url_accion }}</p>
+{% endblock %}
+{% block pie %}Si no te registraste, ignora este correo: no se creará ninguna cuenta.{% endblock %}

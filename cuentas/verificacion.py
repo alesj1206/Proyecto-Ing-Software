@@ -14,6 +14,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import transaction
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
@@ -49,7 +50,9 @@ def _enviar(pendiente: RegistroPendiente, request) -> None:
     send_mail("Confirma tu correo en Scoutly",
               f"Hola. Abre este enlace para crear tu cuenta de Scoutly (vence en 3 días):\n\n{enlace}\n\n"
               "Si no te registraste, ignora este correo: no se creará ninguna cuenta.",
-              settings.DEFAULT_FROM_EMAIL, [pendiente.email])
+              settings.DEFAULT_FROM_EMAIL, [pendiente.email],
+              html_message=render_to_string("cuentas/correo_verificacion.html",
+                                            {"url_accion": enlace, "texto_boton": "Confirmar mi correo"}))
 
 
 def registrar_pendiente(email: str, password: str, request) -> None:
