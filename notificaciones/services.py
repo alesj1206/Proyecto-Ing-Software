@@ -15,6 +15,8 @@ from datetime import date, timedelta
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Exists, OuterRef
+from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 
 from cuentas.models import Perfil
@@ -28,6 +30,7 @@ from .models import Notificacion
 VENTANA = timedelta(hours=36)  # un día más margen: cubre lo que el batch decidió después de la corrida anterior
 MAX_ASUNTO = 150
 MAX_AVISOS_DIA = 20  # por persona: un candidato nuevo con miles de POSTULAR no recibe miles de avisos
+MAX_DESTACADAS = 3  # el correo invita a entrar: las demás se ven en la página
 log = logging.getLogger(__name__)
 
 
@@ -42,13 +45,43 @@ def _limpio(texto: str) -> str:
     return " ".join(texto.split())[:MAX_ASUNTO]
 
 
-def enviar_correo(perfil: Perfil, asunto: str, cuerpo: str) -> bool:
+def enviar_correo(perfil: Perfil, asunto: str, cuerpo: str, html: str | None = None) -> bool:
     """Al correo de la cuenta (verificado o dado por la red social), nunca al que aparece en el CV."""
     try:
-        return send_mail(_limpio(asunto), cuerpo, settings.DEFAULT_FROM_EMAIL, [perfil.usuario.email]) > 0
+        return send_mail(_limpio(asunto), cuerpo, settings.DEFAULT_FROM_EMAIL, [perfil.usuario.email],
+                         html_message=html) > 0
     except (smtplib.SMTPException, OSError, ValueError):  # ValueError: encabezado inválido; se reintenta luego
         log.exception("No se pudo enviar el correo al perfil %s", perfil.pk)
         return False
+
+
+def _url(nombre: str, *args) -> str:
+    """Absoluta: el batch envía el correo sin una petición de la que sacar el dominio."""
+    return settings.SCOUTLY_URL_SITIO.rstrip("/") + reverse(nombre, args=args)
+
+
+def _primer_nombre(perfil: Perfil) -> str:
+    return (perfil.nombre or "").split(" ")[0].strip()
+
+
+def _titular(total: int) -> str:
+    return "tienes 1 vacante nueva para ti" if total == 1 else f"tienes {total} vacantes nuevas para ti"
+
+
+def _enviar_aviso(perfil: Perfil, asunto: str, pendientes: list[Notificacion], url_accion: str, boton: str) -> bool:
+    destacadas = [n.vacante for n in pendientes[:MAX_DESTACADAS]]
+    contexto = {"nombre": _primer_nombre(perfil), "total": len(pendientes), "titular": asunto,
+                "titular_corto": _titular(len(pendientes)), "destacadas": destacadas,
+                "restantes": len(pendientes) - len(destacadas), "url_accion": url_accion, "texto_boton": boton,
+                "url_avisos": _url("expectativas")}
+    return enviar_correo(perfil, asunto, render_to_string("notificaciones/correo_vacantes.txt", contexto),
+                         render_to_string("notificaciones/correo_vacantes.html", contexto))
+
+
+def _asunto_resumen(perfil: Perfil, total: int) -> str:
+    cuantas = "1 vacante nueva te espera" if total == 1 else f"{total} vacantes nuevas te esperan"
+    nombre = _primer_nombre(perfil)
+    return f"{nombre}, {cuantas} en Scoutly" if nombre else f"{cuantas} en Scoutly"
 
 
 def _por_notificar(ahora):
@@ -75,19 +108,21 @@ def _enviar_pendientes(perfil: Perfil, hoy: date, ahora) -> int:
     if perfil.notif_modo == Perfil.ModoNotificacion.DESACTIVADO:
         return 0
     pendientes = list(Notificacion.objects.filter(perfil=perfil, enviada=False, creada_en__gte=ahora - VENTANA)
-                      .order_by("creada_en"))
+                      .select_related("vacante").order_by("creada_en"))  # de mejor a peor: así se crean
     if not pendientes:
         return 0
     enviados_hoy = Notificacion.objects.filter(perfil=perfil, enviada=True, fecha=hoy)
     if perfil.notif_modo == Perfil.ModoNotificacion.INDIVIDUAL:
         restantes = max(perfil.notif_max - enviados_hoy.count(), 0)
-        enviadas = [n for n in pendientes[:restantes] if enviar_correo(perfil, n.mensaje, n.mensaje)]
+        enviadas = [n for n in pendientes[:restantes]
+                    if _enviar_aviso(perfil, n.mensaje, [n], _url("vacante_detalle", n.vacante_id), "Ver la vacante")]
         correos = len(enviadas)
     else:  # resumen: un solo correo al día
         if enviados_hoy.exists():
             return 0
-        cuerpo = "Tienes vacantes nuevas para postular en Scoutly:\n\n" + "\n".join(f"- {n.mensaje}" for n in pendientes)
-        enviadas = pendientes if enviar_correo(perfil, f"{len(pendientes)} vacantes nuevas para postular", cuerpo) else []
+        enviado = _enviar_aviso(perfil, _asunto_resumen(perfil, len(pendientes)), pendientes, _url("notificaciones"),
+                                "Ver mis vacantes")
+        enviadas = pendientes if enviado else []
         correos = 1 if enviadas else 0
     Notificacion.objects.filter(id__in=[n.id for n in enviadas]).update(enviada=True, fecha=hoy)
     return correos

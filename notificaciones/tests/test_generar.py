@@ -39,7 +39,7 @@ def test_solo_notifica_postular_nuevo_de_hoy(perfil):
     assert Notificacion.objects.get().mensaje == "Nueva vacante para postular: Cargo 1 en Empresa 1"
 
 
-def test_resumen_envia_un_solo_correo_con_todas(perfil):
+def test_resumen_envia_un_solo_correo_y_marca_todas(perfil):
     for i in range(3):
         _decision(perfil, i)
     r = generar_notificaciones()

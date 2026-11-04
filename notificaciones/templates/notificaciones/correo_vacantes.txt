@@ -1,0 +1,8 @@
+{% autoescape off %}{% if nombre %}{{ nombre }}, {% endif %}{{ titular_corto }}
+
+{% for v in destacadas %}- {{ v.titulo }} ({{ v.empresa }})
+{% endfor %}{% if restantes %}y {{ restantes }} más te esperan en Scoutly.
+{% endif %}
+{{ texto_boton }}: {{ url_accion }}
+
+Cambiar o apagar estos avisos: {{ url_avisos }}{% endautoescape %}

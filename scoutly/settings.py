@@ -262,3 +262,5 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'notificaciones@scoutly.local')
+# Dirección pública de la web, para los enlaces de los correos que envía el batch (no tiene una petición de donde sacarla).
+SCOUTLY_URL_SITIO = os.environ.get('SCOUTLY_URL_SITIO', 'http://127.0.0.1:8000')
