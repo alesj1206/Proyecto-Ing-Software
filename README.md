@@ -58,6 +58,7 @@ Requisitos: Python 3.14, Podman y Chrome (para la ingesta de Magneto).
 ```bash
 python3.14 -m venv .venv && .venv/bin/pip install -r requirements.txt -r requirements-dev.txt
 cp .env.example .env              # y llena DJANGO_SECRET_KEY y la base (ver los comentarios del archivo)
+cp infra/postgres/.env.ejemplo infra/postgres/.env   # pon la misma clave en DJANGO_DB_PASSWORD del .env
 infra/postgres/levantar.sh        # Postgres 17 + pgvector en 127.0.0.1:5433
 .venv/bin/python manage.py migrate
 .venv/bin/python manage.py ingerir_vacantes --fuente magneto     # o --fuente fixture, sin red
