@@ -12,6 +12,15 @@ def embedder_falso(settings):
     settings.SCOUTLY_RERANKER = ""
 
 
+@pytest.fixture(autouse=True)
+def cache_en_memoria(settings):
+    """Los tests no dependen de la tabla de caché de Postgres, y cada uno empieza con la caché vacía."""
+    from django.core.cache import cache
+
+    settings.CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+    cache.clear()
+
+
 @pytest.fixture
 def usuario(db):
     from cuentas.services import crear_usuario_con_autorizacion

@@ -125,3 +125,12 @@ def test_area_metropolitana_dice_la_ciudad_como_la_escribio():
 ])
 def test_area_metropolitana(lugar, busca, esperado):
     assert estado(RestriccionUbicacion(), perfil(exp_ubicacion=busca), vacante(ubicacion=lugar)) == esperado
+
+
+@pytest.mark.parametrize("lugar,busca,esperado", [
+    ("Bogotá", "Bogotá D.C.", "cumple"), ("Bogotá, D.C.", "Bogotá DC", "cumple"),
+    ("Medellín", "Medellín y alrededores", "cumple"), ("Bello - Envigado", "Envigado centro", "cumple"),
+    ("Bogotá", "Medellín y alrededores", "no_cumple"), ("Cali", "Calima", "no_cumple"),
+])
+def test_ubicacion_escrita_con_mas_palabras_que_la_de_la_vacante(lugar, busca, esperado):
+    assert estado(RestriccionUbicacion(), perfil(exp_ubicacion=busca), vacante(ubicacion=lugar)) == esperado

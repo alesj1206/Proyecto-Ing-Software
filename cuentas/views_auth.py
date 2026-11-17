@@ -2,21 +2,22 @@
 
 from django.contrib import messages
 from django.contrib.auth import login, logout
+from django.contrib.auth.views import PasswordResetView
 from django.core.cache import cache
-from django.db import IntegrityError
 from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 
 from .forms import ClaveLoginForm, CorreoForm, RegistroClaveForm, RegistroDatosForm
 from .legal import VERSION_POLITICA, VERSION_TERMINOS
 from .models import Usuario
 from .selectors import perfil_con_cv
-from .services import crear_usuario_con_autorizacion
 from .sociales import proveedores_activos
 from .verificacion import EnlaceInvalido, EnlaceUsado, EnlaceVencido, registrar_pendiente, reenviar, verificar
 
 MAX_INTENTOS_LOGIN = 5
 BLOQUEO_LOGIN_S = 15 * 60
+MAX_REGISTROS_IP, VENTANA_REGISTROS_S = 20, 60 * 60  # correos de confirmación por IP y hora (una red compartida cabe)
 SESION_LOGIN = "login_correo"
 SESION_REGISTRO = "registro_paso1"
 BACKEND_CORREO = "django.contrib.auth.backends.ModelBackend"
@@ -26,10 +27,25 @@ def _destino_tras_login(usuario):
     return "dashboard" if perfil_con_cv(usuario) else "onboarding"
 
 
+def _ip(request) -> str:
+    """Detrás de cloudflared la IP real llega en CF-Connecting-IP."""
+    return request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("REMOTE_ADDR", "")
+
+
 def _clave_intentos(request, email: str) -> str:
-    """Por correo y por IP (detrás de cloudflared la IP real llega en CF-Connecting-IP)."""
-    ip = request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("REMOTE_ADDR", "")
-    return f"login-fallidos:{email}:{ip}"
+    """Por correo y por IP."""
+    return f"login-fallidos:{email}:{_ip(request)}"
+
+
+def _demasiados_registros(request) -> bool:
+    """Tope de correos de confirmación por IP: sin él, registrarse en bucle manda correos sin límite a un tercero. Es
+    por IP y no por correo para que nadie pueda bloquear el registro del dueño de una dirección."""
+    clave = f"registros:{_ip(request)}"
+    cache.add(clave, 0, VENTANA_REGISTROS_S)
+    try:
+        return cache.incr(clave) > MAX_REGISTROS_IP
+    except ValueError:  # la clave venció entre el add y el incr
+        return False
 
 
 def _render_login(request, *, correo_form=None, clave_form=None):
@@ -112,6 +128,9 @@ def registro_view(request):
     clave_form = RegistroClaveForm(request.POST, email=paso1["email"])
     if not clave_form.is_valid():
         return _render_registro(request, clave_form=clave_form)
+    if _demasiados_registros(request):
+        clave_form.add_error("password1", "Demasiados registros desde tu red. Inténtalo de nuevo en una hora.")
+        return _render_registro(request, clave_form=clave_form)
     request.session.pop(SESION_REGISTRO, None)
     registrar_pendiente(paso1["email"], clave_form.cleaned_data["password1"], request)
     return render(request, "cuentas/registro.html", {"enviado": paso1["email"], "proveedores": []})
@@ -144,3 +163,22 @@ def reenviar_verificacion_view(request):
 def logout_view(request):
     logout(request)
     return redirect("login")
+
+
+class ClaveOlvidadaView(PasswordResetView):
+    """Restablecimiento de Django: solo escribe a cuentas activas con contraseña y responde igual exista o no el
+    correo. Comparte el tope de correos por IP del registro."""
+
+    template_name = "cuentas/clave.html"
+    extra_context = {"paso": "olvidada"}
+    email_template_name = "cuentas/correo_clave.txt"
+    subject_template_name = "cuentas/correo_clave_asunto.txt"
+    success_url = reverse_lazy("clave_enviado")
+
+    def get_initial(self):  # viene del paso de contraseña del login: el correo ya está escrito
+        return {"email": self.request.session.get(SESION_LOGIN, "")}
+
+    def form_valid(self, form):
+        if _demasiados_registros(self.request):
+            return redirect(self.success_url)  # misma respuesta, sin correo
+        return super().form_valid(form)

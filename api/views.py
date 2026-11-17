@@ -6,14 +6,17 @@ from functools import wraps
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.utils import timezone
+from django.views.decorators.http import require_GET, require_POST
 
 from cuentas.models import Perfil
+from matching.models import SolicitudDecision
 from matching.services import solicitar_decision
 from notificaciones.services import generar_notificaciones
 from vacantes.fuentes.magneto_detalle import FuenteMagnetoDetalle
 from vacantes.fuentes.magneto_detalle import TERMINOS_POR_DEFECTO
-from vacantes.services import ingerir_en_segundo_plano
+from vacantes.models import Corrida, EstadoIngesta
+from vacantes.services import INGESTA_COLGADA, ingerir_en_segundo_plano
 
 from .autenticacion import token_invalido
 
@@ -88,3 +91,17 @@ def decidir(request):
 def notificar(request):
     resumen = generar_notificaciones()
     return JsonResponse({"creadas": resumen.creadas, "correos": resumen.correos})
+
+
+@require_GET
+def estado(request):
+    """Lo consulta n8n entre pasos para esperar a que la ingesta y el batch terminen de verdad. Una ingesta colgada
+    (más de INGESTA_COLGADA) cuenta como terminada, igual que para tomar el candado."""
+    if error := token_invalido(request):
+        return error
+    ingesta = EstadoIngesta.objects.filter(id=1).first()
+    en_curso = bool(ingesta and ingesta.en_curso and ingesta.iniciada_en
+                    and ingesta.iniciada_en >= timezone.now() - INGESTA_COLGADA)
+    return JsonResponse({"ingesta_en_curso": en_curso, "ultimo_resumen": ingesta.ultimo_resumen if ingesta else "",
+                         "cola": SolicitudDecision.objects.count(),
+                         "corridas": list(Corrida.objects.values("paso", "inicio", "fin", "ok", "resumen")[:5])})

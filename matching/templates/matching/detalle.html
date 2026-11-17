@@ -47,13 +47,14 @@
       <div class="card" style="display:flex;align-items:center;gap:1.25rem;">
         <div style="width:88px;height:88px;border-radius:999px;background:conic-gradient(var(--brand) {{ match.score }}%, var(--surface-strong) 0);display:flex;align-items:center;justify-content:center;">
           <div style="width:70px;height:70px;border-radius:999px;background:var(--background);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:1.3rem;color:var(--navy);">
-            {{ decision.cubres_visible }}
+            {{ decision.compatibilidad_visible }}
           </div>
         </div>
         <div style="max-width:12rem;">
           <p style="margin:0;font-family:var(--font-display);font-size:0.875rem;font-weight:700;color:var(--navy);">
-            Requisitos obligatorios que cubres
+            Compatibilidad
           </p>
+          <p style="margin-top:0.2rem;font-size:0.8rem;color:var(--navy);">Cubres {{ decision.cubres_visible }} requisitos obligatorios</p>
           <p style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">
             La solidez dice qué tan segura es esta recomendación, no qué tanto encajas.
           </p>
@@ -74,7 +75,7 @@
       <div class="card" style="max-width:16rem;">
         <p style="margin:0;font-size:0.875rem;font-weight:600;color:var(--navy);">¿Qué tan compatible eres?</p>
         <p style="margin-top:0.4rem;font-size:0.8rem;color:var(--muted-foreground);line-height:1.5;">
-          Inicia sesión y carga tu hoja de vida para ver tu compatibilidad con esta vacante.
+          {% if analizando %}Estamos analizando tu hoja de vida. Vuelve en un minuto.{% elif perfil %}Esta vacante no quedó entre las relevantes para tu perfil, así que no calculamos tu compatibilidad.{% else %}Inicia sesión y carga tu hoja de vida para ver tu compatibilidad con esta vacante.{% endif %}
         </p>
       </div>
       {% endif %}
@@ -164,7 +165,9 @@
         {% endif %}
       {% else %}
         <p style="margin-top:0.75rem;font-size:0.8125rem;color:var(--muted-foreground);line-height:1.5;">
-          {% if user.is_authenticated %}
+          {% if perfil %}
+            {% if analizando %}Estamos analizando tu hoja de vida.{% else %}Esta vacante no quedó entre las relevantes para tu hoja de vida.{% endif %}
+          {% elif user.is_authenticated %}
             Aún no has cargado tu hoja de vida.
             <a href="{% url 'onboarding' %}" style="color:var(--navy);font-weight:600;text-decoration:underline;">Cárgala aquí</a>.
           {% else %}

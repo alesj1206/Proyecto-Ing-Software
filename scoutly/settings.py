@@ -176,6 +176,16 @@ WHITENOISE_USE_FINDERS = True  # los sirve desde su origen: no hace falta collec
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Caché en Postgres: el bloqueo de login y los topes de correos se comparten entre los procesos de gunicorn y
+# sobreviven a un reinicio (la caché en memoria por defecto es una por proceso). La tabla se crea una vez con
+# `manage.py createcachetable`.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'scoutly_cache',
+    }
+}
+
 # Sesión: se mantiene activa 30 días, igual que el Sprint 1 original.
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
@@ -225,22 +235,22 @@ ACCOUNT_ADAPTER = 'cuentas.adaptadores.AdaptadorCuenta'  # next= solo hacia el m
 SOCIALACCOUNT_LOGIN_ON_GET = False
 
 # HU-06: token compartido que el workflow de n8n manda en el header
-# X-Scoutly-Token al disparar POST /api/recalcular-matches. En desarrollo
+# X-Scoutly-Token al llamar los endpoints de /api/. En desarrollo
 # cae a un valor fijo (conocido, está en este repo) para que el endpoint
-# funcione sin configurar nada; con DEBUG=False, views.recalcular_matches_api
+# funcione sin configurar nada; con DEBUG=False, api/autenticacion.py
 # rechaza este valor en vez de aceptarlo como si fuera un secreto real —
 # ver la comparación ahí.
 N8N_SCORING_TOKEN_DEV_DEFAULT = 'dev-local-token-change-me'
 N8N_SCORING_TOKEN = os.environ.get('N8N_SCORING_TOKEN', N8N_SCORING_TOKEN_DEV_DEFAULT)
 
-# Explicaciones por criterio del matching (vacantes/ai_explicaciones.py),
+# Explicación en prosa de una decisión (matching/explicaciones.py),
 # vía la API gratuita de Groq (console.groq.com — sin tarjeta de crédito).
-# Sin esta variable, obtener_explicacion() cae directo al texto de
+# Sin esta variable, explicar() cae directo al texto de
 # respaldo (no genérico, pero sin redactar por IA) — no rompe nada.
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 SCOUTLY_GROQ_MODELO = os.environ.get('SCOUTLY_GROQ_MODELO', 'qwen/qwen3.8-27b')  # el que funcionaba en v2
 
-# HU-11: notificaciones de nuevos matches (vacantes/notificaciones.py).
+# HU-11: notificaciones de nuevos matches (notificaciones/services.py).
 # Único canal: correo (se evaluó WhatsApp vía Twilio y se descartó —
 # exige que cada candidato haga un opt-in manual antes de poder recibir
 # nada; el correo con SMTP real no le pide ningún paso extra).

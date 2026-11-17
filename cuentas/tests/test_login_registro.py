@@ -24,6 +24,11 @@ def test_login_paso1_siempre_pide_contrasena(client, db):
     assert 'name="password"' in r.content.decode()
 
 
+def test_olvide_mi_clave_trae_el_correo_del_login(client, db):
+    client.post(reverse("login"), {"paso": "correo", "email": "ana@ejemplo.com"})
+    assert 'value="ana@ejemplo.com"' in client.get(reverse("clave_olvidada")).content.decode()
+
+
 def test_login_correcto_con_mayusculas_y_espacios(client, usuario):
     r = _login(client, " Ana@Ejemplo.com ", CLAVE_DE_PRUEBA)
     assert r.status_code == 302 and "_auth_user_id" in client.session

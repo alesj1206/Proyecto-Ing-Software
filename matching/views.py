@@ -15,7 +15,7 @@ from vacantes.models import Vacante
 from . import selectors, taller as taller_cv
 from .explicaciones import explicar
 from .ia import obtener_redactor
-from .models import Decision, SugerenciaCV
+from .models import Decision, SolicitudDecision, SugerenciaCV
 from .politica import Accion
 
 
@@ -62,6 +62,7 @@ def detalle_view(request, vacante_id):
     perfil = perfil_con_cv(request.user) if request.user.is_authenticated else None
     decision = selectors.detalle(perfil, vacante) if perfil else None
     contexto = {"vacante": vacante, "match": None, "criterios": [], "modificador": None, "decision": None,
+                "perfil": perfil, "analizando": bool(perfil) and SolicitudDecision.objects.filter(perfil=perfil).exists(),
                 "postulacion": Postulacion.objects.filter(perfil=perfil, vacante=vacante).first() if perfil else None}
     return render(request, "matching/detalle.html", contexto | (decision or {}))
 

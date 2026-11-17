@@ -1,0 +1,122 @@
+openapi: 3.1.0
+info:
+  title: Scoutly, API para n8n
+  version: "3"
+  description: >
+    Los cuatro endpoints que llama el workflow de n8n (n8n/workflow-matches-diarios.json):
+    ingesta, decisión, notificaciones y estado. Ninguno carga modelos; `decidir` solo encola y
+    el trabajo lo hace `manage.py decidir --escuchar`.
+servers:
+  - url: http://localhost:8000
+security:
+  - tokenN8n: []
+paths:
+  /api/importar-vacantes:
+    post:
+      summary: Arranca la ingesta de vacantes de Magneto en segundo plano
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                terminos:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  items: {type: string, minLength: 1, maxLength: 60}
+                  description: Si falta, usa los términos por defecto.
+                por_termino:
+                  type: integer
+                  minimum: 1
+                  maximum: 20
+                  default: 5
+                  description: Fuera de rango se ajusta a 1..20.
+      responses:
+        "202":
+          description: Ingesta iniciada
+          content:
+            application/json:
+              schema: {type: object, properties: {estado: {type: string, example: ingesta iniciada}}}
+        "400": {$ref: "#/components/responses/Error"}
+        "401": {$ref: "#/components/responses/Error"}
+        "409":
+          description: Ya hay una ingesta en curso
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Error"}
+        "503": {$ref: "#/components/responses/Error"}
+  /api/decidir:
+    post:
+      summary: Encola una decisión por cada perfil con hoja de vida
+      responses:
+        "202":
+          description: Perfiles encolados
+          content:
+            application/json:
+              schema: {type: object, properties: {encolados: {type: integer}}}
+        "401": {$ref: "#/components/responses/Error"}
+        "503": {$ref: "#/components/responses/Error"}
+  /api/generar-notificaciones:
+    post:
+      summary: Crea los avisos pendientes y manda los correos (idempotente)
+      responses:
+        "200":
+          description: Resumen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  creadas: {type: integer}
+                  correos: {type: integer}
+        "401": {$ref: "#/components/responses/Error"}
+        "503": {$ref: "#/components/responses/Error"}
+  /api/estado:
+    get:
+      summary: Si la ingesta sigue corriendo, cuántos perfiles faltan por decidir y las últimas corridas
+      responses:
+        "200":
+          description: Estado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ingesta_en_curso:
+                    type: boolean
+                    description: Una ingesta de más de 30 minutos se da por colgada y cuenta como false.
+                  ultimo_resumen: {type: string}
+                  cola: {type: integer, description: Perfiles que esperan decisión.}
+                  corridas:
+                    type: array
+                    maxItems: 5
+                    items:
+                      type: object
+                      properties:
+                        paso: {type: string, enum: [ingesta, decision, notificacion]}
+                        inicio: {type: string, format: date-time}
+                        fin: {type: string, format: date-time}
+                        ok: {type: boolean}
+                        resumen: {type: string}
+        "401": {$ref: "#/components/responses/Error"}
+        "503": {$ref: "#/components/responses/Error"}
+components:
+  securitySchemes:
+    tokenN8n:
+      type: apiKey
+      in: header
+      name: X-Scoutly-Token
+      description: Igual a N8N_SCORING_TOKEN del .env. Sin DEBUG, el token de desarrollo responde 503.
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: {type: string}
+  responses:
+    Error:
+      description: "400: entrada inválida. 401: token inválido. 503: N8N_SCORING_TOKEN sin configurar."
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}

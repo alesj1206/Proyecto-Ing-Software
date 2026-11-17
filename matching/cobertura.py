@@ -101,6 +101,9 @@ def cubrir(requisitos, matriz_req: np.ndarray, evidencias: list[str], matriz_evi
            tau_alto: float, tau_bajo: float) -> Cobertura:
     if len(evidencias):
         similitudes = matriz_req @ matriz_evid.T
+        # una habilidad blanda suelta del CV ("Liderazgo") no prueba un requisito técnico, igual que un requisito blando
+        # no cuenta; una frase de experiencia que la menciona ("Lideré un equipo de 5 en SQL") sí sigue valiendo
+        similitudes[:, [es_blando(e) and len(e.split()) <= 4 for e in evidencias]] = -1.0
         mejores, indices = similitudes.max(axis=1), similitudes.argmax(axis=1)
     else:
         mejores, indices = np.zeros(len(requisitos)), np.zeros(len(requisitos), dtype=int)

@@ -71,28 +71,18 @@
     <p style="margin-top:0.35rem;font-size:0.8125rem;color:var(--muted-foreground);">
       Cuando revisemos tu ranking y encontremos una vacante que ayer no
       estaba en tu top y hoy sí, te llega un correo automático
-      {% if perfil.contacto %}
-        a <strong>{{ perfil.contacto }}</strong> (el de tu hoja de vida)
-      {% else %}
-        — carga tu CV para que detectemos a dónde mandarlo
-      {% endif %}
+      a <strong>{{ request.user.email }}</strong> (el correo de tu cuenta)
       — además de quedar siempre visible en la campana de arriba.
     </p>
   </div>
 
   <div class="card" style="margin-top:1.5rem;background:var(--magneto-purple-soft);border-color:var(--magneto-purple);">
     <p style="margin:0;font-size:0.8125rem;color:var(--navy);">
-      Tu compatibilidad con cada vacante se calcula con 5 criterios independientes:
-      habilidades (40%), experiencia (20%), salario (15%), modalidad (15%) y
-      ubicación (10%). Los que dejes sin completar aquí simplemente no cuentan
-      — su peso se reparte entre los demás. Puedes ver el desglose completo,
-      con una explicación de cada criterio, en el detalle de cualquier vacante.
-    </p>
-    <p style="margin:0.75rem 0 0;font-size:0.8125rem;color:var(--navy);">
-      <strong>Disponibilidad</strong> no es un 6º criterio — solo entra en
-      juego cuando una vacante está marcada como "Requerido con urgencia":
-      ahí sí suma hasta +5% si puedes empezar de inmediato, o resta hasta
-      -5% si necesitas un mes. En vacantes sin esa urgencia, no cambia nada.
+      Tu compatibilidad con una vacante es el porcentaje de sus requisitos obligatorios
+      que tu hoja de vida cubre. Lo que llenas aquí no cambia ese porcentaje: salario,
+      modalidad, ubicación y años de experiencia deciden qué te recomendamos hacer con
+      la vacante (postular, cerrar una brecha o descartarla). Si dejas un dato vacío,
+      no lo usamos. En el detalle de cada vacante ves qué cumples y qué no.
     </p>
   </div>
 </div>

@@ -1,7 +1,8 @@
 """Notificaciones de vacantes nuevas para postular (spec §5.7).
 
-Una decisión se notifica si hoy es POSTULAR, antes no lo era (o recién es relevante: `accion_anterior`) y no se ha
-notificado desde su último cambio (`cambio_en`), dentro de una ventana de 36 h. No depende de que n8n llame en el
+Una decisión se notifica si hoy es POSTULAR, pasó a serlo (o apareció) hace menos de 36 h (`cambio_en`) y no se ha
+notificado desde entonces. No se mira `accion_anterior`: una segunda decisión del mismo perfil la pisa, y si llegaba
+antes que las notificaciones el aviso se perdía. No depende de que n8n llame en el
 momento justo: lo que el batch decida después de una corrida se notifica en la siguiente (revisión final, Fase 3).
 La campana muestra todas; el correo va a la cuenta (verificada) según la preferencia y con un máximo por día, y los
 correos que fallan se reintentan."""
@@ -24,6 +25,7 @@ from matching import candados
 from matching.candados import candado_de_aviso
 from matching.models import Decision
 from matching.politica import Accion
+from vacantes.models import Corrida
 
 from .models import Notificacion
 
@@ -88,7 +90,7 @@ def _por_notificar(ahora):
     ya_notificada = Notificacion.objects.filter(perfil=OuterRef("perfil"), vacante=OuterRef("vacante"),
                                                 creada_en__gte=OuterRef("cambio_en"))
     return (Decision.objects.filter(accion=Accion.POSTULAR, cambio_en__gte=ahora - VENTANA)
-            .exclude(accion_anterior=Accion.POSTULAR).exclude(Exists(ya_notificada))
+            .exclude(Exists(ya_notificada))
             .select_related("vacante", "perfil__usuario").order_by("perfil_id", "-orden", "id")
             .defer("cobertura", "restricciones", "motivos", "vacante__texto_completo", "vacante__descripcion",
                    "vacante__vector", "vacante__matriz_requisitos"))
@@ -96,6 +98,9 @@ def _por_notificar(ahora):
 
 def _crear(decision: Decision, hoy: date) -> bool:
     v = decision.vacante
+    # Un aviso de otro día sin enviar de esta misma vacante chocaría con el de hoy al marcarlos enviados (restricción
+    # única por perfil, vacante y fecha) y el correo se repetiría en cada vuelta del batch.
+    Notificacion.objects.filter(perfil=decision.perfil, vacante=v, enviada=False).exclude(fecha=hoy).delete()
     _, creada = Notificacion.objects.update_or_create(
         perfil=decision.perfil, vacante=v, fecha=hoy,
         defaults={"score_pct": decision.cobertura_pct, "enviada": False, "leida": False,
@@ -156,6 +161,7 @@ def _generar(hoy: date | None) -> ResumenNotificaciones:
         perfiles[perfil.pk] = perfil
     for perfil in perfiles.values():
         resumen.correos += _enviar_pendientes(perfil, hoy, ahora)
+    Corrida.registrar(Corrida.Paso.NOTIFICACION, ahora, f"avisos creados: {resumen.creadas}, correos: {resumen.correos}")
     return resumen
 
 
@@ -167,4 +173,11 @@ def bandeja(perfil: Perfil | None) -> list[Notificacion]:
     sin_leer = [n.id for n in notificaciones if not n.leida]
     if sin_leer:
         Notificacion.objects.filter(id__in=sin_leer).update(leida=True)
+    # el aviso es historial, pero si la decisión cambió (p. ej. al guardar la ciudad) se dice, para que no contradiga
+    # al dashboard
+    vigentes = {v: (a, m) for v, a, m in Decision.objects.filter(perfil=perfil).values_list("vacante_id", "accion", "motivos")}
+    for n in notificaciones:
+        accion, motivos = vigentes.get(n.vacante_id, (None, []))
+        n.ya_no = None if accion == Accion.POSTULAR else (
+            motivos[0] if accion and motivos else "Ya no está entre tus vacantes relevantes")
     return notificaciones

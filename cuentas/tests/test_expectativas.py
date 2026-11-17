@@ -17,6 +17,14 @@ def test_expectativas_sin_cv_crea_perfil_vacio(client, usuario):
     assert not Perfil.objects.get(usuario=usuario).tiene_cv()
 
 
+def test_no_explica_la_formula_por_pesos_que_ya_no_existe(client, usuario):
+    """El decisor v3 no pondera criterios ni da bono por disponibilidad; el texto viejo hacía 'no cuadrar' el 100%."""
+    client.force_login(usuario)
+    html = client.get(reverse("expectativas")).content.decode()
+    assert "(40%)" not in html and "+5%" not in html and "requisitos obligatorios" in html
+    assert "Select an option" not in html and "Elige una opción" in html
+
+
 def test_salario_negativo_no_se_guarda(client, usuario):
     client.force_login(usuario)
     r = client.post(reverse("expectativas"), {"exp_salario_min": -5})

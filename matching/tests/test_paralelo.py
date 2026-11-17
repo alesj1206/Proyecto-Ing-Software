@@ -294,6 +294,7 @@ def hijos(monkeypatch):
 
     _Hijo.lanzados = []
     monkeypatch.setattr(comando.subprocess, "Popen", _Hijo)
+    monkeypatch.setattr(comando, "PAUSA_SUPERVISION_S", 0)
     manejadores = {}
     monkeypatch.setattr(comando.signal, "signal", lambda sig, f: manejadores.__setitem__(sig, f))
     return manejadores
@@ -321,6 +322,26 @@ def test_un_hijo_que_muere_se_reporta(db, hijos, monkeypatch):
     monkeypatch.setattr(_Hijo, "poll", lambda self: 1 if self is _Hijo.lanzados[0] else 0)
     with pytest.raises(CommandError, match="terminaron con error"):
         call_command("decidir", "--escuchar", "--procesos", "2")
+
+
+def test_un_hijo_que_muere_se_reemplaza(db, hijos, monkeypatch):
+    from django.core.management.base import CommandError
+
+    monkeypatch.setattr(_Hijo, "poll", lambda self: 1 if self is _Hijo.lanzados[0] else 0)
+    with pytest.raises(CommandError):
+        call_command("decidir", "--escuchar", "--procesos", "2")
+    assert len(_Hijo.lanzados) == 3  # los dos de siempre y el reemplazo del que murió
+
+
+def test_los_reemplazos_tienen_tope(db, hijos, monkeypatch):
+    from django.core.management.base import CommandError
+
+    import matching.management.commands.decidir as comando
+
+    monkeypatch.setattr(_Hijo, "poll", lambda self: 1)  # todos mueren al arrancar (p. ej. la base está caída)
+    with pytest.raises(CommandError):
+        call_command("decidir", "--escuchar", "--procesos", "2")
+    assert len(_Hijo.lanzados) == 2 + comando.MAX_RELANZAMIENTOS
 
 
 def test_procesos_tiene_un_tope(db):

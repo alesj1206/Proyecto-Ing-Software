@@ -57,3 +57,9 @@ def test_verificar_no_reactiva_una_cuenta_desactivada(client, usuario):
     usuario.save()
     client.post(reverse("reenviar_verificacion"), {"email": usuario.email})
     assert len(mail.outbox) == 0
+
+
+def test_registrarse_en_bucle_no_manda_correos_sin_limite(client, db, monkeypatch):
+    monkeypatch.setattr("cuentas.views_auth.MAX_REGISTROS_IP", 2)
+    respuestas = [_registrar(client, email=f"victima{i}@ejemplo.com") for i in range(4)]
+    assert len(mail.outbox) == 2 and "Demasiados registros" in respuestas[-1].content.decode()

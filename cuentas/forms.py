@@ -31,6 +31,9 @@ class ExpectativasForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["notif_modo"].required = False
         self.fields["notif_max"].required = False
+        for campo in self.fields.values():  # Django 6.1 trae "- Select an option -" sin traducir al español
+            if isinstance(campo, forms.ChoiceField):
+                campo.choices = [("", "Elige una opción") if v == "" else (v, l) for v, l in campo.choices]
 
     def clean_notif_modo(self):
         return self.cleaned_data.get("notif_modo") or self.instance.notif_modo

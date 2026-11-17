@@ -108,6 +108,13 @@ def test_requisitos_tecnicos_no_son_blandos(texto):
     assert not es_blando(texto)
 
 
+def test_una_habilidad_blanda_del_cv_no_cubre_un_requisito():
+    """Caso real: «…decisiones de diseño con equipos funcionales, líderes té» quedaba cubierto por «Liderazgo» (0,4998)."""
+    evid = ["Liderazgo", "Lideré un equipo de 5 analistas en SQL"]
+    c = _cubrir([req("Decisiones de diseño con líderes"), req("SQL")], [_fila(0.9, con=0), _fila(0.9, con=1)], evid=evid)
+    assert [r.estado for r in c.requisitos] == ["faltante", "cubierto"]
+
+
 def test_lo_blando_no_cuenta_como_brecha():
     c = _cubrir([req("Trabajo en equipo"), req("a")], [_fila(0.1), _fila(0.6)])
     assert c.requisitos[0].estado == "blando" and c.faltantes_obligatorios == [] and c.obligatorios_total == 1

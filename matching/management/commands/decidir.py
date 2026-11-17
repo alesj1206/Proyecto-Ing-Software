@@ -7,6 +7,7 @@ import time
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
 
 from cuentas.models import Perfil
 from matching.ia import obtener_modelos, obtener_reordenador
@@ -14,11 +15,13 @@ from matching.models import SolicitudDecision
 from matching.orden import OrdenConReranker, OrdenSimilitudCobertura
 from matching.services import decidir_para_perfil
 from matching.vectores import embeber_vacantes
+from vacantes.models import Corrida
 
 PAUSA_ESCUCHA_S = 5
 PAUSA_SUPERVISION_S = 1
 TANDA_NOTIFICACIONES = 20  # perfiles decididos entre una generación de notificaciones y la siguiente
 MAX_PROCESOS = 6  # en este PC (31 GB), 3 ya rinden lo mismo que 6 (docs/exploracion/2026-11-02-eficiencia.md)
+MAX_RELANZAMIENTOS = 5  # procesos de la cola que se reemplazan tras morir con error, en toda la vida del padre
 MAX_INTENTOS = 3  # tras 3 fallos el perfil sale de la cola (queda en el log) para no bloquear a nadie
 log = logging.getLogger(__name__)
 
@@ -85,6 +88,10 @@ class Command(BaseCommand):
                     vivos.remove(hijo)
                     if codigo and not terminando:  # se avisa enseguida: los demás siguen atendiendo la cola
                         fallidos.append(codigo)
+                        if len(fallidos) <= MAX_RELANZAMIENTOS:  # con tope: si la base está caída, todos mueren al
+                            nuevo = subprocess.Popen(orden, cwd=settings.BASE_DIR)  # arrancar y cada uno carga 2 GB
+                            hijos.append(nuevo)
+                            vivos.append(nuevo)
                         log.error("Un proceso de la cola terminó con código %s; quedan %s", codigo, len(vivos))
                 if vivos:
                     time.sleep(PAUSA_SUPERVISION_S)
@@ -102,7 +109,7 @@ class Command(BaseCommand):
         embebidas = embeber_vacantes(self.modelos, esperar=False)  # si otro proceso embebe, no se espera
         if embebidas:
             self.stdout.write(f"vacantes embebidas: {embebidas}")
-        vistos, decididos = [], 0
+        vistos, decididos, hechos, inicio = [], 0, 0, timezone.now()
         while True:
             with transaction.atomic():
                 # of=("self",): solo la fila de la cola; sin eso se bloquea también el perfil y la web del candidato
@@ -112,10 +119,12 @@ class Command(BaseCommand):
                 if solicitud is None:
                     break
                 vistos.append(solicitud.perfil_id)  # uno que falla no se reintenta en esta misma vuelta
-                decididos += self._decidir_uno(solicitud.perfil)
+                decidido = self._decidir_uno(solicitud.perfil)
+                decididos, hechos = decididos + decidido, hechos + decidido
             if decididos >= TANDA_NOTIFICACIONES:  # fuera de la transacción: una cola larga no retrasa los correos
                 self._notificar(decididos)
                 decididos = 0
+        self._registrar(inicio, hechos, len(vistos))
         self._notificar(decididos)
 
     def _decidir(self, perfiles):
@@ -125,7 +134,16 @@ class Command(BaseCommand):
         embebidas = embeber_vacantes(self.modelos)
         if embebidas:
             self.stdout.write(f"vacantes embebidas: {embebidas}")
-        self._notificar(sum(self._decidir_uno(perfil) for perfil in perfiles))
+        inicio = timezone.now()
+        hechos = sum(self._decidir_uno(perfil) for perfil in perfiles)
+        self._registrar(inicio, hechos, len(perfiles))
+        self._notificar(hechos)
+
+    def _registrar(self, inicio, hechos: int, intentados: int):
+        """Una fila de auditoría por vuelta que intentó decidir algo (solo conteos)."""
+        if intentados:
+            Corrida.registrar(Corrida.Paso.DECISION, inicio,
+                              f"perfiles decididos: {hechos}, fallidos: {intentados - hechos}", ok=hechos == intentados)
 
     def _decidir_uno(self, perfil) -> bool:
         try:

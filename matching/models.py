@@ -48,6 +48,11 @@ class Decision(models.Model):
         """Para mostrar solo: un "0/0" se lee como un error."""
         return self.cubres if self.contables else "—"
 
+    @property
+    def compatibilidad_visible(self) -> str:
+        """El porcentaje para el anillo; sin obligatorios comparables, un guion en vez de un "0%" engañoso."""
+        return f"{self.cobertura_pct}%" if self.contables else "—"
+
     def __str__(self):
         return f"{self.perfil} / {self.vacante_id}: {self.accion}"
 

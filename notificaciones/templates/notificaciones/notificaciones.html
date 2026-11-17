@@ -30,9 +30,12 @@
             {% if n.enviada %}
               enviada por correo
             {% else %}
-              solo en la app (sin correo detectado en tu CV)
+              solo en la app
             {% endif %}
           </p>
+          {% if n.ya_no %}
+          <p style="margin-top:0.35rem;font-size:0.75rem;font-weight:600;color:#c0392b;">Ya no te la recomendamos: {{ n.ya_no }}</p>
+          {% endif %}
         </div>
         <span class="badge-match" style="flex-shrink:0;"><span class="dot"></span> {{ n.score_pct }}%</span>
       </div>

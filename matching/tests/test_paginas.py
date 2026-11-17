@@ -87,6 +87,9 @@ LINEAS_V2_QUE_CAMBIAN = {  # cambios acordados (ledger Task 8 y 9); todo lo dem�
     'Calculada sobre las habilidades registradas en tu hoja de vida.',
     '<h3 style="font-size:0.875rem;color:var(--navy);">Desglose de compatibilidad</h3>',
     '<span class="criterio-score">{{ c.score_pct }}%</span>',
+    # con hoja de vida y sin decisión, ya no pide "carga tu hoja de vida": dice si se está analizando o no es relevante
+    'Inicia sesión y carga tu hoja de vida para ver tu compatibilidad con esta vacante.',
+    '{% if user.is_authenticated %}',
 }
 
 
@@ -171,23 +174,31 @@ def _porcentaje_visible(html: str, valor: int) -> bool:
     return re.search(rf">\s*{valor}%\s*<", html) is not None
 
 
-def test_el_plan_y_las_filas_muestran_cuantos_obligatorios_cubre_y_no_un_porcentaje(client_con_cv, usuario, vacante_v1):
+def test_el_plan_y_las_filas_muestran_el_porcentaje_y_los_obligatorios_cubiertos(client_con_cv, usuario, vacante_v1):
     _decidir(usuario.perfil, vacante_v1)
     html = client_con_cv.get(reverse("dashboard")).content.decode()
-    assert not _porcentaje_visible(html, 75)
-    assert len(re.findall(r">\s*1/3\s*<", html)) == 2  # el anillo del plan y la fila de su grupo
+    assert _porcentaje_visible(html, 75)  # el anillo del plan
+    assert "Cubres 1/3 obligatorios" in html and re.search(r">\s*75% · 1/3\s*<", html)  # tarjeta y fila del grupo
 
 
 def test_el_detalle_nombra_lo_que_mide_el_anillo_y_lo_que_mide_la_solidez(client_con_cv, usuario, vacante_v1):
     _decidir(usuario.perfil, vacante_v1)
     html = client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
-    assert not _porcentaje_visible(html, 75) and "Compatibilidad" not in html
-    assert "Requisitos obligatorios que cubres" in html
+    assert _porcentaje_visible(html, 75) and "Compatibilidad" in html
+    assert "Cubres 1/3 requisitos obligatorios" in html
     assert "qué tan segura es esta recomendación" in html
-    assert len(re.findall(r">\s*1/3\s*<", html)) == 2  # el anillo y la fila "Habilidades" del desglose
 
 
 def test_sin_requisitos_obligatorios_no_muestra_cero_de_cero(client_con_cv, usuario, vacante_v1):
     _decidir(usuario.perfil, vacante_v1, accion="SIN_DATOS", cobertura=[], cobertura_pct=0)
     html = client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
-    assert "0/0" not in html and re.search(r">\s*—\s*<", html)
+    assert "0/0" not in html and not _porcentaje_visible(html, 0) and re.search(r">\s*—\s*<", html)
+
+
+def test_con_cv_y_sin_decision_no_pide_cargar_la_hoja_de_vida(client_con_cv, usuario, vacante_v1):
+    from matching.models import SolicitudDecision
+
+    SolicitudDecision.objects.filter(perfil=usuario.perfil).delete()
+    html = client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
+    assert "Aún no has cargado" not in html and "carga tu hoja de vida" not in html
+    assert "no quedó entre las relevantes" in html

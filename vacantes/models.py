@@ -98,3 +98,31 @@ class EstadoIngesta(models.Model):
     iniciada_en = models.DateTimeField(null=True, blank=True)
     ultimo_resumen = models.CharField(max_length=255, blank=True)
     corrida = models.CharField(max_length=32, blank=True)  # dueño del candado: solo él lo suelta
+
+
+class Corrida(models.Model):
+    """Bitácora del flujo diario (auditoría técnica): qué paso corrió, cuándo y con qué resultado. Una fila por
+    ingesta, por vuelta del batch que decidió algo y por generación de notificaciones. El resumen solo lleva conteos:
+    nunca datos del candidato."""
+    # shortcut: no se purga; si llega a decenas de miles de filas, borrar las de más de 90 días.
+
+    class Paso(models.TextChoices):
+        INGESTA = "ingesta", "Ingesta"
+        DECISION = "decision", "Decisión"
+        NOTIFICACION = "notificacion", "Notificación"
+
+    paso = models.CharField(max_length=12, choices=Paso.choices)
+    inicio = models.DateTimeField()
+    fin = models.DateTimeField(auto_now_add=True)
+    ok = models.BooleanField(default=True)
+    resumen = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        ordering = ["-fin"]
+
+    def __str__(self):
+        return f"{self.get_paso_display()} {self.fin:%Y-%m-%d %H:%M}: {self.resumen}"
+
+    @classmethod
+    def registrar(cls, paso: str, inicio, resumen, ok: bool = True) -> "Corrida":
+        return cls.objects.create(paso=paso, inicio=inicio, ok=ok, resumen=str(resumen)[:255])

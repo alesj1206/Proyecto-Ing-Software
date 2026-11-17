@@ -93,7 +93,11 @@ class RestriccionUbicacion:
             return ResultadoRestriccion(self.criterio, "sin_datos", "La vacante no dice dónde queda")
         lugar = normalizar(vacante.ubicacion)
         ciudades = [normalizar(c) for c in perfil.exp_ubicacion.split(",") if normalizar(c)]
-        if any(c in lugar for c in ciudades):
+        # En los dos sentidos: el campo es texto libre, y "Bogotá D.C." o "Medellín y alrededores" no están dentro de
+        # "bogota" ni de "medellin". Al revés se compara por palabras completas ("cali" no es "calima") y sin trozos
+        # de menos de 4 letras ("D.C.").
+        partes = [p for p in map(normalizar, re.split(r",|\s-\s", vacante.ubicacion)) if len(p) >= 4]
+        if any(c in lugar for c in ciudades) or any(f" {p} " in f" {c} " for p in partes for c in ciudades):
             return ResultadoRestriccion(self.criterio, "cumple", f"Queda en {vacante.ubicacion}")
         nombres = [c.strip() for c in perfil.exp_ubicacion.split(",") if normalizar(c)]
         if area := next((n for n in nombres if any(m in lugar for m in _con_area(normalizar(n)))), None):

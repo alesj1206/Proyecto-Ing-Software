@@ -30,7 +30,11 @@ MIN_LARGO_PALABRA_NOMBRE = 3
 def minimizar(texto: str, nombre: str | None = None) -> str:
     for patron in _PATRONES:
         texto = patron.sub(MARCA, texto)
-    for palabra in (nombre or "").split():  # el nombre de la persona, palabra por palabra
-        if len(palabra) >= MIN_LARGO_PALABRA_NOMBRE:
-            texto = re.sub(rf"\b{re.escape(palabra)}\b", MARCA, texto, flags=re.IGNORECASE)
+    palabras = [re.escape(p) for p in (nombre or "").split() if len(p) >= MIN_LARGO_PALABRA_NOMBRE]
+    if palabras:
+        una = "(?:" + "|".join(palabras) + ")"
+        # Dos o más palabras del nombre seguidas ("Laura Gómez"). Una suelta no se tacha: un apellido como "Cruz" o
+        # "León" también puede ser parte de la experiencia ("Cruz Verde"). Un nombre de una sola palabra sí.
+        patron = rf"\b{una}(?:\s+{una})+\b" if len(palabras) > 1 else rf"\b{una}\b"
+        texto = re.sub(patron, MARCA, texto, flags=re.IGNORECASE)
     return texto

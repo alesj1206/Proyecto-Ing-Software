@@ -31,7 +31,7 @@ def perfil(client_con_cv, usuario):
 
 def test_solo_notifica_postular_nuevo_de_hoy(perfil):
     _decision(perfil, 1)
-    _decision(perfil, 2, anterior="POSTULAR")
+    _decision(perfil, 2, anterior="POSTULAR", cuando=timezone.now() - timedelta(days=3))  # ya era POSTULAR
     _decision(perfil, 3, anterior="AJUSTAR_CV", cuando=timezone.now() - timedelta(days=3))  # fuera de la ventana
     _decision(perfil, 4, accion="AJUSTAR_CV")
     generar_notificaciones()
@@ -76,10 +76,9 @@ def test_correr_dos_veces_no_duplica(perfil):
 def test_redecidir_el_mismo_dia_no_renotifica(perfil):
     d = _decision(perfil, 1)
     generar_notificaciones()
-    Notificacion.objects.all().delete()  # aunque se borre la campana, la segunda corrida ya no es "nueva"
     Decision.objects.filter(id=d.id).update(accion_anterior="POSTULAR")  # lo que deja decidir_para_perfil
     generar_notificaciones()
-    assert not Notificacion.objects.exists()
+    assert Notificacion.objects.count() == 1 and len(mail.outbox) == 1
 
 
 def test_la_preferencia_se_guarda_desde_expectativas(client_con_cv, usuario):
@@ -101,3 +100,18 @@ def test_el_maximo_diario_avisa_primero_las_mejores(perfil):
     assert ids == {f"v{i}" for i in range(5, MAX_AVISOS_DIA + 5)}  # las de mayor orden
     assert generar_notificaciones(hoy=date(2026, 11, 2)).creadas == 0  # el mismo día, nada más
     assert generar_notificaciones(hoy=date(2026, 11, 3)).creadas == 5  # al día siguiente, las que quedaron
+
+
+def test_decidir_dos_veces_antes_de_notificar_no_pierde_el_aviso(perfil):
+    _decision(perfil, 1, anterior="POSTULAR")  # la segunda decisión ya dejó accion_anterior igual a la acción
+    generar_notificaciones()
+    assert Notificacion.objects.count() == 1 and len(mail.outbox) == 1
+
+
+def test_un_aviso_viejo_sin_enviar_no_choca_con_el_de_hoy(perfil):
+    d = _decision(perfil, 1)
+    Notificacion.objects.create(perfil=perfil, vacante=d.vacante, score_pct=80, mensaje="viejo",
+                                fecha=HOY - timedelta(days=1))
+    Notificacion.objects.update(creada_en=timezone.now() - timedelta(hours=2))  # sin enviar y anterior al cambio
+    generar_notificaciones()
+    assert Notificacion.objects.count() == 1 and len(mail.outbox) == 1

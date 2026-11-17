@@ -91,3 +91,10 @@ def test_reenviar_no_revela_si_el_correo_existe(client, db):
 
 def test_cuentas_sociales_no_necesitan_verificacion(db):
     assert crear_usuario_con_autorizacion("social@ejemplo.com", None).is_active
+
+
+def test_la_autorizacion_guarda_la_version_que_se_acepto(client, db):
+    _registrar(client)
+    RegistroPendiente.objects.update(version_politica="vieja-1", version_terminos="vieja-2")
+    usuario = verificar(_token())
+    assert list(usuario.autorizacion_set.values_list("version_politica", "version_terminos")) == [("vieja-1", "vieja-2")]

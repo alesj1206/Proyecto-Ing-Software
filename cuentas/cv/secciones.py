@@ -12,7 +12,13 @@ ENCABEZADOS = {
     "habilidades": {"habilidades", "habilidades tecnicas", "competencias", "conocimientos", "skills",
                     "herramientas", "aptitudes"},
 }
+# Títulos típicos de un CV que no son experiencia, educación ni habilidades: cierran la sección anterior.
+OTROS_ENCABEZADOS = {"referencias", "referencias personales", "referencias laborales", "idiomas", "datos personales",
+                     "informacion personal", "perfil", "perfil profesional", "resumen", "cursos", "certificaciones",
+                     "proyectos", "logros", "contacto", "objetivo", "intereses", "sobre mi", "hoja de vida",
+                     "curriculum", "curriculum vitae"}
 MAX_LARGO_NOMBRE = 80  # pypdf a veces une todo el encabezado (nombre | cargo | correo | teléfono…) en una línea
+MAX_PALABRAS_NOMBRE = 4  # "Laura Gómez Analista de Datos" trae el cargo pegado: no se toma como nombre
 MAX_LARGO_CORREO = 254
 MAX_LINEAS_VISIBLES = 4  # lo que muestra /perfil por sección, igual que en v2
 PALABRAS_RUIDO_ARCHIVO = {"cv", "resume", "curriculum", "hoja", "de", "vida", "hv"}
@@ -49,13 +55,18 @@ def _lineas(texto: str) -> list[str]:
     return [linea for linea in limpias if linea]
 
 
-def _seccion_de(linea: str) -> str | None:
-    """El nombre de la sección si la línea es un encabezado conocido; "otra" si parece un encabezado
-    desconocido (corto y en mayúsculas); None si es contenido."""
+def _seccion_de(linea: str, dentro: bool = False) -> str | None:
+    """El nombre de la sección si la línea es un encabezado conocido; "otra" si es otro título típico o parece un
+    encabezado desconocido (corto y en mayúsculas); None si es contenido. `dentro` de una sección conocida, una línea
+    en mayúsculas es contenido: suele ser un cargo o una empresa ("ANALISTA DE DATOS - BANCOLOMBIA")."""
     normal = _normalizar(linea)
     for seccion, encabezados in ENCABEZADOS.items():
         if normal in encabezados:
             return seccion
+    if normal in OTROS_ENCABEZADOS:
+        return "otra"
+    if dentro:
+        return None
     letras = [c for c in linea if c.isalpha()]
     if len(letras) >= 3 and linea == linea.upper() and len(linea) <= 45 and not VINETA.match(linea):
         return "otra"
@@ -66,7 +77,7 @@ def _agrupar(lineas: list[str]) -> dict[str, list[str]]:
     secciones: dict[str, list[str]] = {}
     actual = None
     for linea in lineas:
-        seccion = _seccion_de(linea)
+        seccion = _seccion_de(linea, dentro=actual in ENCABEZADOS)
         if seccion:
             actual = seccion
             secciones.setdefault(actual, [])
@@ -100,8 +111,9 @@ def _habilidades(lineas: list[str]) -> list[str]:
 
 
 def _parece_nombre(linea: str) -> bool:
-    return (len(linea) <= MAX_LARGO_NOMBRE and "@" not in linea and not any(c.isdigit() for c in linea)
-            and _seccion_de(linea) is None)
+    # dentro=True: un nombre escrito en mayúsculas ("LAURA GÓMEZ") no es un encabezado.
+    return (len(linea) <= MAX_LARGO_NOMBRE and len(linea.split()) <= MAX_PALABRAS_NOMBRE and "@" not in linea
+            and not any(c.isdigit() for c in linea) and _seccion_de(linea, dentro=True) is None)
 
 
 def _nombre_desde_archivo(nombre_archivo: str) -> str | None:

@@ -44,7 +44,7 @@
         </div>
         <div class="match-ring" style="width:56px;height:56px;background:conic-gradient(var(--brand) {{ m.score_pct }}%, var(--surface-strong) 0);border-radius:999px;display:flex;align-items:center;justify-content:center;">
           <div style="width:44px;height:44px;border-radius:999px;background:var(--background);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:0.8rem;color:var(--navy);">
-            {{ m.decision.cubres_visible }}
+            {{ m.decision.compatibilidad_visible }}
           </div>
         </div>
       </div>
@@ -91,7 +91,7 @@
               <h3 style="font-size:1rem;color:var(--navy);">{{ d.vacante.titulo }}</h3>
               <div class="job-meta"><span>{{ d.vacante.empresa }}</span><span>{{ d.motivos|first }}</span></div>
             </div>
-            <p style="margin:0;font-size:0.875rem;font-weight:600;color:var(--navy);" title="Requisitos obligatorios que cubres">{{ d.cubres_visible }}</p>
+            <p style="margin:0;font-size:0.875rem;font-weight:600;color:var(--navy);" title="Compatibilidad · requisitos obligatorios que cubres">{{ d.compatibilidad_visible }}{% if d.contables %} · {{ d.cubres }}{% endif %}</p>
           </a>
         </li>
         {% endfor %}

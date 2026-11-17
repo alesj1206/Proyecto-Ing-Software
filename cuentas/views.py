@@ -32,7 +32,7 @@ def onboarding_view(request):
     if request.method == "POST":
         form, guardado = _cargar_cv(request)
         if guardado:
-            return redirect("perfil")
+            return redirect("expectativas")  # primeros pasos: CV y luego expectativas
     return render(request, "cuentas/onboarding.html", {"form": form})
 
 

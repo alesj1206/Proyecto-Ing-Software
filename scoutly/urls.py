@@ -11,7 +11,6 @@ urlpatterns = [
     path("", include("postulaciones.urls")),  # antes que matching: "vacantes/<id>/postularme"
     path("", include("matching.urls")),
     path("", include("notificaciones.urls")),
-    path("", include("vacantes.urls")),
     path("", include("api.urls")),
     # allauth solo se usa para el login social: sus pantallas propias redirigen a las nuestras.
     path("cuentas/login/", RedirectView.as_view(pattern_name="login")),

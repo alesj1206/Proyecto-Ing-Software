@@ -87,5 +87,8 @@ def verificar(token: str) -> Usuario:
     usuario = crear_usuario_con_autorizacion(pendiente.email, None)
     usuario.password = pendiente.password  # el hash que eligió quien se registró
     usuario.save(update_fields=["password"])
+    # La autorización guarda las versiones que la persona aceptó al registrarse, no las vigentes hoy (Ley 1581).
+    usuario.autorizacion_set.update(version_politica=pendiente.version_politica,
+                                    version_terminos=pendiente.version_terminos)
     pendiente.delete()
     return usuario

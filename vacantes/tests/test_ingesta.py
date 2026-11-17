@@ -244,3 +244,23 @@ def test_una_empresa_o_ubicacion_larga_se_guarda_entera(db):
     assert resumen.errores == 0
     v = Vacante.objects.get(id="v1")
     assert (v.ubicacion, v.empresa) == (ciudades, empresa)
+
+
+def test_cada_ingesta_deja_una_corrida_en_la_bitacora(db):
+    from vacantes.models import Corrida
+
+    ingerir(FuenteEnMemoria([cruda("v1", "Requisitos:\n- SQL\n- Excel")]))
+    corrida = Corrida.objects.get()
+    assert (corrida.paso, corrida.ok) == ("ingesta", True) and "creadas: 1" in corrida.resumen
+
+
+def test_la_ingesta_desactiva_las_vacantes_viejas_solo_de_fuentes_con_vigencia(db):
+    class FuenteConVigencia(FuenteEnMemoria):
+        nombre, dias_vigencia = "con-vigencia", 60
+
+    texto = "Requisitos:\n- SQL\n- Excel"
+    ingerir(FuenteEnMemoria([cruda("v3", texto, fecha_publicacion=date(2020, 1, 1))]))  # sin vigencia: no se toca
+    r = ingerir(FuenteConVigencia([cruda("v1", texto, fecha_publicacion=date(2020, 1, 1)),
+                                   cruda("v2", texto, fecha_publicacion=date.today())]))
+    assert r.vencidas == 1
+    assert dict(Vacante.objects.values_list("id", "activa")) == {"v1": False, "v2": True, "v3": True}

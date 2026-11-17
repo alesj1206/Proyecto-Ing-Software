@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from .extraccion import extraer_requisitos, extraer_restricciones, requisitos_insuficientes
 from .fuentes import FuenteVacantes, VacanteCruda
-from .models import EstadoIngesta, Requisito, Vacante
+from .models import Corrida, EstadoIngesta, Requisito, Vacante
 
 log = logging.getLogger(__name__)
 # Va dentro del hash: al cambiar las reglas de extracción o lo que se embebe, la próxima ingesta reprocesa todo.
@@ -27,10 +27,11 @@ class ResumenIngesta:
     sin_cambios: int = 0
     insuficientes: int = 0
     errores: int = 0
+    vencidas: int = 0  # desactivadas por antigüedad (solo las fuentes con `dias_vigencia`)
 
     def __str__(self) -> str:
         return (f"creadas: {self.creadas}, actualizadas: {self.actualizadas}, sin cambios: {self.sin_cambios}, "
-                f"insuficientes: {self.insuficientes}, errores: {self.errores}")
+                f"insuficientes: {self.insuficientes}, errores: {self.errores}, vencidas: {self.vencidas}")
 
 
 def hash_contenido(cruda: VacanteCruda) -> str:
@@ -84,7 +85,7 @@ def _guardar(cruda: VacanteCruda, fuente: str, firma: str) -> bool:
 
 
 def ingerir(fuente: FuenteVacantes) -> ResumenIngesta:
-    resumen = ResumenIngesta()
+    resumen, inicio = ResumenIngesta(), timezone.now()
     hashes = dict(Vacante.objects.values_list("id", "hash_contenido"))
     for cruda in fuente.obtener():
         firma = hash_contenido(cruda)
@@ -103,6 +104,13 @@ def ingerir(fuente: FuenteVacantes) -> ResumenIngesta:
             resumen.creadas += 1
         hashes[cruda.id] = firma
         resumen.insuficientes += insuficiente
+    # No hay señal fiable de que una vacante cerró (la búsqueda solo abre unas pocas por término): se da por vencida
+    # por antigüedad. Si la fuente la republica con fecha nueva, _guardar la reactiva.
+    if dias := getattr(fuente, "dias_vigencia", None):
+        resumen.vencidas = Vacante.objects.filter(
+            fuente=fuente.nombre, activa=True,
+            fecha_publicacion__lt=timezone.localdate() - timedelta(days=dias)).update(activa=False)
+    Corrida.registrar(Corrida.Paso.INGESTA, inicio, f"{fuente.nombre}: {resumen}", ok=not resumen.errores)
     return resumen
 
 
@@ -143,13 +151,14 @@ def ingerir_en_segundo_plano(fuente: FuenteVacantes) -> bool:
         return False
 
     def trabajar():
-        resumen = ""
+        resumen, inicio = "", timezone.now()
         try:
             resumen = str(ingerir(fuente))
             _encolar_decisiones()  # n8n no espera: el batch decide en cuanto termina la ingesta
         except Exception:  # se registra; el candado se suelta igual
             log.exception("La ingesta en segundo plano falló")
             resumen = "falló (ver el log)"
+            Corrida.registrar(Corrida.Paso.INGESTA, inicio, f"{fuente.nombre}: {resumen}", ok=False)
         finally:
             # Solo el dueño suelta el candado: un hilo viejo que termina tarde no libera el de otra corrida.
             EstadoIngesta.objects.filter(id=1, corrida=corrida).update(en_curso=False, ultimo_resumen=resumen[:255])

@@ -75,10 +75,10 @@ def test_cargar_cv_otra_vez_reemplaza_la_evidencia(usuario):
 
 # --- páginas ---------------------------------------------------------------------------------------
 
-def test_onboarding_carga_el_cv_y_va_al_perfil(client, usuario):
+def test_onboarding_carga_el_cv_y_sigue_con_las_expectativas(client, usuario):
     client.force_login(usuario)
     r = client.post(reverse("onboarding"), {"cv": pdf_cv()})
-    assert r.status_code == 302 and r.url == reverse("perfil")
+    assert r.status_code == 302 and r.url == reverse("expectativas")
     assert "Power BI" in client.get(reverse("perfil")).content.decode()
 
 
@@ -170,3 +170,28 @@ def test_la_evidencia_no_lleva_el_nombre_de_la_persona(usuario):
 def test_un_pdf_que_rompe_el_parser_no_da_error_500():
     with mock.patch("cuentas.cv.lector.PdfReader", side_effect=ValueError("xref roto")):
         assert extraer_texto(pdf_cv()) == ""
+
+
+# --- auditoría: CVs con mayúsculas y cargo junto al nombre -----------------------------------------
+
+def test_un_cargo_en_mayusculas_no_cierra_la_experiencia():
+    cv = analizar_cv("Pedro Ruiz\nEXPERIENCIA\nANALISTA DE DATOS - BANCOLOMBIA\n- Construí tableros en Power BI.\n"
+                     "REFERENCIAS\n- Ana, jefe directa.\nHABILIDADES\nSQL, PYTHON")
+    experiencia = [u.texto for u in cv.unidades if u.seccion == "experiencia"]
+    assert "Construí tableros en Power BI." in experiencia and not any("jefe" in t for t in experiencia)
+    assert cv.habilidades == ["SQL", "PYTHON"]
+
+
+def test_un_nombre_en_mayusculas_se_detecta():
+    assert analizar_cv("LAURA GÓMEZ RÍOS\nEXPERIENCIA\n- Vendí seguros.").nombre == "LAURA GÓMEZ RÍOS"
+
+
+def test_el_cargo_junto_al_nombre_no_se_tacha_de_la_evidencia(usuario):
+    perfil = guardar_perfil_desde_cv(usuario, pdf_cv(nombre="Laura Gómez Analista de Datos",
+                                                     experiencia=["Analista de datos en Comercial Andina."]))
+    assert perfil.nombre is None
+    assert "Analista de datos en Comercial Andina." in perfil.evidencias.values_list("texto", flat=True)
+
+
+def test_minimizar_no_tacha_una_palabra_suelta_del_nombre():
+    assert minimizar("Trabajé en Cruz Verde con Ana Cruz", "Ana Cruz") == "Trabajé en Cruz Verde con [dato personal]"

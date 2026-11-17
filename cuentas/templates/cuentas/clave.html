@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Recuperar contraseña | Scoutly{% endblock %}
+{% block body %}
+{# Una sola plantilla para los cuatro pasos del restablecimiento de Django; `paso` lo fija cada ruta (cuentas/urls.py). #}
+<main class="auth-page">
+  <section class="auth-card">
+    <a href="{% url 'login' %}" class="brand-mark auth-brand"><img src="{% static 'img/logo.svg' %}" alt="" />Scoutly</a>
+    {% if paso == "olvidada" %}
+      <h1 class="auth-title">Recupera tu contraseña</h1>
+      <p class="auth-subtitle">Escribe el correo de tu cuenta y te enviamos un enlace para crear una contraseña nueva.</p>
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        <div class="auth-input">
+          {% include "cuentas/_icono_correo.html" %}
+          <input type="email" name="email" placeholder="Correo electrónico" autocomplete="email" required value="{{ form.email.value|default:'' }}" />
+        </div>
+        {% if form.email.errors %}<p class="form-error">{{ form.email.errors.0 }}</p>{% endif %}
+        <button type="submit" class="btn auth-btn-primario">Enviar enlace</button>
+      </form>
+    {% elif paso == "enviado" %}
+      <h1 class="auth-title">Revisa tu correo</h1>
+      <p class="auth-subtitle">Si ese correo tiene una cuenta con contraseña, te enviamos un enlace para cambiarla. Vence en 3 días.</p>
+    {% elif paso == "nueva" and validlink %}
+      <h1 class="auth-title">Crea una contraseña nueva</h1>
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        <div class="auth-input">
+          {% include "cuentas/_icono_clave.html" %}
+          <input type="password" name="new_password1" placeholder="Contraseña nueva" autocomplete="new-password" required />
+        </div>
+        {% for error in form.new_password1.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+        <div class="auth-input">
+          {% include "cuentas/_icono_clave.html" %}
+          <input type="password" name="new_password2" placeholder="Confirma tu contraseña" autocomplete="new-password" required />
+        </div>
+        {% for error in form.new_password2.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+        <button type="submit" class="btn auth-btn-primario">Guardar contraseña</button>
+      </form>
+    {% elif paso == "nueva" %}
+      <h1 class="auth-title">Este enlace no es válido o ya venció</h1>
+      <p class="auth-subtitle"><a href="{% url 'clave_olvidada' %}" class="btn-link">Pide un enlace nuevo</a>.</p>
+    {% else %}
+      <h1 class="auth-title">Tu contraseña quedó cambiada</h1>
+      <p class="auth-subtitle">Ya puedes iniciar sesión con ella.</p>
+    {% endif %}
+    <p class="auth-pie"><a href="{% url 'login' %}" class="auth-btn-secundario">Volver a iniciar sesión</a></p>
+  </section>
+</main>
+{% endblock %}

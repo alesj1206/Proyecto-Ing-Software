@@ -68,11 +68,46 @@ def test_generar_notificaciones_devuelve_el_resumen(client, db):
     assert r.status_code == 200 and r.json() == {"creadas": 0, "correos": 0}
 
 
-def test_el_workflow_llama_los_tres_endpoints_en_orden():
+def test_el_workflow_llama_los_tres_endpoints_en_orden_y_espera_entre_pasos():
+    """Camino feliz (la primera salida de cada nodo): tras la ingesta y tras decidir se consulta /api/estado. La
+    segunda salida de cada IF va a un nodo de espera que vuelve a consultar."""
     flujo = json.loads(Path("n8n/workflow-matches-diarios.json").read_text(encoding="utf-8"))
     nodos = {n["name"]: n.get("parameters", {}).get("url", "") for n in flujo["nodes"]}
+    tipos = {n["name"]: n["type"] for n in flujo["nodes"]}
     orden, actual = [], next(n["name"] for n in flujo["nodes"] if n["type"].endswith("scheduleTrigger"))
     while actual in flujo["connections"]:
-        actual = flujo["connections"][actual]["main"][0][0]["node"]
-        orden.append(nodos[actual].rsplit("/", 1)[-1])
-    assert orden == ["importar-vacantes", "decidir", "generar-notificaciones"]
+        salidas = flujo["connections"][actual]["main"]
+        if tipos[actual].endswith(".if"):
+            espera = salidas[1][0]["node"]
+            assert tipos[espera].endswith(".wait")
+            assert nodos[flujo["connections"][espera]["main"][0][0]["node"]].endswith("/api/estado")
+        actual = salidas[0][0]["node"]
+        if nodos[actual]:
+            orden.append(nodos[actual].rsplit("/", 1)[-1])
+    assert orden == ["importar-vacantes", "estado", "decidir", "estado", "generar-notificaciones"]
+
+
+def test_estado_dice_si_la_ingesta_y_la_cola_terminaron(client, usuario):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    perfil = Perfil.objects.create(usuario=usuario, cv_nombre_archivo="cv.pdf")
+    EstadoIngesta.objects.create(id=1, en_curso=True, iniciada_en=timezone.now())
+    SolicitudDecision.objects.create(perfil=perfil)
+    r = client.get(reverse("api_estado"), HTTP_X_SCOUTLY_TOKEN=TOKEN)
+    assert (r.status_code, r.json()["ingesta_en_curso"], r.json()["cola"]) == (200, True, 1)
+    EstadoIngesta.objects.update(iniciada_en=timezone.now() - timedelta(hours=1))  # colgada: no se espera
+    assert client.get(reverse("api_estado"), HTTP_X_SCOUTLY_TOKEN=TOKEN).json()["ingesta_en_curso"] is False
+    assert client.get(reverse("api_estado")).status_code == 401
+
+
+def test_el_contrato_openapi_tiene_las_mismas_rutas_y_metodos_que_la_api():
+    import yaml
+
+    from api.urls import urlpatterns
+
+    contrato = yaml.safe_load((Path(__file__).resolve().parents[1] / "openapi.yaml").read_text(encoding="utf-8"))
+    assert set(contrato["paths"]) == {f"/{p.pattern}" for p in urlpatterns}
+    assert {r: list(m) for r, m in contrato["paths"].items()}["/api/estado"] == ["get"]
+    assert all(list(m) == ["post"] for r, m in contrato["paths"].items() if r != "/api/estado")

@@ -90,6 +90,7 @@ def parsear_detalle(cuerpo: str, url: str) -> VacanteCruda | None:
 
 class FuenteMagnetoDetalle:
     nombre = "magneto"
+    dias_vigencia = 60  # la ingesta desactiva las vacantes de esta fuente publicadas hace más (vacantes.services)
 
     def __init__(self, terminos: list[str], por_termino: int, chrome: str = CHROME, omitir: frozenset[str] = frozenset()):
         """`omitir`: ids numéricos de Magneto que no hace falta abrir (la carga de un catálogo grande se puede retomar)."""

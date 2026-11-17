@@ -56,11 +56,11 @@ Web (Django): Plan de hoy, acciones, detalle con razones, Taller de CV, tablero 
 Requisitos: Python 3.14, Podman y Chrome (para la ingesta de Magneto).
 
 ```bash
-python3.14 -m venv .venv && .venv/bin/pip install -r requirements.txt -r requirements-dev.txt
+python3.14 -m venv .venv && .venv/bin/pip install -r requirements.txt -r requirements-dev.txt -c requirements-lock.txt
 cp .env.example .env              # y llena DJANGO_SECRET_KEY y la base (ver los comentarios del archivo)
 cp infra/postgres/.env.ejemplo infra/postgres/.env   # pon la misma clave en DJANGO_DB_PASSWORD del .env
 infra/postgres/levantar.sh        # Postgres 17 + pgvector en 127.0.0.1:5433
-.venv/bin/python manage.py migrate
+.venv/bin/python manage.py migrate && .venv/bin/python manage.py createcachetable   # tablas y caché compartida
 .venv/bin/python manage.py ingerir_vacantes --fuente magneto     # o --fuente fixture, sin red
 infra/systemd/instalar.sh         # Postgres, el batch (3 procesos) y la web como servicios: http://localhost:8000
 ```
@@ -93,7 +93,7 @@ solo después de que el equipo revise los términos de uso de Magneto.
 ## Pruebas
 
 ```bash
-.venv/bin/python -m pytest -q -m "not lento"   # 465 pruebas; los fakes reemplazan modelos, Groq y Magneto
+.venv/bin/python -m pytest -q -m "not lento"   # los fakes reemplazan modelos, Groq y Magneto
 .venv/bin/python -m pytest -q -m lento         # las que cargan modelos reales o abren magneto365.com
 ```
 
@@ -112,10 +112,24 @@ Los detalles están en [`docs/fase4/EVALUACION.md`](docs/fase4/EVALUACION.md).
   lo único que se copia es lo que escribe el candidato.
 - **Las etiquetas del set de evaluación las propuso el equipo de desarrollo** y están pendientes de revisión.
 
+## Vacantes de Magneto: solo para la demo
+
+El reto no da acceso a vacantes reales ni conexión directa con la plataforma (sección 6.1). Permite scraping de sitios
+públicos "respetando términos y límites" y solo para la demo (6.2). Scoutly usa esa alternativa:
+
+- `--fuente magneto` abre con Playwright las páginas públicas de detalle de magneto365.com, sin iniciar sesión.
+- Va despacio: espera 1,5 s entre páginas, corre una sola ingesta a la vez y la API acepta como mucho 10 términos y 20
+  vacantes por término.
+- Las vacantes publicadas hace más de 60 días salen del catálogo en la siguiente ingesta.
+- `--fuente fixture` trae 18 vacantes guardadas en el repo y no sale a internet. Sirve para las pruebas y para una demo
+  sin red.
+
+Pendiente del equipo: leer los términos de uso de magneto365.com y dejar aquí la conclusión. Hasta entonces el scraper
+no debe usarse fuera de la demo del curso. El MCP oficial de candidatos sigue apagado por la misma razón.
+
 ## Historia
 
-- **Sprint 1:** la entrega congelada vive en [`entregas/sprint-1/`](entregas/sprint-1/), en el tag `sprint-1` y en
-  [`ENTREGA_SPRINT1.md`](ENTREGA_SPRINT1.md).
+- **Sprint 1:** la entrega congelada vive en [`entregas/sprint-1/`](entregas/sprint-1/) y en el tag `sprint-1`.
 - **Sprint 2 (v2):** ranking por 5 criterios sin IA y explicaciones de Groq al abrir el detalle de una vacante. El tag `pre-sprint3-rebuild` marca su
   final; el README de entonces está en el historial de git.
 - **Sprint 3 (v3):** esta reescritura.

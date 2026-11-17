@@ -24,6 +24,18 @@ def test_lo_decidido_despues_de_notificar_se_notifica_en_la_siguiente_corrida(pe
     assert Notificacion.objects.filter(perfil=perfil, vacante_id="v1").count() == 1
 
 
+def test_la_bandeja_avisa_si_la_vacante_dejo_de_ser_postular(perfil, client_con_cv):
+    """Caso real: avisada como POSTULAR y descartada al guardar la ciudad; la campana contradecía al dashboard."""
+    from django.urls import reverse
+
+    d = _decision(perfil, 1)
+    generar_notificaciones()
+    d.accion, d.motivos = "DESCARTAR", ["Queda en Bogotá y buscas en Medellín"]
+    d.save()
+    html = client_con_cv.get(reverse("notificaciones")).content.decode()
+    assert "Ya no te la recomendamos: Queda en Bogotá y buscas en Medellín" in html
+
+
 def test_el_maximo_individual_es_por_dia(perfil):
     perfil.notif_modo, perfil.notif_max = "individual", 3
     perfil.save()

@@ -1,0 +1,33 @@
+# CI básico: las pruebas rápidas contra Postgres con pgvector, en cada push y pull request.
+name: pruebas
+
+on: [push, pull_request]
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: scoutly
+          POSTGRES_PASSWORD: scoutly  # base desechable del propio job
+          POSTGRES_DB: scoutly_v3
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U scoutly" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DJANGO_SECRET_KEY: clave-solo-para-ci
+      DJANGO_DB_USER: scoutly
+      DJANGO_DB_PASSWORD: scoutly
+      DJANGO_DB_PORT: "5432"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-dev.txt -c requirements-lock.txt
+      - run: python manage.py makemigrations --check --dry-run
+      # spike/ queda fuera: sus pruebas piden el Postgres de Podman (infra/postgres/.env).
+      - run: python -m pytest -q -m "not lento" --ignore=spike

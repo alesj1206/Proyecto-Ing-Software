@@ -104,8 +104,6 @@ class Perfil(models.Model):
     def tiene_expectativas(self) -> bool:
         return bool(self.exp_salario_min or self.exp_modalidad or self.exp_ubicacion or self.exp_disponibilidad)
 
-    def puede_notificar(self) -> bool:
-        return bool(self.contacto)
 
 
 class EvidenciaPerfil(models.Model):
