@@ -32,6 +32,12 @@ CAMPOS_PESADOS = ("vacante__texto_completo", "vacante__descripcion", "vacante__v
 SUFIJOS_EMPRESA = re.compile(r"\b(?:s a s|sas|s a|sa|ltda|s en c)\b")
 CRITERIOS = (("experiencia", "Experiencia"), ("salario", "Salario"), ("modalidad", "Modalidad"),
              ("ubicacion", "Ubicación"))
+# Por qué un requisito queda fuera del porcentaje (cobertura.RequisitoEvaluado.cuenta)
+FUERA_DEL_PORCENTAJE = {
+    "formacion": "Formación: un texto parecido no prueba un título; revísala tú.",
+    "experiencia": "Años de experiencia: se comparan con los que declaraste en tus expectativas.",
+    "blando": "Competencia blanda o condición: casi nunca aparece en una hoja de vida.",
+}
 
 
 def catalogo(modalidad: str = "", pagina: str | int = 1):
@@ -163,10 +169,20 @@ def detalle(perfil, vacante) -> dict | None:
                   "razones": decision.motivos},
         "criterios": criterios,
         "modificador": None,
-        "requisitos": {grupo: [r for r in decision.cobertura if r["estado"] == estado]
-                       for grupo, estado in (("cubiertos", "cubierto"), ("parciales", "parcial"),
-                                             ("faltantes", "faltante"))},
+        "desglose": desglose(decision),
     }
+
+
+def desglose(decision: Decision) -> dict:
+    """De dónde sale el porcentaje: (cubiertos + ½ parciales) / obligatorios comparables, y lo que queda por fuera."""
+    contables = decision.contables
+    grupos = {grupo: [r for r in contables if r["estado"] == estado]
+              for grupo, estado in (("cubiertos", "cubierto"), ("parciales", "parcial"), ("faltantes", "faltante"))}
+    puntos = len(grupos["cubiertos"]) + len(grupos["parciales"]) / 2
+    fuera = [{**r, "motivo": FUERA_DEL_PORCENTAJE.get(
+                 r["estado"], "Deseable: suma a tu favor, pero no es obligatorio.")}
+             for r in decision.cobertura if r not in contables]
+    return grupos | {"total": len(contables), "puntos": f"{puntos:g}".replace(".", ","), "fuera": fuera}
 
 
 def _ranking(foto: FotoDiaria) -> list[dict]:

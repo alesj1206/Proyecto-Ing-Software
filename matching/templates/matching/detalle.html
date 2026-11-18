@@ -54,7 +54,7 @@
           <p style="margin:0;font-family:var(--font-display);font-size:0.875rem;font-weight:700;color:var(--navy);">
             Compatibilidad
           </p>
-          <p style="margin-top:0.2rem;font-size:0.8rem;color:var(--navy);">Cubres {{ decision.cubres_visible }} requisitos obligatorios</p>
+          <p style="margin-top:0.2rem;font-size:0.8rem;color:var(--navy);">{% if decision.contables %}Cubres {{ decision.cubres_visible }} requisitos obligatorios{% else %}Sin requisitos obligatorios para comparar{% endif %}</p>
           <p style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted-foreground);line-height:1.5;">
             La solidez dice qué tan segura es esta recomendación, no qué tanto encajas.
           </p>
@@ -85,6 +85,55 @@
 
 <div class="container detail-layout">
   <article style="display:flex;flex-direction:column;gap:2.5rem;">
+    {% if decision %}
+    <section class="card decision-desglose" id="desglose">
+      <h2 style="font-size:1.125rem;color:var(--navy);">Cómo se calcula tu compatibilidad</h2>
+      {% if desglose.total %}
+      <p style="margin-top:0.5rem;color:var(--navy);line-height:1.6;">
+        Cubres <strong>{{ desglose.puntos }} de {{ desglose.total }}</strong> requisitos obligatorios que podemos comparar
+        con tu hoja de vida: {{ desglose.puntos }} ÷ {{ desglose.total }} = <strong>{{ decision.cobertura_pct }}%</strong>.
+        {% if desglose.parciales %}Los que cubres a medias cuentan como medio.{% endif %}
+      </p>
+      <div style="margin-top:0.75rem;">
+        {% for req in desglose.cubiertos %}
+        <div class="requirement-item">
+          <span class="requirement-dot matched">✓</span>
+          <span>{{ req.texto }}{% if req.evidencia %}<span class="decision-evidencia">tu evidencia: «{{ req.evidencia }}»</span>{% endif %}</span>
+        </div>
+        {% endfor %}
+        {% for req in desglose.parciales %}
+        <div class="requirement-item">
+          <span class="requirement-dot decision-parcial">~</span>
+          <span>{{ req.texto }}<span class="decision-evidencia">cuenta como medio; hazlo explícito en tu CV — tu evidencia: «{{ req.evidencia }}»</span></span>
+        </div>
+        {% endfor %}
+        {% for req in desglose.faltantes %}
+        <div class="requirement-item">
+          <span class="requirement-dot missing">–</span>
+          <span>{{ req.texto }}<span class="decision-evidencia">no encontramos nada parecido en tu hoja de vida</span></span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="margin-top:0.5rem;color:var(--muted-foreground);line-height:1.6;">
+        Esta vacante no trae requisitos obligatorios que podamos comparar con tu hoja de vida, así que no calculamos un
+        porcentaje: con uno solo, el resultado sería 0% o 100% y no diría nada. Revisa la descripción y decide tú.
+      </p>
+      {% endif %}
+      {% if desglose.fuera %}
+      <details class="criterio-detalle" style="margin-top:0.75rem;">
+        <summary>No entran en el porcentaje ({{ desglose.fuera|length }})</summary>
+        {% for req in desglose.fuera %}
+        <div class="requirement-item">
+          <span class="requirement-dot">·</span>
+          <span>{{ req.texto }}<span class="decision-evidencia">{{ req.motivo }}{% if req.estado == "cubierto" %} Lo cubres: «{{ req.evidencia }}»{% endif %}</span></span>
+        </div>
+        {% endfor %}
+      </details>
+      {% endif %}
+    </section>
+    {% endif %}
+
     <section>
       <h2 style="font-size:1.125rem;color:var(--navy);">Descripción del cargo</h2>
       <p style="margin-top:0.75rem;color:var(--muted-foreground);line-height:1.6;">{{ vacante.descripcion }}</p>
@@ -190,24 +239,7 @@
       {% if ofrece_taller %}
       <a href="{% url 'taller' vacante.id %}" class="btn btn-brand" style="margin-bottom:1rem;">Abrir el taller de CV</a>
       {% endif %}
-      {% for req in requisitos.cubiertos %}
-      <div class="requirement-item">
-        <span class="requirement-dot matched">✓</span>
-        <span>{{ req.texto }}{% if req.evidencia %}<span class="decision-evidencia">tu evidencia: «{{ req.evidencia }}»</span>{% endif %}</span>
-      </div>
-      {% endfor %}
-      {% for req in requisitos.parciales %}
-      <div class="requirement-item">
-        <span class="requirement-dot decision-parcial">~</span>
-        <span>{{ req.texto }}<span class="decision-evidencia">hazlo explícito en tu CV — tu evidencia: «{{ req.evidencia }}»</span></span>
-      </div>
-      {% endfor %}
-      {% for req in requisitos.faltantes %}
-      <div class="requirement-item">
-        <span class="requirement-dot missing">–</span>
-        <span>{{ req.texto }}{% if req.tipo == "deseable" %} <span class="decision-evidencia">(deseable)</span>{% endif %}</span>
-      </div>
-      {% endfor %}
+      <a href="#desglose" class="btn-link">Ver cómo se calcula tu compatibilidad</a>
     </div>
     {% endif %}
 

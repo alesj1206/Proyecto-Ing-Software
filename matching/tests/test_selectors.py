@@ -88,7 +88,25 @@ def test_detalle_arma_las_cinco_barras(perfil):
     assert (salario["aplica"], salario["es_del_candidato"], salario["razon_no_aplica"]) == (
         False, True, "No declaraste tu salario mínimo")
     assert ctx["criterios"][3]["score_pct"] == 50 and ctx["criterios"][0]["peso_pct"] is None
-    assert ctx["requisitos"]["cubiertos"][0]["evidencia"] == "Usé SQL"
+    assert ctx["desglose"]["cubiertos"][0]["evidencia"] == "Usé SQL"
+
+
+def test_el_desglose_explica_el_porcentaje_y_lo_que_queda_por_fuera(perfil):
+    """3 cubiertos, 1 parcial y 1 faltante de 5 comparables: 3,5 / 5 = 70 %. Formación y deseables no entran."""
+    from matching.models import Decision
+
+    def req(texto, estado, tipo="obligatorio"):
+        return {"texto": texto, "tipo": tipo, "origen": "texto", "estado": estado, "similitud": 0.5, "evidencia": "x"}
+
+    d = Decision(cobertura=[req("SQL", "cubierto"), req("Excel", "cubierto"), req("Power BI", "cubierto"),
+                            req("Python", "parcial"), req("Docker", "faltante"),
+                            req("Profesional en economía", "formacion"), req("Tableau", "faltante", "deseable")],
+                 cobertura_pct=70)
+    g = selectors.desglose(d)
+    assert (g["puntos"], g["total"]) == ("3,5", 5)
+    assert [r["texto"] for r in g["faltantes"]] == ["Docker"]
+    assert [(r["texto"], r["motivo"].split(":")[0]) for r in g["fuera"]] == [
+        ("Profesional en economía", "Formación"), ("Tableau", "Deseable")]
 
 
 def test_detalle_sin_decision_es_none(perfil):

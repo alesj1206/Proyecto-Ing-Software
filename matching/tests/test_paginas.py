@@ -202,3 +202,10 @@ def test_con_cv_y_sin_decision_no_pide_cargar_la_hoja_de_vida(client_con_cv, usu
     html = client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
     assert "Aún no has cargado" not in html and "carga tu hoja de vida" not in html
     assert "no quedó entre las relevantes" in html
+
+
+def test_el_detalle_desglosa_de_donde_sale_el_porcentaje(client_con_cv, usuario, vacante_v1):
+    _decidir(usuario.perfil, vacante_v1)  # 1 cubierto, 1 parcial y 1 faltante de 3 obligatorios
+    html = client_con_cv.get(reverse("vacante_detalle", args=["v1"])).content.decode()
+    assert "Cómo se calcula tu compatibilidad" in html and "1,5 ÷ 3" in html
+    assert "no encontramos nada parecido en tu hoja de vida" in html  # Docker
