@@ -35,6 +35,7 @@ def dashboard_view(request):
         grupos, conteos = selectors.decisiones_por_accion(perfil), selectors.conteo_por_accion(perfil)
         contexto |= {
             "pendiente": selectors.pendiente_de_decision(perfil),
+            "total_relevantes": sum(conteos.values()),
             "por_accion": [(a, Accion(a).label, ds, conteos.get(a, 0), conteos.get(a, 0) - len(ds))
                            for a, ds in grupos.items() if ds],
             "aprendizaje": selectors.plan_de_aprendizaje(perfil),

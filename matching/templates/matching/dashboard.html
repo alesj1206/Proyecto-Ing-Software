@@ -8,7 +8,7 @@
     <h1>Hola, {{ perfil.nombre|default:user.email }}</h1>
     {% if perfil %}
       <p style="margin-top:0.5rem;max-width:36rem;color:var(--muted-foreground);">
-        Tienes {{ top_matches|length }} vacante{{ top_matches|length|pluralize }} con coincidencias según tu hoja de vida actual.
+        Tienes {{ top_matches|length }} vacante{{ top_matches|length|pluralize }} para postular hoy{% if total_relevantes %} de {{ total_relevantes }} relevante{{ total_relevantes|pluralize }} según tu hoja de vida actual; las demás están abajo, agrupadas por acción{% else %} según tu hoja de vida actual{% endif %}.
       </p>
     {% else %}
       <div class="cta-banner">

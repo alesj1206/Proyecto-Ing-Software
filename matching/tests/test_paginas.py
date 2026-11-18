@@ -76,6 +76,8 @@ from matching.services import solicitar_decision
 
 LINEAS_V2_QUE_CAMBIAN = {  # cambios acordados (ledger Task 8 y 9); todo lo demás de v2 se conserva
     '{% block title %}Matches de hoy | Scoutly{% endblock %}',
+    # el contador era solo de POSTULAR pero decía "con coincidencias", y la lista de abajo muestra otras con porcentaje
+    'Tienes {{ top_matches|length }} vacante{{ top_matches|length|pluralize }} con coincidencias según tu hoja de vida actual.',
     '<p class="label-eyebrow">Matches de hoy</p>',
     '<h2 style="font-size:1.25rem;color:var(--navy);">Matches de hoy</h2>',
     '<p style="margin-top:1rem;color:var(--muted-foreground);">Todavía no hay vacantes que coincidan con tus habilidades registradas.</p>',
